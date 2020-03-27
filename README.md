@@ -20,7 +20,7 @@ This change is important for code dependency management, to make sure that your 
 | Number | Name           | User                                | Email                                           |
 | -------|----------------|-------------------------------------| ------------------------------------------------|
 | 90714  | Filipe Sousa   | <https://github.com/filipesousaist> | <mailto:filipe.miguel.sousa@tecnico.ulisboa.pt> |
-| 90762  | Pedro Vilela   | <https://github.com/pedro19v>       | <mailto:pedro.l.pereira@tecnico.ulisboa.pt >    |
+| 90762  | Pedro Vilela   | <https://github.com/pedro19v>       | <mailto:pedro.l.pereira@tecnico.ulisboa.pt>     |
 | 90766  | Pedro Pereira  | <https://github.com/pedro99p>       | <mailto:pedro.vilela@tecnico.ulisboa.pt>        |
 
 ### Task leaders
