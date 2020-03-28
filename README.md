@@ -15,27 +15,23 @@ This change is important for code dependency management, to make sure that your 
 
 ### Team members
 
-*(fill-in table below with team members; and then delete this line)*  
-
 | Number | Name           | User                                | Email                                           |
 | -------|----------------|-------------------------------------| ------------------------------------------------|
 | 90714  | Filipe Sousa   | <https://github.com/filipesousaist> | <mailto:filipe.miguel.sousa@tecnico.ulisboa.pt> |
-| 90762  | Pedro Vilela   | <https://github.com/pedro19v>       | <mailto:pedro.l.pereira@tecnico.ulisboa.pt>     |
-| 90766  | Pedro Pereira  | <https://github.com/pedro99p>       | <mailto:pedro.vilela@tecnico.ulisboa.pt>        |
+| 90762  | Pedro Vilela   | <https://github.com/pedro19v>       | <mailto:pedro.vilela@tecnico.ulisboa.pt>        |
+| 90766  | Pedro Pereira  | <https://github.com/pedro99p>       | <mailto:pedro.l.pereira@tecnico.ulisboa.pt>     |
 
 ### Task leaders
-
-*(fill-in table below with with team members assigned as leader to each task set; and then delete this line)*  
 
 | Task set | To-Do                         | Leader              |
 | ---------|-------------------------------| --------------------|
 | core     | protocol buffers, silo-client | _(whole team)_      |
-| T1       | cam_join, cam_info, eye       | _Alice Distributed_ |
-| T2       | report, spotter               | _Bob Systems_       |
-| T3       | track, trackMatch, trace      | _Charlie Rules_     |
-| T4       | test T1                       | _Charlie Rules_     |
-| T5       | test T2                       | _Alice Distributed_ |
-| T6       | test T3                       | _Bob Systems_       |
+| T1       | cam_join, cam_info, eye       | _Filipe Sousa_      |
+| T2       | report, spotter               | _Pedro Vilela_      |
+| T3       | track, trackMatch, trace      | _Pedro Pereira_     |
+| T4       | test T1                       | _Pedro Pereira_     |
+| T5       | test T2                       | _Filipe Sousa_      |
+| T6       | test T3                       | _Pedro Vilela_      |
 
 
 ## Getting Started
