@@ -4,3 +4,8 @@
 syntax = "proto3";
 package pt.tecnico.sauron.silo.grpc;
 
+
+service SiloService{
+
+}
+
