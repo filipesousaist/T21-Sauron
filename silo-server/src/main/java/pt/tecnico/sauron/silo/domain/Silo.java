@@ -1,16 +1,13 @@
-package pt.tecnico.sauron.silo;
+package pt.tecnico.sauron.silo.domain;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 public class Silo {
 
-    private Map personObservations = new HashMap<Long, PersonObservation>();
-    private Map carObservation = new HashMap<String, CarObservation>();
+    private Map observations = new HashMap<Long, Observation>();
 
     public Silo(){
 

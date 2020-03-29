@@ -1,4 +1,4 @@
-package pt.tecnico.sauron.silo;
+package pt.tecnico.sauron.silo.domain;
 
 import java.util.Date;
 
