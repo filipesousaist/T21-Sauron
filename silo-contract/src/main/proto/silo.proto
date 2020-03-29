@@ -6,23 +6,91 @@ package pt.tecnico.sauron.silo.grpc;
 
 import "google/protobuf/timestamp.proto";
 
+
+// *** GENERAL ***
+
+// Message with no fields
+message EmptyMessage {}
+
+// Geolocation
+message Coordinates {
+    string latitude = 1;
+    string longitude = 2;
+}
+
+// Possible types of the observable objects
 enum ObjectType {
     PERSON = 0;
     CAR = 1;
 }
 
+
+// *** SILO ***
+
 message ObjectRequest {
     string id = 1;
-    int32 type = 2;
+    ObjectType type = 2;
 }
 
 message ObservationResponse {
     string id = 1;
-    int32 type = 2;
+    ObjectType type = 2;
     google.protobuf.Timestamp date = 3;
 }
 
+
+// *** EYE ***
+
+// Information sent by an Eye to register in Silo server
+enum EyeJoinStatus {
+    OK = 0;
+    REPEATED = 1;
+}
+
+// Message sent by the Eye to request to be registered
+message EyeJoinRequest {
+    string camName = 1;
+    Coordinates coordinates = 2;
+}
+
+// Control message sent by the Silo server to
+// inform an Eye of the registration outcome
+message EyeJoinResponse {
+    EyeJoinStatus status = 1;
+}
+
+// Message with a name on an Eye
+message EyeName {
+    string camName = 1;
+}
+
+// A single observation made by an Eye
+message EyeObservationData {
+    ObjectType type = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    oneof ObjectId {
+        int64 personId = 3;
+        string carId = 4;
+    }
+}
+
+// A batch of one or more observations made by an Eye
+message EyeObservation {
+    string camName = 1;
+    repeated EyeObservationData data = 2;
+}
+
+
+// *** SPOTTER ***
+
+
+// *** RPC SERVICE ***
+
 service SiloService {
+    rpc cam_join(EyeJoinRequest) returns (EyeJoinResponse);
+    rpc cam_info(EyeName) returns (Coordinates);
+    rpc report(EyeObservation) returns (EmptyMessage); // TODO: Define report response message
     rpc track (ObjectRequest) returns (ObservationResponse);
 }
 
+// *** END ***
