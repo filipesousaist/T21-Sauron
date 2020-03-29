@@ -4,8 +4,25 @@
 syntax = "proto3";
 package pt.tecnico.sauron.silo.grpc;
 
+import "google/protobuf/timestamp.proto";
 
-service SiloService{
+enum ObjectType {
+    PERSON = 0;
+    CAR = 1;
+}
 
+message ObjectRequest {
+    string id = 1;
+    int32 type = 2;
+}
+
+message ObservationResponse {
+    string id = 1;
+    int32 type = 2;
+    google.protobuf.Timestamp date = 3;
+}
+
+service SiloService {
+    rpc track (ObjectRequest) returns (ObservationResponse);
 }
 
