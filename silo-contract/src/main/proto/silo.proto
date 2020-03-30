@@ -6,23 +6,103 @@ package pt.tecnico.sauron.silo.grpc;
 
 import "google/protobuf/timestamp.proto";
 
+
+// *** GENERAL ***
+
+// Message with no fields
+message EmptyMessage {}
+
+// Geolocation
+message Coordinates {
+    string latitude = 1;
+    string longitude = 2;
+}
+
+// Possible types of the observable objects
 enum ObjectType {
     PERSON = 0;
     CAR = 1;
 }
 
-message ObjectRequest {
-    string id = 1;
-    int32 type = 2;
+// Information about an observable object
+message ObjectData {
+    ObjectType type = 1;
+    string id = 2;
 }
 
-message ObservationResponse {
-    string id = 1;
-    int32 type = 2;
-    google.protobuf.Timestamp date = 3;
+
+// *** EYE ***
+
+// Information sent by an Eye to register in Silo server
+enum EyeJoinStatus {
+    JOIN_OK = 0; // Join was successful
+    DUPLICATE_JOIN = 1; // Join was successful, but the name/coordinates combination already exists
+    REPEATED_NAME = 2; // Join was unsuccessful, because the given name already existed with different coordinates
+    INVALID_EYE_NAME = 3; // Eye name does not match the expected format
+    INVALID_COORDINATES = 4; // Coordinates do not match the expected format
 }
+
+// Message sent by the Eye to request to be registered
+message EyeJoinRequest {
+    string camName = 1;
+    Coordinates coordinates = 2;
+}
+
+// Control message sent by the Silo server to
+// inform an Eye of the registration outcome
+message EyeJoinResponse {
+    EyeJoinStatus status = 1;
+}
+
+// Message with a name on an Eye
+message EyeName {
+    string camName = 1;
+}
+
+// A batch of one or more observations made by an Eye
+message EyeObservation {
+    string camName = 1;
+    repeated ObjectData data = 2;
+}
+
+// Status sent by server to indicate Eye report outcome
+enum ReportStatus {
+    REPORT_OK = 0; // Report was successful
+    INVALID_ID = 1; // ID does not match the expected format
+    UNREGISTERED_EYE = 2; // Eye name is not registered in the server
+}
+
+// Message containing status sent by server after Eye report
+message ReportResponse {
+    ReportStatus status = 1;
+}
+
+
+// *** SPOTTER ***
+
+// Data about an observation of a single object on a single instant
+message ObservationData {
+    ObjectType type = 1;
+    google.protobuf.Timestamp date = 2;
+    string id = 3;
+    string camName = 4;
+}
+
+// A batch of zero or more observations requested by a Spotter
+message ObservationResponse {
+    repeated ObservationData data = 1;
+}
+
+
+// *** RPC SERVICE ***
 
 service SiloService {
-    rpc track (ObjectRequest) returns (ObservationResponse);
+    rpc cam_join(EyeJoinRequest) returns (EyeJoinResponse);
+    rpc cam_info(EyeName) returns (Coordinates);
+    rpc report(EyeObservation) returns (ReportResponse);
+    rpc track(ObjectData) returns (ObservationResponse);
+    rpc trackMatch(ObjectData) returns (ObservationResponse);
+    rpc trace(ObjectData) returns (ObservationResponse);
 }
 
+// *** END ***
