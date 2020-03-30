@@ -1,21 +1,22 @@
 package pt.tecnico.sauron.silo.domain;
 
+import pt.tecnico.sauron.silo.grpc.Silo.*;
+
 import java.util.Date;
 
-public class PersonObservation {
+public class PersonObservation extends Observation{
 
     private long id;
-    private Date date;
 
     public PersonObservation(long id, Date date){
+        super(date, ObjectType.PERSON);
         this.id = id;
-        this.date = date;
     }
 
+    @Override
     public String getId(){
         return ""+id;
     }
 
-    public Date getDate(){ return date;}
 
 }
