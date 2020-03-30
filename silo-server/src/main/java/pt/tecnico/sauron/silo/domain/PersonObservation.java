@@ -8,15 +8,17 @@ public class PersonObservation extends Observation{
 
     private long id;
 
-    public PersonObservation(long id, Date date){
-        super(date, ObjectType.PERSON);
+    public PersonObservation(long id){
+        super(ObjectType.PERSON);
         this.id = id;
     }
 
-    @Override
-    public String getId(){
-        return ""+id;
+    public long getId(){
+        return id;
     }
 
-
+    @Override
+    public String getStrId() {
+        return ""+id;
+    }
 }

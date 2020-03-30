@@ -6,6 +6,8 @@ import pt.tecnico.sauron.silo.grpc.Silo.*;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc.*;
 
+import java.util.List;
+
 public class SiloFrontend implements AutoCloseable{
     private final ManagedChannel channel;
     private SiloServiceBlockingStub stub;
@@ -17,6 +19,10 @@ public class SiloFrontend implements AutoCloseable{
     }
 
     public ClearResponse ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
+
+    public ObservationResponse track(ObjectData objectData){
+        return stub.track(objectData);
+    }
 
     @Override
     public void close(){
