@@ -26,7 +26,7 @@ public class SiloClientApp {
 
 		EmptyMessage request = EmptyMessage.getDefaultInstance();
 
-		ClearResponse response = frontend.ctrlClear(request);
+		StringMessage response = frontend.ctrlClear(request);
 		System.out.println(response.getText());
 
 		Silo.ObjectData objectData = Silo.ObjectData.newBuilder()
@@ -34,7 +34,7 @@ public class SiloClientApp {
 				.setType(Silo.ObjectType.PERSON)
 				.build();
 
-		Silo.ObservationResponse observationResponse = frontend.trackMatach(objectData);
+		Silo.ObservationResponse observationResponse = frontend.trackMatch(objectData);
 
 		List<ObservationData> objectDataList = observationResponse.getDataList();
 

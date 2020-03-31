@@ -20,7 +20,7 @@ public class SiloFrontend implements AutoCloseable {
         return stub.camJoin(eyeJoinRequest);
     }
 
-    public Coordinates camInfo(EyeName eyeName) {
+    public Coordinates camInfo(StringMessage eyeName) {
         return stub.camInfo(eyeName);
     }
 
@@ -28,13 +28,17 @@ public class SiloFrontend implements AutoCloseable {
         return stub.report(eyeObservation);
     }
 
-    public ClearResponse ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
+    public StringMessage ctrlPing(StringMessage request){ return stub.ctrlPing(request); }
+
+    public StringMessage ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
+
+    public StringMessage ctrlInit(EmptyMessage request){ return stub.ctrlInit(request); }
 
     public ObservationResponse track(ObjectData objectData){
         return stub.track(objectData);
     }
 
-    public ObservationResponse trackMatach(ObjectData objectData){
+    public ObservationResponse trackMatch(ObjectData objectData){
         return stub.trackMatch(objectData);
     }
 

@@ -1,7 +1,7 @@
 //
 // Protocol buffers definition for Silo server
 //
-syntax = "proto3";
+    syntax = "proto3";
 package pt.tecnico.sauron.silo.grpc;
 
 import "google/protobuf/timestamp.proto";
@@ -12,6 +12,11 @@ import "google/protobuf/timestamp.proto";
 // Message with no fields
 message EmptyMessage {}
 
+// Message with only one string
+message StringMessage {
+    string text = 1;
+}
+
 // Geolocation
 message Coordinates { //TODO: Change string to different data type
     double latitude = 1;
@@ -19,15 +24,17 @@ message Coordinates { //TODO: Change string to different data type
 }
 
 // Possible types of the observable objects
+
 enum ObjectType {
     PERSON = 0;
     CAR = 1;
-}
+    }
 
 // Information about an observable object
 message ObjectData {
     ObjectType type = 1;
     string id = 2;
+
 }
 
 
@@ -40,7 +47,7 @@ enum EyeJoinStatus {
     REPEATED_NAME = 2; // Join was unsuccessful, because the given name already existed with different coordinates
     INVALID_EYE_NAME = 3; // Eye name does not match the expected format
     INVALID_COORDINATES = 4; // Coordinates do not match the expected format
-}
+    }
 
 // Message sent by the Eye to request to be registered
 message EyeJoinRequest {
@@ -54,11 +61,6 @@ message EyeJoinResponse {
     EyeJoinStatus status = 1;
 }
 
-// Message with a name on an Eye
-message EyeName {
-    string camName = 1;
-}
-
 // A batch of one or more observations made by an Eye
 message EyeObservation {
     string camName = 1;
@@ -70,7 +72,7 @@ enum ReportStatus {
     REPORT_OK = 0; // Report was successful
     INVALID_ID = 1; // ID does not match the expected format
     UNREGISTERED_EYE = 2; // Eye name is not registered in the server
-}
+    }
 
 // Message containing status sent by server after Eye report
 message ReportResponse {
@@ -93,21 +95,18 @@ message ObservationResponse {
     repeated ObservationData data = 1;
 }
 
-message ClearResponse {
-    string text = 1;
-}
-
-
 // *** RPC SERVICE ***
 
 service SiloService {
     rpc cam_join(EyeJoinRequest) returns (EyeJoinResponse);
-    rpc cam_info(EyeName) returns (Coordinates);
+    rpc cam_info(StringMessage) returns (Coordinates);
     rpc report(EyeObservation) returns (ReportResponse);
-    rpc track(ObjectData) returns (ObservationResponse);
-    rpc trackMatch(ObjectData) returns (ObservationResponse);
+    rpc track (ObjectData) returns (ObservationResponse);
+    rpc trackMatch (ObjectData) returns (ObservationResponse);
     rpc trace (ObjectData) returns (ObservationResponse);
-    rpc ctrlClear (EmptyMessage) returns (ClearResponse);
+    rpc ctrlPing (StringMessage) returns (StringMessage);
+    rpc ctrlClear (EmptyMessage) returns (StringMessage);
+    rpc ctrlInit (EmptyMessage) returns (StringMessage);
 }
 
 // *** END ***

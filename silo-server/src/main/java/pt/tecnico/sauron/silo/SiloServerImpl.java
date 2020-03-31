@@ -17,12 +17,32 @@ import java.util.List;
 
 public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
+    private SiloServerApp siloServerApp = new SiloServerApp();
+
     private SiloServer siloServer = new SiloServer();
 
     @Override
-    public void ctrlClear(EmptyMessage request, StreamObserver<ClearResponse> responseObserver) {
+    public void ctrlPing(StringMessage request, StreamObserver<StringMessage> responseObserver) {
+        String msg = siloServer.ping(request.getText());
+        StringMessage response = StringMessage.newBuilder().setText(msg).build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void ctrlClear(EmptyMessage request, StreamObserver<StringMessage> responseObserver) {
         String msg  = siloServer.clear();
-        ClearResponse clearResponse = ClearResponse.newBuilder().setText(msg).build();
+        StringMessage clearResponse = StringMessage.newBuilder().setText(msg).build();
+
+        responseObserver.onNext(clearResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void ctrlInit(EmptyMessage request, StreamObserver<StringMessage> responseObserver) {
+        String msg  = siloServer.init();
+        StringMessage clearResponse = StringMessage.newBuilder().setText(msg).build();
 
         responseObserver.onNext(clearResponse);
         responseObserver.onCompleted();

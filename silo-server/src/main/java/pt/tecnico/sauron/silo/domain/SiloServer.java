@@ -1,7 +1,6 @@
 package pt.tecnico.sauron.silo.domain;
 
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import pt.tecnico.sauron.silo.domain.exception.NoObservationMatchExcpetion;
@@ -14,7 +13,7 @@ public class SiloServer {
     private List<Observation> observations = new LinkedList<>();
     private Map<String, Coordinates> eyes = new HashMap<>();
 
-    public SiloServer(){
+    public SiloServer() {
 
     }
 
@@ -54,29 +53,48 @@ public class SiloServer {
 
     public List<Observation> trackMatch(String id, ObjectType type) throws NoObservationMatchExcpetion {
         String regex;
-        switch (type){
+        switch (type) {
             case PERSON:
-                regex = "[0-9]*"; break;
+                regex = "[0-9]*";
+                break;
             case CAR:
-                regex = "[0-9A-Z]*"; break;
+                regex = "[0-9A-Z]*";
+                break;
             default:
                 regex = ".";
         }
 
         String pattern = id.replace("*", regex);
 
-        List<Observation> res =  observations.stream()
-               .filter(o -> o.getType() == type)
-               .filter(o -> o.getStrId().matches(pattern))
-               .collect(Collectors.toList());
+        List<Observation> res = observations.stream()
+                .filter(o -> o.getType() == type)
+                .filter(o -> o.getStrId().matches(pattern))
+                .collect(Collectors.toList());
 
         if (res.isEmpty()) throw new NoObservationMatchExcpetion(id);
 
         return res;
     }
 
-    public String clear(){
+        public String ping(String message){
+            return "Hello " + message + " !";
+        }
+
+    public String clear() {
         observations.clear();
         return "Server has been cleared.";
+    }
+
+    public String init(){
+        observations.add(new CarObservation("AA00BB"));
+        observations.add(new CarObservation("LD04BY"));
+        observations.add(new PersonObservation(123456));
+        observations.add(new CarObservation("4502GS"));
+        observations.add(new PersonObservation(654321));
+        observations.add(new CarObservation("AA43BY"));
+        observations.add(new PersonObservation(2568628));
+        observations.add(new PersonObservation(12344321));
+
+        return "Observations added.";
     }
 }
