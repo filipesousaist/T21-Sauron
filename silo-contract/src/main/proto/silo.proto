@@ -14,8 +14,8 @@ message EmptyMessage {}
 
 // Geolocation
 message Coordinates { //TODO: Change string to different data type
-    string latitude = 1;
-    string longitude = 2;
+    double latitude = 1;
+    double longitude = 2;
 }
 
 // Possible types of the observable objects

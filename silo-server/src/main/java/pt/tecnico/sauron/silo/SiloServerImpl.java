@@ -30,7 +30,8 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
     @Override
     public void camJoin(EyeJoinRequest request, StreamObserver<EyeJoinResponse> responseObserver) {
-        EyeJoinResponse response = EyeJoinResponse.newBuilder().build();
+        EyeJoinStatus status = siloServer.cam_join(request.getCamName(), request.getCoordinates());
+        EyeJoinResponse response = EyeJoinResponse.newBuilder().setStatus(status).build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

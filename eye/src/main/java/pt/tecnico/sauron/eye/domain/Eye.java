@@ -27,8 +27,8 @@ public class Eye {
 
     public Coordinates getCoordinates() {
         return Coordinates.newBuilder()
-            .setLatitude(Double.toString(latitude))
-            .setLongitude(Double.toString(longitude))
+            .setLatitude(latitude)
+            .setLongitude(longitude)
             .build();
     }
 

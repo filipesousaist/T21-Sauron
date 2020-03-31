@@ -36,13 +36,13 @@ public class EyeApp {
 				System.out.println("Error registering in server: " + e.getMessage());
 			}
 		}
-		catch (ArgCountException|NumberFormatException e) {
+		catch (ArgCountException|NumberFormatException e) { // NumberFormatException can occur in parseArgs
 			System.out.println(e.getMessage());
 		}
 		System.out.println("End");
 	}
 
-	private static Object[] parseArgs(String[] args) throws ArgCountException, NumberFormatException {
+	private static Object[] parseArgs(String[] args) throws ArgCountException {
 		if (args.length != NUM_ARGS)
 			throw new ArgCountException(args.length, NUM_ARGS);
 		Object[] parsedArgs = new Object[NUM_ARGS];

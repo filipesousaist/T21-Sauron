@@ -41,9 +41,6 @@ public class SiloServerApp {
 		String s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(ts);
 		System.out.println(s);
 
-
-
-
 		server.awaitTermination();
 	}
 
