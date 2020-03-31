@@ -93,6 +93,10 @@ message ObservationResponse {
     repeated ObservationData data = 1;
 }
 
+message ClearResponse {
+    string text = 1;
+}
+
 
 // *** RPC SERVICE ***
 
@@ -102,7 +106,8 @@ service SiloService {
     rpc report(EyeObservation) returns (ReportResponse);
     rpc track(ObjectData) returns (ObservationResponse);
     rpc trackMatch(ObjectData) returns (ObservationResponse);
-    rpc trace(ObjectData) returns (ObservationResponse);
+    rpc trace (ObjectData) returns (ObservationResponse);
+    rpc ctrlClear (EmptyMessage) returns (ClearResponse);
 }
 
 // *** END ***

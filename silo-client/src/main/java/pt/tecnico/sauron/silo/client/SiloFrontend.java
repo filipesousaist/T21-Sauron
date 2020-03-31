@@ -28,7 +28,11 @@ public class SiloFrontend implements AutoCloseable {
         return stub.report(eyeObservation);
     }
 
-    //public ClearResponse ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
+    public ClearResponse ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
+
+    public ObservationResponse track(ObjectData objectData){
+        return stub.track(objectData);
+    }
 
     @Override
     public void close(){

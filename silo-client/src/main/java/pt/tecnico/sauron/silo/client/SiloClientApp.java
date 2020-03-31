@@ -4,6 +4,8 @@ package pt.tecnico.sauron.silo.client;
 import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
+import java.util.List;
+
 public class SiloClientApp {
 	
 	public static void main(String[] args) {
@@ -24,9 +26,19 @@ public class SiloClientApp {
 
 		EmptyMessage request = EmptyMessage.getDefaultInstance();
 
-		/*ClearResponse response = frontend.ctrlClear(request);
-		System.out.println(response.getClearStatus());*/
+		ClearResponse response = frontend.ctrlClear(request);
+		System.out.println(response.getText());
 
+		Silo.ObjectData objectData = Silo.ObjectData.newBuilder()
+				.setId("123456")
+				.setType(Silo.ObjectType.PERSON)
+				.build();
+
+		Silo.ObservationResponse observationResponse = frontend.track(objectData);
+
+		List<ObservationData> objectDataList = observationResponse.getDataList();
+
+		objectDataList.stream().forEach(System.out::println);
 	}
 	
 }

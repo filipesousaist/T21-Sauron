@@ -8,14 +8,17 @@ public class CarObservation extends Observation {
 
     private String id;
 
-    public CarObservation(String id, Date date){
-        super(date, ObjectType.CAR);
+    CarObservation(String id){
+        super(ObjectType.CAR);
         this.id = id;
     }
 
-    @Override
     public String getId() {
         return id;
     }
 
+    @Override
+    public String getStrId() {
+        return id;
+    }
 }
