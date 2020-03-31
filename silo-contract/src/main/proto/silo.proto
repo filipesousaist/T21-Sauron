@@ -13,7 +13,7 @@ import "google/protobuf/timestamp.proto";
 message EmptyMessage {}
 
 // Geolocation
-message Coordinates {
+message Coordinates { //TODO: Change string to different data type
     string latitude = 1;
     string longitude = 2;
 }
@@ -83,7 +83,7 @@ message ReportResponse {
 // Data about an observation of a single object on a single instant
 message ObservationData {
     ObjectType type = 1;
-    google.protobuf.Timestamp date = 2;
+    google.protobuf.Timestamp timestamp = 2;
     string id = 3;
     string camName = 4;
 }

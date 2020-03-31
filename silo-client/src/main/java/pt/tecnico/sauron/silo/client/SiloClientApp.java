@@ -36,7 +36,6 @@ public class SiloClientApp {
 
 		Silo.ObservationResponse observationResponse = frontend.trackMatach(objectData);
 
-
 		List<ObservationData> objectDataList = observationResponse.getDataList();
 
 		objectDataList.stream().forEach(System.out::println);

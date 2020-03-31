@@ -7,12 +7,11 @@ import pt.tecnico.sauron.silo.domain.Observation;
 import pt.tecnico.sauron.silo.domain.SiloServer;
 import pt.tecnico.sauron.silo.domain.exception.NoObservationMatchExcpetion;
 import pt.tecnico.sauron.silo.domain.exception.ObservationNotFoundException;
-import pt.tecnico.sauron.silo.grpc.Silo;
-import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
+import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 import com.google.protobuf.Timestamp;
+import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,23 +20,29 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     private SiloServer siloServer = new SiloServer();
 
     @Override
-    public void ctrlClear(Silo.EmptyMessage request, StreamObserver<Silo.ClearResponse> responseObserver) {
+    public void ctrlClear(EmptyMessage request, StreamObserver<ClearResponse> responseObserver) {
         String msg  = siloServer.clear();
-        Silo.ClearResponse clearResponse = Silo.ClearResponse.newBuilder().setText(msg).build();
+        ClearResponse clearResponse = ClearResponse.newBuilder().setText(msg).build();
 
         responseObserver.onNext(clearResponse);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void track(Silo.ObjectData request, StreamObserver<Silo.ObservationResponse> responseObserver) {
-        try{
-            Observation observation = siloServer.track(request.getId(), request.getType());
+    public void camJoin(EyeJoinRequest request, StreamObserver<EyeJoinResponse> responseObserver) {
+        EyeJoinResponse response = EyeJoinResponse.newBuilder().build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 
+
+    @Override
+    public void track(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
+        try {
             List<Observation> observations = new LinkedList<>();
-            observations.add(observation);
+            observations.add(siloServer.track(request.getId(), request.getType()));
 
-            Silo.ObservationResponse response = buildObservationResponse(observations);
+            ObservationResponse response = buildObservationResponse(observations);
 
             responseObserver.onNext(response);
 
@@ -49,11 +54,11 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     }
 
     @Override
-    public void trackMatch(Silo.ObjectData request, StreamObserver<Silo.ObservationResponse> responseObserver) {
+    public void trackMatch(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
         try{
             List<Observation> observations = siloServer.trackMatch(request.getId(), request.getType());
 
-            Silo.ObservationResponse response = buildObservationResponse(observations);
+            ObservationResponse response = buildObservationResponse(observations);
 
             responseObserver.onNext(response);
 
@@ -66,18 +71,18 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
 
 
-    private Silo.ObservationResponse buildObservationResponse(List<Observation> observations){
-        Silo.ObservationResponse.Builder builder = Silo.ObservationResponse.newBuilder();
-        List<Silo.ObservationData> observationDataList = new LinkedList<>();
+    private ObservationResponse buildObservationResponse(List<Observation> observations){
+        ObservationResponse.Builder builder = ObservationResponse.newBuilder();
+        List<ObservationData> observationDataList = new LinkedList<>();
 
         for(Observation obs : observations) {
 
-            Timestamp.Builder ts = Timestamp.newBuilder().setSeconds(obs.getDate().getTime() / 1000).setNanos(0);
+            Timestamp ts = Timestamp.newBuilder().setSeconds(obs.getDate().getTime()/1000).setNanos(0).build();
 
-            Silo.ObservationData observationData = Silo.ObservationData.newBuilder()
+            ObservationData observationData = ObservationData.newBuilder()
                     .setType(obs.getType())
                     .setId(obs.getStrId())
-                    .setDate(ts)// need to figure out how to build the protobuf timestamp
+                    .setTimestamp(ts)// need to figure out how to build the protobuf timestamp
                     .build();
             // TODO add the camName set,when the cam part is implemented
 

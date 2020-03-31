@@ -32,10 +32,12 @@ public class SiloIT extends BaseIT {
 	}
 		
 	// tests 
-	
+
+	/*
 	@Test
 	public void testOkctrlPing() {
 		Assertions.assertEquals(SERVER_STATUS, frontend.ctrlClear(buildEmptyMessage()).getClearStatus());
 	}
+	 */
 
 }
