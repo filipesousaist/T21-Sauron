@@ -30,11 +30,11 @@ public class SiloClientApp {
 		System.out.println(response.getText());
 
 		Silo.ObjectData objectData = Silo.ObjectData.newBuilder()
-				.setId("123456")
+				.setId("1*456")
 				.setType(Silo.ObjectType.PERSON)
 				.build();
 
-		Silo.ObservationResponse observationResponse = frontend.track(objectData);
+		Silo.ObservationResponse observationResponse = frontend.trackMatch(objectData);
 
 		List<ObservationData> objectDataList = observationResponse.getDataList();
 

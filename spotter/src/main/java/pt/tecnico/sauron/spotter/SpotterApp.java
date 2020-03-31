@@ -103,11 +103,11 @@ public class SpotterApp {
 		ObjectData request = ObjectData.newBuilder().setType(type).setId(lineArgs[2]).build();
 		ObservationResponse response;
 
-		/*if (lineArgs[2].indexOf('*') != -1){
-			//response = frontend.trackMatch(request);
-		} else {*/
+		if (lineArgs[2].indexOf('*') != -1){
+			response = frontend.trackMatch(request);
+		} else {
 			response = frontend.track(request);
-			//}
+			}
 
 		printResult(response, frontend);
 	}
