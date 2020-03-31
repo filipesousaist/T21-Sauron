@@ -2,6 +2,7 @@ package pt.tecnico.sauron.spotter;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 
@@ -43,8 +44,10 @@ public class SpotterApp {
 		String operation;
 		String id;
 		String inputType;
+		Coordinates camCoords;
 		ObjectType type;
-		SpotterResponse response;
+		ObservationData responseData;
+		ObservationResponse response;
 
 
 
@@ -54,10 +57,17 @@ public class SpotterApp {
 				operation = scanner.next();
 				id = scanner.next();
 				inputType = scanner.next();
-				type = getType(inputType);
 
-				if (type == ObjectType.UNKNOWN) {
-					System.out.println("Wrong type " + inputType + ", try again...");
+				switch(inputType){
+					case "person":
+						type = ObjectType.PERSON;
+						break;
+					case "car":
+						type = ObjectType.CAR;
+						break;
+					default:
+						System.out.println("Wrong type " + inputType + ", try again...");
+						continue;
 				}
 
 				switch (operation){
@@ -67,12 +77,12 @@ public class SpotterApp {
 					case "trail":
 						response = trail(stub, type, id);
 						break;
-					case "ctrl_ping":
+					/*case "ctrl_ping":
 						System.out.println(ping(stub));
 						continue;
 					case "ctrl_clear":
 						clear(stub);
-						continue;
+						continue;*/
 					case "ctrl_init":
 
 					case "help":
@@ -82,27 +92,19 @@ public class SpotterApp {
 						System.out.println("Wrong input " + operation + ", try again...");
 						continue;
 				}
-
-				for (int i = 0; i < response.getIdCount(); i++){
-					System.out.println("" + response.getId(i) + ","
-							+ response.getType(i) + ","
-							+ response.getDate(i) + ","
-							+ response.getCameraName(i) + ","
-							+ response.getCameraLat(i) + ","
-							+ response.getCameraLong(i));
+				if (response.getDataCount() != 0) {
+					for (int i = 0; i < response.getDataCount(); i++) {
+						responseData = response.getData(i);
+						camCoords = camInfo(stub, responseData.getCamName());
+						System.out.println("" + responseData.getId() + ","
+								+ responseData.getType() + ","
+								+ responseData.getDate() + ","
+								+ responseData.getCamName() + ","
+								+ camCoords.getLatitude() + ","
+								+ camCoords.getLongitude());
+					}
 				}
 			}
-		}
-	}
-
-	private static ObjectType getType(String inputType){
-		switch(inputType){
-			case "person":
-				return ObjectType.PERSON;
-			case "car":
-				return ObjectType.CAR;
-			default:
-				return ObjectType.UNKNOWN;
 		}
 	}
 
@@ -115,7 +117,7 @@ public class SpotterApp {
 				"ctrl-init (allows definition of initial configuration parameters of server)");
 	}
 
-	private static String ping(SiloServiceGrpc.SiloServiceBlockingStub stub){
+	/*private static String ping(SiloServiceGrpc.SiloServiceBlockingStub stub){
 		EmptyMessage request = EmptyMessage.newBuilder().build();
 		StringMessage response = stub.ctrlPing(request);
 		return response.getString();
@@ -124,17 +126,27 @@ public class SpotterApp {
 	private static void clear(SiloServiceGrpc.SiloServiceBlockingStub stub){
 		EmptyMessage request = EmptyMessage.newBuilder().build();
 		stub.ctrlClear(request);
+	}*/
+
+	private static ObservationResponse spot(SiloServiceGrpc.SiloServiceBlockingStub stub, ObjectType type, String id){
+		ObjectData request = ObjectData.newBuilder().
+				setType(type).setId(id).build();
+
+		if (id.indexOf('*') != -1){
+		 	return stub.trackMatch(request);
+		} else {
+			return stub.track(request);
+		}
 	}
 
-	private static SpotterResponse spot(SiloServiceGrpc.SiloServiceBlockingStub stub, ObjectType type, String id){
-		ObjectRequest request = ObjectRequest.newBuilder().
+	private static ObservationResponse trail(SiloServiceGrpc.SiloServiceBlockingStub stub, ObjectType type, String id){
+		ObjectData request = ObjectData.newBuilder().
 				setType(type).setId(id).build();
-		return stub.spot(request);
+		return stub.trace(request);
 	}
 
-	private static SpotterResponse trail(SiloServiceGrpc.SiloServiceBlockingStub stub, ObjectType type, String id){
-		ObjectRequest request = ObjectRequest.newBuilder().
-				setType(type).setId(id).build();
-		return stub.trail(request);
+	private static Coordinates camInfo(SiloServiceGrpc.SiloServiceBlockingStub stub, String camName){
+		EyeName request = EyeName.newBuilder().setCamName(camName).build();
+		return stub.camInfo(request);
 	}
 }

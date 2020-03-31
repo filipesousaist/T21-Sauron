@@ -1,9 +1,15 @@
 package pt.tecnico.sauron.silo.client;
 
 
+import pt.tecnico.sauron.silo.grpc.Silo;
+import pt.tecnico.sauron.silo.grpc.Silo.*;
+
 public class SiloClientApp {
 	
 	public static void main(String[] args) {
+		String host;
+		int port;
+
 		System.out.println(SiloClientApp.class.getSimpleName());
 		
 		// receive and print arguments
@@ -11,6 +17,16 @@ public class SiloClientApp {
 		for (int i = 0; i < args.length; i++) {
 			System.out.printf("arg[%d] = %s%n", i, args[i]);
 		}
+		host = args[0];
+		port = Integer.parseInt(args[1]);
+
+		SiloFrontend frontend = new SiloFrontend(host, port);
+
+		EmptyMessage request = EmptyMessage.getDefaultInstance();
+
+		ClearResponse response = frontend.ctrlClear(request);
+		System.out.println(response.getClearStatus());
+
 	}
 	
 }

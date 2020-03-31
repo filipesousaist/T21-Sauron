@@ -2,6 +2,7 @@ package pt.tecnico.sauron.silo.client;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import pt.tecnico.sauron.silo.grpc.Silo;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -11,6 +12,7 @@ public class BaseIT {
 
 	private static final String TEST_PROP_FILE = "/test.properties";
 	protected static Properties testProps;
+	static SiloFrontend frontend;
 	
 	@BeforeAll
 	public static void oneTimeSetup () throws IOException {
@@ -25,11 +27,19 @@ public class BaseIT {
 			System.out.println(msg);
 			throw e;
 		}
+
+		final String host = testProps.getProperty("server.host");
+		final int port = Integer.parseInt(testProps.getProperty("server.port"));
+		frontend = new SiloFrontend(host, port);
 	}
 	
 	@AfterAll
 	public static void cleanup() {
 		
+	}
+
+	protected Silo.EmptyMessage buildEmptyMessage(){
+		return Silo.EmptyMessage.getDefaultInstance();
 	}
 
 }

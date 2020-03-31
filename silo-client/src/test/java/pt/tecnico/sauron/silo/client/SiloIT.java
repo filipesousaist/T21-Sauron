@@ -6,8 +6,8 @@ public class SiloIT extends BaseIT {
 	
 	// static members
 	// TODO	
-	
-	
+	static final String SERVER_STATUS = "Server has been cleared.";
+
 	// one-time initialization and clean-up
 	@BeforeAll
 	public static void oneTimeSetUp(){
@@ -23,7 +23,7 @@ public class SiloIT extends BaseIT {
 	
 	@BeforeEach
 	public void setUp() {
-		
+
 	}
 	
 	@AfterEach
@@ -34,9 +34,8 @@ public class SiloIT extends BaseIT {
 	// tests 
 	
 	@Test
-	public void test() {
-		
-		
+	public void testOkctrlPing() {
+		Assertions.assertEquals(SERVER_STATUS, frontend.ctrlClear(buildEmptyMessage()).getClearStatus());
 	}
 
 }

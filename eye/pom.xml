@@ -60,7 +60,7 @@
 				<configuration>
 					<mainClass>${mainclass}</mainClass>
 					<arguments>
-
+						<argument></argument>
 					</arguments>
 				</configuration>
 			</plugin>

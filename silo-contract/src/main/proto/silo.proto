@@ -25,18 +25,11 @@ enum ObjectType {
     CAR = 1;
 }
 
+// Information about an observable object
+message ObjectData {
+    ObjectType type = 1;
+    string id = 2;
 
-// *** SILO ***
-
-message ObjectRequest {
-    string id = 1;
-    ObjectType type = 2;
-}
-
-message ObservationResponse {
-    string id = 1;
-    ObjectType type = 2;
-    google.protobuf.Timestamp timestamp = 3;
 }
 
 
@@ -44,8 +37,11 @@ message ObservationResponse {
 
 // Information sent by an Eye to register in Silo server
 enum EyeJoinStatus {
-    OK = 0;
-    REPEATED = 1;
+    JOIN_OK = 0; // Join was successful
+    DUPLICATE_JOIN = 1; // Join was successful, but the name/coordinates combination already exists
+    REPEATED_NAME = 2; // Join was unsuccessful, because the given name already existed with different coordinates
+    INVALID_EYE_NAME = 3; // Eye name does not match the expected format
+    INVALID_COORDINATES = 4; // Coordinates do not match the expected format
 }
 
 // Message sent by the Eye to request to be registered
@@ -65,42 +61,39 @@ message EyeName {
     string camName = 1;
 }
 
-// A single observation made by an Eye
-message EyeObservationData {
-    ObjectType type = 1;
-    google.protobuf.Timestamp timestamp = 2;
-    oneof ObjectId {
-        int64 personId = 3;
-        string carId = 4;
-    }
-}
-
 // A batch of one or more observations made by an Eye
 message EyeObservation {
     string camName = 1;
-    repeated EyeObservationData data = 2;
+    repeated ObjectData data = 2;
+}
+
+// Status sent by server to indicate Eye report outcome
+enum ReportStatus {
+    REPORT_OK = 0; // Report was successful
+    INVALID_ID = 1; // ID does not match the expected format
+    UNREGISTERED_EYE = 2; // Eye name is not registered in the server
+}
+
+// Message containing status sent by server after Eye report
+message ReportResponse {
+    ReportStatus status = 1;
 }
 
 
 // *** SPOTTER ***
 
-// Information of an observation response queried by Spotter
-message SpotterResponseData {
+// Data about an observation of a single object on a single instant
+message ObservationData {
     ObjectType type = 1;
     google.protobuf.Timestamp date = 2;
-    oneof ObjectId {
-        int64 personId = 3;
-        string carId = 4;
-    }
-    string camName = 5;
-    Coordinates coordinates = 6;
+    string id = 3;
+    string camName = 4;
 }
 
-// Information of multiple observations responses queried by Spotter
-message SpotterResponse {
-    repeated SpotterResponseData data = 1;
+// A batch of zero or more observations requested by a Spotter
+message ObservationResponse {
+    repeated ObservationData data = 1;
 }
-
 
 
 // *** RPC SERVICE ***
@@ -108,9 +101,10 @@ message SpotterResponse {
 service SiloService {
     rpc cam_join(EyeJoinRequest) returns (EyeJoinResponse);
     rpc cam_info(EyeName) returns (Coordinates);
-    rpc report(EyeObservation) returns (EmptyMessage); // TODO: Define report response message
-    rpc track (ObjectRequest) returns (ObservationResponse);
-
+    rpc report(EyeObservation) returns (ReportResponse);
+    rpc track(ObjectData) returns (ObservationResponse);
+    rpc trackMatch(ObjectData) returns (ObservationResponse);
+    rpc trace(ObjectData) returns (ObservationResponse);
 }
 
 // *** END ***
