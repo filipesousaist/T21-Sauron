@@ -1,9 +1,8 @@
 package pt.tecnico.sauron.silo;
 
 import io.grpc.stub.StreamObserver;
-import pt.tecnico.sauron.silo.domain.*;
+import pt.tecnico.sauron.silo.domain.SiloServer;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
-import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 
 public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
@@ -17,6 +16,16 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     }*/
 
     @Override
+    public void camJoin(EyeJoinRequest request, StreamObserver<EyeJoinResponse> responseObserver) {
+        EyeJoinResponse response = EyeJoinResponse.newBuilder().build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+
+
+    /*@Override
     public void ctrlClear(EmptyMessage request, StreamObserver<ClearResponse> responseObserver) {
 
         String serverStatus = siloServer.clear();
@@ -26,7 +35,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         responseObserver.onCompleted();
 
 
-    }
+    }*/
 
 
 }

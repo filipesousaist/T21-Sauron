@@ -24,8 +24,8 @@ public class SiloClientApp {
 
 		EmptyMessage request = EmptyMessage.getDefaultInstance();
 
-		ClearResponse response = frontend.ctrlClear(request);
-		System.out.println(response.getClearStatus());
+		/*ClearResponse response = frontend.ctrlClear(request);
+		System.out.println(response.getClearStatus());*/
 
 	}
 	
