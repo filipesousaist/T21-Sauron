@@ -24,6 +24,10 @@ public class SiloFrontend implements AutoCloseable{
         return stub.track(objectData);
     }
 
+    public ObservationResponse trackMatach(ObjectData objectData){
+        return stub.trackMatch(objectData);
+    }
+
     @Override
     public void close(){
         channel.shutdown();
