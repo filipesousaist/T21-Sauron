@@ -6,7 +6,7 @@ import pt.tecnico.sauron.silo.grpc.Silo.*;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc.*;
 
-public class SiloFrontend implements AutoCloseable{
+public class SiloFrontend implements AutoCloseable {
     private final ManagedChannel channel;
     private SiloServiceBlockingStub stub;
 
@@ -16,7 +16,27 @@ public class SiloFrontend implements AutoCloseable{
         stub = SiloServiceGrpc.newBlockingStub(channel);
     }
 
-    public ClearResponse ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
+    public EyeJoinResponse camJoin(EyeJoinRequest eyeJoinRequest) {
+        return stub.camJoin(eyeJoinRequest);
+    }
+
+    public Coordinates camInfo(StringMessage eyeName) {
+        return stub.camInfo(eyeName);
+    }
+
+    public ReportResponse report(EyeObservation eyeObservation) {
+        return stub.report(eyeObservation);
+    }
+
+    public StringMessage ctrlPing(StringMessage request){ return stub.ctrlPing(request); }
+
+    public StringMessage ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
+
+    public StringMessage ctrlInit(EmptyMessage request){ return stub.ctrlInit(request); }
+
+    public ObservationResponse track(ObjectData objectData){
+        return stub.track(objectData);
+    }
 
     @Override
     public void close(){
