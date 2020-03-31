@@ -43,6 +43,14 @@ public class SiloServer {
         }
     }
 
+    public EyeInfo cam_info(String camName) {
+        boolean exists = eyes.containsKey(camName);
+        EyeInfo.Builder eyeInfo = EyeInfo.newBuilder().setExists(exists);
+        if (exists)
+            eyeInfo.setCoordinates(eyes.get(camName));
+        return eyeInfo.build();
+    }
+
     public Observation track(String id, ObjectType type) throws ObservationNotFoundException{
         return observations.stream()
             .filter(o -> o.getType() == type)

@@ -185,6 +185,6 @@ public class SpotterApp {
 
 	private static Coordinates camInfo(String camName, SiloFrontend frontend){
 		StringMessage request = StringMessage.newBuilder().setText(camName).build();
-		return frontend.camInfo(request);
+		return frontend.camInfo(request).getCoordinates();
 	}
 }

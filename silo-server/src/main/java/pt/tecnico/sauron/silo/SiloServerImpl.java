@@ -56,6 +56,12 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void camInfo(StringMessage request, StreamObserver<EyeInfo> responseObserver) {
+        EyeInfo response = siloServer.cam_info(request.getText());
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 
     @Override
     public void track(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {

@@ -20,7 +20,7 @@ public class SiloFrontend implements AutoCloseable {
         return stub.camJoin(eyeJoinRequest);
     }
 
-    public Coordinates camInfo(StringMessage eyeName) {
+    public EyeInfo camInfo(StringMessage eyeName) {
         return stub.camInfo(eyeName);
     }
 

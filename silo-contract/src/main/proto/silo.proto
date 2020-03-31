@@ -18,7 +18,7 @@ message StringMessage {
 }
 
 // Geolocation
-message Coordinates { //TODO: Change string to different data type
+message Coordinates {
     double latitude = 1;
     double longitude = 2;
 }
@@ -61,6 +61,12 @@ message EyeJoinResponse {
     EyeJoinStatus status = 1;
 }
 
+// Message containing information about an Eye
+message EyeInfo {
+    bool exists = 1;
+    Coordinates coordinates = 2;
+}
+
 // A batch of one or more observations made by an Eye
 message EyeObservation {
     string camName = 1;
@@ -99,7 +105,7 @@ message ObservationResponse {
 
 service SiloService {
     rpc cam_join(EyeJoinRequest) returns (EyeJoinResponse);
-    rpc cam_info(StringMessage) returns (Coordinates);
+    rpc cam_info(StringMessage) returns (EyeInfo);
     rpc report(EyeObservation) returns (ReportResponse);
     rpc track (ObjectData) returns (ObservationResponse);
     rpc trackMatch (ObjectData) returns (ObservationResponse);
