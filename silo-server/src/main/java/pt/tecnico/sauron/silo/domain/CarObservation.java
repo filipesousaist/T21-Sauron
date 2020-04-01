@@ -8,8 +8,8 @@ public class CarObservation extends Observation {
 
     private String id;
 
-    CarObservation(String id, String camName){
-        super(ObjectType.CAR, camName);
+    CarObservation(String id, String camName, Date date){
+        super(ObjectType.CAR, camName, date);
         this.id = id;
     }
 

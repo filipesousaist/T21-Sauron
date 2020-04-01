@@ -36,7 +36,4 @@ public class SiloServerApp {
 
 		server.awaitTermination();
 	}
-
-
-	
 }

@@ -77,7 +77,7 @@
 					<mainClass>${mainclass}</mainClass>
 					<arguments>
 						<argument>localhost</argument>
-						<argument>5432</argument>
+						<argument>8080</argument>
 						<argument>Tagus</argument>
 						<argument>38.737259</argument>
 						<argument>-9.302400</argument>

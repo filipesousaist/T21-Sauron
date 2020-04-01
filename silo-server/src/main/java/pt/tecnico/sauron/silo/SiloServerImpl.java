@@ -58,10 +58,10 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
             responseObserver.onError(Status.OUT_OF_RANGE.asRuntimeException());
         }
         catch (DuplicateJoinException e) {
-            responseObserver.onError(Status.OK.asRuntimeException()); // Allow duplicate joins
+            responseObserver.onError(Status.ALREADY_EXISTS.asRuntimeException()); // Allow duplicate joins
         }
         catch (RepeatedNameException e) {
-            responseObserver.onError(Status.ALREADY_EXISTS.asRuntimeException());
+            responseObserver.onError(Status.PERMISSION_DENIED.asRuntimeException());
         }
     }
 

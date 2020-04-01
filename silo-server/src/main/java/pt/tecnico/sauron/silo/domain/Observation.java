@@ -11,8 +11,8 @@ public abstract class Observation {
     private ObjectType type;
     private String camName;
 
-    public Observation(ObjectType type, String camName){
-        this.date = new Date();
+    public Observation(ObjectType type, String camName, Date date) {
+        this.date = date;
         this.type = type;
         this.camName = camName;
     }

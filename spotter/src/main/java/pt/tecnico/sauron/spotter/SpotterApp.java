@@ -48,19 +48,22 @@ public class SpotterApp {
 		return parsedArgs;
 	}
 
-	private static void handleInput(SiloFrontend frontend){
-
-		try (Scanner scanner = new Scanner(System.in)){
-			while(true) {
+	private static void handleInput(SiloFrontend frontend) {
+		Scanner scanner = new Scanner(System.in);
+		while (true) {
+			try {
 				String line = scanner.nextLine();
-				parseLine(line, frontend);
+				if (!parseLine(line, frontend))
+					break;
 			}
-		} catch (InvalidLineException e){
-			System.out.println(e.getMessage());
+			catch (InvalidLineException e){
+				System.out.println(e.getMessage());
+			}
 		}
+		scanner.close();
 	}
 
-	private static void parseLine(String line, SiloFrontend frontend)
+	private static boolean parseLine(String line, SiloFrontend frontend)
 			throws InvalidLineException{
 		String[] lineArgs = line.split(" ");
 		if (lineArgs.length > 3 || lineArgs.length < 1)
@@ -83,12 +86,15 @@ public class SpotterApp {
 			case "init":
 				init(frontend);
 				break;
+			case "exit":
+				return false;
 			case "help":
 				printHelp();
 				break;
 			default:
 				throw new InvalidLineException("Unknown command: " + lineArgs[0]);
 		}
+		return true;
 	}
 
 
@@ -121,9 +127,9 @@ public class SpotterApp {
 		ObjectType type = getObjectType(lineArgs);
 
 		ObjectData request = ObjectData.newBuilder().setType(type).setId(lineArgs[2]).build();
-		/*ObservationResponse response = frontend.trace(request);
+		ObservationResponse response = frontend.trace(request);
 
-		printResult(response, frontend);*/
+		printResult(response, frontend);
 	}
 
 	private static ObjectType getObjectType(String[] lineArgs) throws InvalidLineException {
@@ -142,14 +148,16 @@ public class SpotterApp {
 	}
 
 	private static void printResult(ObservationResponse response, SiloFrontend frontend){
-		ObservationData responseData;
-		Coordinates camCoords;
 		for (int i = 0; i < response.getDataCount(); i++) {
-			responseData = response.getData(i);
-			camCoords = camInfo(responseData.getCamName(), frontend);
+			ObservationData responseData = response.getData(i);
+			Coordinates camCoords = camInfo(responseData.getCamName(), frontend);
+
+			SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			String timeString = timeFormat.format(responseData.getTimestamp().getSeconds() * 1000);
+
 			System.out.println("" + responseData.getId() + ","
 					+ responseData.getType() + ","
-					+ new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(responseData.getTimestamp()) + ","
+					+ timeString + ","
 					+ responseData.getCamName() + ","
 					+ camCoords.getLatitude() + ","
 					+ camCoords.getLongitude());
@@ -180,7 +188,8 @@ public class SpotterApp {
 				"trail <type> <id> (returns path taken by <type> with <id>)\n" +
 				"ping (returns message with server state)\n" +
 				"clear (clears server state)\n" +
-				"init (allows definition of initial configuration parameters of server)");
+				"init (allows definition of initial configuration parameters of server)\n" +
+				"exit (exits Spotter)");
 	}
 
 	private static Coordinates camInfo(String camName, SiloFrontend frontend){
