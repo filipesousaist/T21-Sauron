@@ -69,21 +69,25 @@ public class EyeApp {
 			System.out.println("Registration successful. Proceeding...");
 		}
 		catch (StatusRuntimeException e) {
-			if (Status.OK.equals(e.getStatus())) {
+			Status.Code code = e.getStatus().getCode();
+			if (Status.ALREADY_EXISTS.getCode().equals(code)) {
+				System.out.println(e.getStatus());
 				System.out.println("This Eye was already registered on server. Proceeding...");
 			}
-			else if (Status.ALREADY_EXISTS.equals(e.getStatus())) {
+			else if (Status.PERMISSION_DENIED.getCode().equals(code)) {
 				throw new RegistrationException(
 					"An Eye already exists with same name, but different coordinates.");
 			}
-			else if (Status.INVALID_ARGUMENT.equals(e.getStatus())) {
+			else if (Status.INVALID_ARGUMENT.getCode().equals(code)) {
 				throw new RegistrationException(
 					"Eye name does not match specified format.");
 			}
-			else if (Status.OUT_OF_RANGE.equals(e.getStatus())) {
+			else if (Status.OUT_OF_RANGE.getCode().equals(code)) {
 				throw new RegistrationException(
 					"Eye coordinates do not match specified format.");
 			}
+
+			System.out.println("Status: " + e.getStatus());
 		}
 	}
 
@@ -147,14 +151,19 @@ public class EyeApp {
 
 		// Report observations to server and check for status
 		try {
+			System.out.println("Before report");
 			frontend.report(
 				eyeObservationBuilder.setCamName(eye.getName()).build());
+			System.out.println("Client didn't catch exception");
 		}
 		catch (StatusRuntimeException e) {
-			if (e.getStatus().equals(Status.INVALID_ARGUMENT))
-				throw new InvalidIdException();
-			else if (e.getStatus().equals(Status.UNAUTHENTICATED))
+			Status.Code code = e.getStatus().getCode();
+			if (Status.INVALID_ARGUMENT.getCode().equals(code)) {
+				throw new InvalidIdException(e.getMessage());
+			}
+			else if (Status.UNAUTHENTICATED.getCode().equals(code)) {
 				throw new UnregisteredEyeException();
+			}
 		}
 	}
 

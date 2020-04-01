@@ -43,8 +43,10 @@ public class SiloServer {
     }
 
     public Coordinates cam_info(String camName) throws UnregisteredEyeException {
-        if (eyes.containsKey(camName))
-            return eyes.get(camName);
+        synchronized (this) {
+            if (eyes.containsKey(camName))
+                return eyes.get(camName);
+        }
         throw new UnregisteredEyeException();
     }
 
@@ -53,24 +55,31 @@ public class SiloServer {
         if (!eyes.containsKey(camName))
             throw new UnregisteredEyeException();
 
-        for (ObjectData object : data){
+        Date date = new Date();
+
+        for (ObjectData object : data) {
             switch (object.getType()) {
                 case PERSON:
                     try {
                         long personId = Long.parseLong(object.getId());
                         if (personId < 0)
                             throw new InvalidIdException("Person ID does not match the specification");
-                        observations.add(new PersonObservation(personId, camName));
+                        synchronized (this) {
+                            observations.add(new PersonObservation(personId, camName, date));
+                        }
                     }
                     catch (NumberFormatException e) {
                         throw new InvalidIdException("Person ID does not match the specification");
                     }
                     break;
                 case CAR:
-                    if (object.getId().matches("[0-9]{2}[A-Z]{4}") ||
-                        object.getId().matches("[A-Z]{2}[0-9]{2}[A-Z]{2}") ||
-                        object.getId().matches("[A-Z]{4}[0-9]{2}")){
-                        observations.add(new CarObservation(object.getId(), camName));
+                    String carId = object.getId();
+                    int numNonDigits = carId.replaceAll("[0-9]", "").length();
+                    if (carId.matches("([0-9]{2}|[A-Z]{2}){3}") &&
+                        numNonDigits == 2 || numNonDigits == 4) {
+                        synchronized (this) {
+                            observations.add(new CarObservation(object.getId(), camName, date));
+                        }
                         break;
                     }
                     else
@@ -82,10 +91,12 @@ public class SiloServer {
     }
 
     public Optional<Observation> track(String id, ObjectType type) {
-        return observations.stream()
-            .filter(o -> o.getType().equals(type))
-            .filter(o -> o.getStrId().equals(id))
-            .max(Comparator.comparing(Observation::getDate));
+        synchronized (this) {
+            return observations.stream()
+                    .filter(o -> o.getType().equals(type))
+                    .filter(o -> o.getStrId().equals(id))
+                    .max(Comparator.comparing(Observation::getDate));
+        }
     }
 
     public List<Observation> trackMatch(String id, ObjectType type) {
@@ -117,7 +128,7 @@ public class SiloServer {
                 .collect(Collectors.toList());
     }
 
-    public String ping(String message){
+    public String ping(String message) {
         return "Hello " + message + " !";
     }
 
@@ -127,7 +138,7 @@ public class SiloServer {
         return "Server has been cleared.";
     }
 
-    public String init(){
+    public String init() {
         String camName1 = "Tagus";
         Coordinates coordinates1 = Coordinates.newBuilder().setLatitude(38.737613).setLongitude(-9.303164).build();
         String camName2 = "Alameda";
@@ -136,14 +147,14 @@ public class SiloServer {
         eyes.put(camName1, coordinates1);
         eyes.put(camName2, coordinates2);
 
-        observations.add(new CarObservation("AA00BB", camName1));
-        observations.add(new CarObservation("LD04BY", camName2));
-        observations.add(new PersonObservation(123456, camName1));
-        observations.add(new CarObservation("4502GS", camName1));
-        observations.add(new PersonObservation(654321, camName2));
-        observations.add(new CarObservation("AA43BY", camName2));
-        observations.add(new PersonObservation(2568628, camName1));
-        observations.add(new PersonObservation(12344321, camName2));
+        observations.add(new CarObservation("AA00BB", camName1, new Date()));
+        observations.add(new CarObservation("LD04BY", camName2, new Date()));
+        observations.add(new PersonObservation(123456, camName1, new Date()));
+        observations.add(new CarObservation("4502GS", camName1, new Date()));
+        observations.add(new PersonObservation(654321, camName2, new Date()));
+        observations.add(new CarObservation("AA43BY", camName2, new Date()));
+        observations.add(new PersonObservation(2568628, camName1, new Date()));
+        observations.add(new PersonObservation(12344321, camName2, new Date()));
 
         return "Observations added.";
     }
