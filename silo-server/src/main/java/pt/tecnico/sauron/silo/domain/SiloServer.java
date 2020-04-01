@@ -113,19 +113,34 @@ public class SiloServer {
         }
 
         String pattern = id.replace("*", regex);
+        synchronized (this) {
+            return observations.stream()
+                    .filter(o -> o.getType() == type)
+                    .filter(o -> o.getStrId().matches(pattern))
+                    .map(Observation::getStrId)
+                    .distinct()
+                    .map(this::getLatest)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
+        }
 
+    }
+
+    private Optional<Observation> getLatest(String id) {
         return observations.stream()
-            .filter(o -> o.getType() == type)
-            .filter(o -> o.getStrId().matches(pattern))
-            .collect(Collectors.toList());
+                .filter(obs -> obs.getStrId().equals(id))
+                .max(Comparator.comparing(Observation::getDate));
     }
 
     public List<Observation> trace(String id, ObjectType type) {
-        return observations.stream()
-                .filter(o -> o.getType().equals(type))
-                .filter(o -> o.getStrId().equals(id))
-                .sorted(Comparator.comparing(Observation::getDate))
-                .collect(Collectors.toList());
+        synchronized (this) {
+            return observations.stream()
+                    .filter(o -> o.getType().equals(type))
+                    .filter(o -> o.getStrId().equals(id))
+                    .sorted(Comparator.comparing(Observation::getDate))
+                    .collect(Collectors.toList());
+        }
     }
 
     public String ping(String message) {
