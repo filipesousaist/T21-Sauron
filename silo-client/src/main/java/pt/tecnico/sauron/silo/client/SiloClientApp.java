@@ -10,7 +10,6 @@ import java.util.List;
 
 public class SiloClientApp {
 
-	private static Timestamp timestamp;
 
 	public static void main(String[] args) {
 		String host;
@@ -42,7 +41,6 @@ public class SiloClientApp {
 		Silo.ObservationResponse observationResponse = frontend.trackMatch(objectData);
 
 		List<ObservationData> objectDataList = observationResponse.getDataList();
-
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss");
 
 		for (ObservationData od : objectDataList) {

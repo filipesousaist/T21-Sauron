@@ -42,4 +42,8 @@ public class BaseIT {
 		return Silo.EmptyMessage.getDefaultInstance();
 	}
 
+	/*protected Silo.EyeJoinRequest buildEyeJoinRequest(){
+
+	}*/
+
 }

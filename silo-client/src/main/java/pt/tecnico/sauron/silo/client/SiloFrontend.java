@@ -38,12 +38,12 @@ public class SiloFrontend implements AutoCloseable {
         return stub.track(objectData);
     }
 
-    public ObservationResponse trace(ObjectData objectData){
-        return stub.trace(objectData);
-    }
-
     public ObservationResponse trackMatch(ObjectData objectData){
         return stub.trackMatch(objectData);
+    }
+
+    public ObservationResponse trace(ObjectData objectData){
+        return stub.trace(objectData);
     }
 
     @Override
