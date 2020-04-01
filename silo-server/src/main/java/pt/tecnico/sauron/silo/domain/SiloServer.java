@@ -52,28 +52,32 @@ public class SiloServer {
             throws InvalidIdException, UnregisteredEyeException {
         if (!eyes.containsKey(camName))
             throw new UnregisteredEyeException();
-        try {
-            for (ObjectData object : data){
-                switch (object.getType()) {
-                    case PERSON:
-                        observations.add(new PersonObservation(Long.parseLong(object.getId()), camName));
+
+        for (ObjectData object : data){
+            switch (object.getType()) {
+                case PERSON:
+                    try {
+                        long personId = Long.parseLong(object.getId());
+                        if (personId < 0)
+                            throw new InvalidIdException("Person ID does not match the specification");
+                        observations.add(new PersonObservation(personId, camName));
+                    }
+                    catch (NumberFormatException e) {
+                        throw new InvalidIdException("Person ID does not match the specification");
+                    }
+                    break;
+                case CAR:
+                    if (object.getId().matches("[0-9]{2}[A-Z]{4}") ||
+                        object.getId().matches("[A-Z]{2}[0-9]{2}[A-Z]{2}") ||
+                        object.getId().matches("[A-Z]{4}[0-9]{2}")){
+                        observations.add(new CarObservation(object.getId(), camName));
                         break;
-                    case CAR:
-                        if (object.getId().matches("[0-9]{2}[A-Z]{4}") ||
-                            object.getId().matches("[A-Z]{2}[0-9]{2}[A-Z]{2}") ||
-                            object.getId().matches("[A-Z]{4}[0-9]{2}")){
-                            observations.add(new CarObservation(object.getId(), camName));
-                            break;
-                        }
-                        else
-                            throw new InvalidIdException("Car ID does not match the specification");
-                    default:
-                        throw new RuntimeException("Invalid type");
-                }
+                    }
+                    else
+                        throw new InvalidIdException("Car ID does not match the specification");
+                default:
+                    throw new RuntimeException("Invalid type");
             }
-        }
-        catch (NumberFormatException e) {
-            throw new InvalidIdException("Person ID does not match the specification");
         }
     }
 
@@ -100,8 +104,16 @@ public class SiloServer {
         String pattern = id.replace("*", regex);
 
         return observations.stream()
-                .filter(o -> o.getType() == type)
-                .filter(o -> o.getStrId().matches(pattern))
+            .filter(o -> o.getType() == type)
+            .filter(o -> o.getStrId().matches(pattern))
+            .collect(Collectors.toList());
+    }
+
+    public List<Observation> trace(String id, ObjectType type) {
+        return observations.stream()
+                .filter(o -> o.getType().equals(type))
+                .filter(o -> o.getStrId().equals(id))
+                .sorted(Comparator.comparing(Observation::getDate))
                 .collect(Collectors.toList());
     }
 
