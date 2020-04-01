@@ -63,6 +63,16 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     }
 
     @Override
+    public void report(EyeObservation request, StreamObserver<ReportResponse> responseObserver) {
+            ReportResponse response = siloServer.report(request.getDataList(), request.getCamName());
+
+            responseObserver.onNext(response);
+
+            responseObserver.onCompleted();
+
+    }
+
+    @Override
     public void track(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
         try {
             List<Observation> observations = new LinkedList<>();

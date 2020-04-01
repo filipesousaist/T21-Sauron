@@ -139,7 +139,7 @@ public class EyeApp {
 		eye.clearObservations();
 
 		// Report observations to server and check for status
-		ReportStatus status = frontend.report(eyeObservationBuilder.build()).getStatus();
+		ReportStatus status = frontend.report(eyeObservationBuilder.setCamName(eye.getName()).build()).getStatus();
 		switch (status) {
 			case INVALID_ID:
 				throw new InvalidIdException();
