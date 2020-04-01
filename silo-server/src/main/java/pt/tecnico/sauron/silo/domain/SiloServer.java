@@ -3,8 +3,7 @@ package pt.tecnico.sauron.silo.domain;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import pt.tecnico.sauron.silo.domain.exception.NoObservationMatchExcpetion;
-import pt.tecnico.sauron.silo.domain.exception.ObservationNotFoundException;
+import pt.tecnico.sauron.silo.domain.exception.*;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 
@@ -17,46 +16,42 @@ public class SiloServer {
 
     }
 
-    public EyeJoinStatus cam_join(String cam_name, Coordinates coordinates) {
+    public void cam_join(String cam_name, Coordinates coordinates)
+            throws InvalidEyeNameException, InvalidCoordinatesException,
+            DuplicateJoinException, RepeatedNameException {
         // Check cam_name
         if (!cam_name.matches("[0-9A-Za-z]{3,15}"))
-            return EyeJoinStatus.INVALID_EYE_NAME;
+            throw new InvalidEyeNameException();
 
         // Check coordinates
         double latitude = coordinates.getLatitude();
         double longitude = coordinates.getLongitude();
         if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180)
-            return EyeJoinStatus.INVALID_COORDINATES;
+            throw new InvalidCoordinatesException();
 
         // Try to add Eye to the "database"
         if (eyes.containsKey(cam_name)) {
             Coordinates dbCoords = eyes.get(cam_name);
             if (Math.abs(latitude - dbCoords.getLatitude()) < ADMISSIBLE_ERROR &&
                 Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR)
-                return EyeJoinStatus.DUPLICATE_JOIN;
+                throw new DuplicateJoinException();
             else
-                return EyeJoinStatus.REPEATED_NAME;
+                throw new RepeatedNameException();
         }
-        else {
+        else
             eyes.put(cam_name, coordinates);
-            return EyeJoinStatus.JOIN_OK;
-        }
     }
 
-    public EyeInfo cam_info(String camName) {
-        boolean exists = eyes.containsKey(camName);
-        EyeInfo.Builder eyeInfo = EyeInfo.newBuilder().setExists(exists);
-        if (exists)
-            eyeInfo.setCoordinates(eyes.get(camName));
-        return eyeInfo.build();
+    public Coordinates cam_info(String camName) throws UnregisteredEyeException {
+        if (eyes.containsKey(camName))
+            return eyes.get(camName);
+        throw new UnregisteredEyeException();
     }
 
-    public ReportResponse report(List<ObjectData> data, String camName) throws RuntimeException{
-        System.out.println(camName);
-        System.out.println(eyes.get(camName));
-        if (!eyes.containsKey(camName)){
-            return ReportResponse.newBuilder().setStatus(ReportStatus.UNREGISTERED_EYE).build();
-        }
+    public void report(List<ObjectData> data, String camName)
+            throws InvalidIdException, UnregisteredEyeException {
+        if (!eyes.containsKey(camName))
+            throw new UnregisteredEyeException();
         try {
             for (ObjectData object : data){
                 switch (object.getType()) {
@@ -69,29 +64,27 @@ public class SiloServer {
                             object.getId().matches("[A-Z]{4}[0-9]{2}")){
                             observations.add(new CarObservation(object.getId(), camName));
                             break;
-                        } else {
-                            return ReportResponse.newBuilder().setStatus(ReportStatus.INVALID_ID).build();
                         }
+                        else
+                            throw new InvalidIdException("Car ID does not match the specification");
                     default:
                         throw new RuntimeException("Invalid type");
                 }
             }
-        } catch (NumberFormatException e){
-            return ReportResponse.newBuilder().setStatus(ReportStatus.INVALID_ID).build();
         }
-
-        return ReportResponse.newBuilder().setStatus(ReportStatus.REPORT_OK).build();
+        catch (NumberFormatException e) {
+            throw new InvalidIdException("Person ID does not match the specification");
+        }
     }
 
-    public Observation track(String id, ObjectType type) throws ObservationNotFoundException{
+    public Optional<Observation> track(String id, ObjectType type) {
         return observations.stream()
             .filter(o -> o.getType().equals(type))
             .filter(o -> o.getStrId().equals(id))
-            .max(Comparator.comparing(Observation::getDate))
-            .orElseThrow(() -> new ObservationNotFoundException(id));
+            .max(Comparator.comparing(Observation::getDate));
     }
 
-    public List<Observation> trackMatch(String id, ObjectType type)/* throws NoObservationMatchExcpetion */{
+    public List<Observation> trackMatch(String id, ObjectType type) {
         String regex;
         switch (type) {
             case PERSON:
@@ -101,19 +94,15 @@ public class SiloServer {
                 regex = "[0-9A-Z]*";
                 break;
             default:
-                regex = ".";
+                throw new RuntimeException("Invalid type");
         }
 
         String pattern = id.replace("*", regex);
 
-        List<Observation> res = observations.stream()
+        return observations.stream()
                 .filter(o -> o.getType() == type)
                 .filter(o -> o.getStrId().matches(pattern))
                 .collect(Collectors.toList());
-
-        //if (res.isEmpty()) throw new NoObservationMatchExcpetion(id);
-
-        return res;
     }
 
     public String ping(String message){

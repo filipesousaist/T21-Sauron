@@ -1,5 +1,7 @@
 package pt.tecnico.sauron.eye;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import pt.tecnico.sauron.eye.domain.Eye;
 import pt.tecnico.sauron.eye.domain.exceptions.*;
 import pt.tecnico.sauron.silo.client.SiloFrontend;
@@ -62,21 +64,26 @@ public class EyeApp {
 			.setCamName(eye.getName())
 			.setCoordinates(eye.getCoordinates())
 			.build();
-		EyeJoinStatus eyeJoinStatus = frontend.camJoin(eyeJoinRequest).getStatus();
-		switch (eyeJoinStatus) {
-			case JOIN_OK:
-				System.out.println("Registration successful. Proceeding..."); break;
-			case DUPLICATE_JOIN:
-				System.out.println("This Eye was already registered on server. Proceeding..."); break;
-			case REPEATED_NAME:
+		try {
+			frontend.camJoin(eyeJoinRequest);
+			System.out.println("Registration successful. Proceeding...");
+		}
+		catch (StatusRuntimeException e) {
+			if (Status.OK.equals(e.getStatus())) {
+				System.out.println("This Eye was already registered on server. Proceeding...");
+			}
+			else if (Status.ALREADY_EXISTS.equals(e.getStatus())) {
 				throw new RegistrationException(
 					"An Eye already exists with same name, but different coordinates.");
-			case INVALID_EYE_NAME:
+			}
+			else if (Status.INVALID_ARGUMENT.equals(e.getStatus())) {
 				throw new RegistrationException(
 					"Eye name does not match specified format.");
-			case INVALID_COORDINATES:
+			}
+			else if (Status.OUT_OF_RANGE.equals(e.getStatus())) {
 				throw new RegistrationException(
 					"Eye coordinates do not match specified format.");
+			}
 		}
 	}
 
@@ -110,7 +117,7 @@ public class EyeApp {
 	}
 
 	private static void parseLine(Eye eye, String line)
-			throws InvalidLineException, InvalidIdException {
+			throws InvalidLineException {
 		String[] lineArgs = line.split(",");
 		if (lineArgs.length != 2)
 			throw new InvalidLineException(
@@ -139,11 +146,14 @@ public class EyeApp {
 		eye.clearObservations();
 
 		// Report observations to server and check for status
-		ReportStatus status = frontend.report(eyeObservationBuilder.setCamName(eye.getName()).build()).getStatus();
-		switch (status) {
-			case INVALID_ID:
+		try {
+			frontend.report(
+				eyeObservationBuilder.setCamName(eye.getName()).build());
+		}
+		catch (StatusRuntimeException e) {
+			if (e.getStatus().equals(Status.INVALID_ARGUMENT))
 				throw new InvalidIdException();
-			case UNREGISTERED_EYE:
+			else if (e.getStatus().equals(Status.UNAUTHENTICATED))
 				throw new UnregisteredEyeException();
 		}
 	}
@@ -153,7 +163,7 @@ public class EyeApp {
 			long sleepTime = Long.parseLong(timeStr);
 			if (sleepTime < 0)
 				throw new InvalidLineException("Argument 2 must be non-negative.");
-			TimeUnit.SECONDS.sleep(sleepTime);
+			TimeUnit.MILLISECONDS.sleep(sleepTime);
 		}
 		catch (NumberFormatException e) {
 			throw new InvalidLineException("Argument 2 is not a valid integer.");

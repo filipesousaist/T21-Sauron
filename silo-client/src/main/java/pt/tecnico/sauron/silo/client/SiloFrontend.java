@@ -16,15 +16,15 @@ public class SiloFrontend implements AutoCloseable {
         stub = SiloServiceGrpc.newBlockingStub(channel);
     }
 
-    public EyeJoinResponse camJoin(EyeJoinRequest eyeJoinRequest) {
+    public EmptyMessage camJoin(EyeJoinRequest eyeJoinRequest) {
         return stub.camJoin(eyeJoinRequest);
     }
 
-    public EyeInfo camInfo(StringMessage eyeName) {
+    public Coordinates camInfo(StringMessage eyeName) {
         return stub.camInfo(eyeName);
     }
 
-    public ReportResponse report(EyeObservation eyeObservation) {
+    public EmptyMessage report(EyeObservation eyeObservation) {
         return stub.report(eyeObservation);
     }
 
@@ -33,8 +33,6 @@ public class SiloFrontend implements AutoCloseable {
     public StringMessage ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
 
     public StringMessage ctrlInit(EmptyMessage request){ return stub.ctrlInit(request); }
-
-
 
     public ObservationResponse track(ObjectData objectData){
         return stub.track(objectData);
