@@ -32,7 +32,7 @@ public class SiloServer {
         if (eyes.containsKey(cam_name)) {
             Coordinates dbCoords = eyes.get(cam_name);
             if (Math.abs(latitude - dbCoords.getLatitude()) < ADMISSIBLE_ERROR &&
-                Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR)
+                    Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR)
                 return EyeJoinStatus.DUPLICATE_JOIN;
             else
                 return EyeJoinStatus.REPEATED_NAME;
@@ -53,10 +53,10 @@ public class SiloServer {
 
     public Observation track(String id, ObjectType type) throws ObservationNotFoundException{
         return observations.stream()
-            .filter(o -> o.getType().equals(type))
-            .filter(o -> o.getStrId().equals(id))
-            .max(Comparator.comparing(Observation::getDate))
-            .orElseThrow(() -> new ObservationNotFoundException(id));
+                .filter(o -> o.getType().equals(type))
+                .filter(o -> o.getStrId().equals(id))
+                .max(Comparator.comparing(Observation::getDate))
+                .orElseThrow(() -> new ObservationNotFoundException(id));
     }
 
     public List<Observation> trackMatch(String id, ObjectType type)/* throws NoObservationMatchExcpetion */{
@@ -74,19 +74,26 @@ public class SiloServer {
 
         String pattern = id.replace("*", regex);
 
-        List<Observation> res = observations.stream()
+        return observations.stream()
                 .filter(o -> o.getType() == type)
                 .filter(o -> o.getStrId().matches(pattern))
                 .collect(Collectors.toList());
 
-        //if (res.isEmpty()) throw new NoObservationMatchExcpetion(id);
-
-        return res;
     }
 
-        public String ping(String message){
-            return "Hello " + message + " !";
-        }
+    public List<Observation> trace(String id, ObjectType type){
+        return observations.stream()
+                .filter(o -> o.getType().equals(type))
+                .filter(o -> o.getStrId().equals(id))
+                .sorted(Comparator.comparing(Observation::getDate))
+                .collect(Collectors.toList());
+
+    }
+
+
+    public String ping(String message){
+        return "Hello " + message + " !";
+    }
 
     public String clear() {
         observations.clear();

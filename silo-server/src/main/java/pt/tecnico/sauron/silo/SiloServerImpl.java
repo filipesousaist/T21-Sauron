@@ -5,7 +5,6 @@ import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import pt.tecnico.sauron.silo.domain.Observation;
 import pt.tecnico.sauron.silo.domain.SiloServer;
-import pt.tecnico.sauron.silo.domain.exception.NoObservationMatchExcpetion;
 import pt.tecnico.sauron.silo.domain.exception.ObservationNotFoundException;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
@@ -83,14 +82,21 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     @Override
     public void trackMatch(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
         List<Observation> observations = siloServer.trackMatch(request.getId(), request.getType());
-
         ObservationResponse response = buildObservationResponse(observations);
 
         responseObserver.onNext(response);
-
         responseObserver.onCompleted();
 
     }
+    @Override
+    public void trace(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
+        List<Observation> observations = siloServer.trackMatch(request.getId(), request.getType());
+        ObservationResponse response = buildObservationResponse(observations);
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
 
 
 
