@@ -100,7 +100,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     }
     @Override
     public void trace(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
-        List<Observation> observations = siloServer.trackMatch(request.getId(), request.getType());
+        List<Observation> observations = siloServer.trace(request.getId(), request.getType());
         ObservationResponse response = buildObservationResponse(observations);
 
         responseObserver.onNext(response);
