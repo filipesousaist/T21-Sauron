@@ -92,18 +92,14 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
     @Override
     public void trackMatch(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
-        try{
-            List<Observation> observations = siloServer.trackMatch(request.getId(), request.getType());
+        List<Observation> observations = siloServer.trackMatch(request.getId(), request.getType());
 
-            ObservationResponse response = buildObservationResponse(observations);
+        ObservationResponse response = buildObservationResponse(observations);
 
-            responseObserver.onNext(response);
+        responseObserver.onNext(response);
 
-            responseObserver.onCompleted();
+        responseObserver.onCompleted();
 
-        }catch (NoObservationMatchExcpetion e){
-            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
-        }
     }
 
 

@@ -85,13 +85,13 @@ public class SiloServer {
 
     public Observation track(String id, ObjectType type) throws ObservationNotFoundException{
         return observations.stream()
-            .filter(o -> o.getType() == type)
+            .filter(o -> o.getType().equals(type))
             .filter(o -> o.getStrId().equals(id))
             .max(Comparator.comparing(Observation::getDate))
             .orElseThrow(() -> new ObservationNotFoundException(id));
     }
 
-    public List<Observation> trackMatch(String id, ObjectType type) throws NoObservationMatchExcpetion {
+    public List<Observation> trackMatch(String id, ObjectType type)/* throws NoObservationMatchExcpetion */{
         String regex;
         switch (type) {
             case PERSON:
@@ -111,7 +111,7 @@ public class SiloServer {
                 .filter(o -> o.getStrId().matches(pattern))
                 .collect(Collectors.toList());
 
-        if (res.isEmpty()) throw new NoObservationMatchExcpetion(id);
+        //if (res.isEmpty()) throw new NoObservationMatchExcpetion(id);
 
         return res;
     }
@@ -122,6 +122,7 @@ public class SiloServer {
 
     public String clear() {
         observations.clear();
+        eyes.clear();
         return "Server has been cleared.";
     }
 
