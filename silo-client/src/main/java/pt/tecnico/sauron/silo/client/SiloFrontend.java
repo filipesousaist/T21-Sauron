@@ -34,6 +34,8 @@ public class SiloFrontend implements AutoCloseable {
 
     public StringMessage ctrlInit(EmptyMessage request){ return stub.ctrlInit(request); }
 
+
+
     public ObservationResponse track(ObjectData objectData){
         return stub.track(objectData);
     }

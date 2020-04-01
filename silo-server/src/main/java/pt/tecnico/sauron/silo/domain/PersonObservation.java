@@ -8,8 +8,8 @@ public class PersonObservation extends Observation{
 
     private long id;
 
-    public PersonObservation(long id){
-        super(ObjectType.PERSON);
+    public PersonObservation(long id, String camName){
+        super(ObjectType.PERSON, camName);
         this.id = id;
     }
 

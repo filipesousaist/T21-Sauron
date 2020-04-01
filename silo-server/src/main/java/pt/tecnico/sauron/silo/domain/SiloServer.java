@@ -51,6 +51,38 @@ public class SiloServer {
         return eyeInfo.build();
     }
 
+    public ReportResponse report(List<ObjectData> data, String camName) throws RuntimeException{
+        System.out.println(camName);
+        System.out.println(eyes.get(camName));
+        if (!eyes.containsKey(camName)){
+            return ReportResponse.newBuilder().setStatus(ReportStatus.UNREGISTERED_EYE).build();
+        }
+        try {
+            for (ObjectData object : data){
+                switch (object.getType()) {
+                    case PERSON:
+                        observations.add(new PersonObservation(Long.parseLong(object.getId()), camName));
+                        break;
+                    case CAR:
+                        if (object.getId().matches("[0-9]{2}[A-Z]{4}") ||
+                            object.getId().matches("[A-Z]{2}[0-9]{2}[A-Z]{2}") ||
+                            object.getId().matches("[A-Z]{4}[0-9]{2}")){
+                            observations.add(new CarObservation(object.getId(), camName));
+                            break;
+                        } else {
+                            return ReportResponse.newBuilder().setStatus(ReportStatus.INVALID_ID).build();
+                        }
+                    default:
+                        throw new RuntimeException("Invalid type");
+                }
+            }
+        } catch (NumberFormatException e){
+            return ReportResponse.newBuilder().setStatus(ReportStatus.INVALID_ID).build();
+        }
+
+        return ReportResponse.newBuilder().setStatus(ReportStatus.REPORT_OK).build();
+    }
+
     public Observation track(String id, ObjectType type) throws ObservationNotFoundException{
         return observations.stream()
             .filter(o -> o.getType() == type)
@@ -84,9 +116,9 @@ public class SiloServer {
         return res;
     }
 
-        public String ping(String message){
-            return "Hello " + message + " !";
-        }
+    public String ping(String message){
+        return "Hello " + message + " !";
+    }
 
     public String clear() {
         observations.clear();
@@ -94,14 +126,22 @@ public class SiloServer {
     }
 
     public String init(){
-        observations.add(new CarObservation("AA00BB"));
-        observations.add(new CarObservation("LD04BY"));
-        observations.add(new PersonObservation(123456));
-        observations.add(new CarObservation("4502GS"));
-        observations.add(new PersonObservation(654321));
-        observations.add(new CarObservation("AA43BY"));
-        observations.add(new PersonObservation(2568628));
-        observations.add(new PersonObservation(12344321));
+        String camName1 = "Tagus";
+        Coordinates coordinates1 = Coordinates.newBuilder().setLatitude(38.737613).setLongitude(-9.303164).build();
+        String camName2 = "Alameda";
+        Coordinates coordinates2 = Coordinates.newBuilder().setLatitude(38.736748).setLongitude(-9.138908).build();
+
+        eyes.put(camName1, coordinates1);
+        eyes.put(camName2, coordinates2);
+
+        observations.add(new CarObservation("AA00BB", camName1));
+        observations.add(new CarObservation("LD04BY", camName2));
+        observations.add(new PersonObservation(123456, camName1));
+        observations.add(new CarObservation("4502GS", camName1));
+        observations.add(new PersonObservation(654321, camName2));
+        observations.add(new CarObservation("AA43BY", camName2));
+        observations.add(new PersonObservation(2568628, camName1));
+        observations.add(new PersonObservation(12344321, camName2));
 
         return "Observations added.";
     }
