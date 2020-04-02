@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 public class ReportIT extends BaseIT {
-    @BeforeEach
+    /*@BeforeEach
     public void setup() {
         frontend.ctrlInit(EmptyMessage.getDefaultInstance());
     }
@@ -19,5 +19,5 @@ public class ReportIT extends BaseIT {
     @Test
     public void validTest() {
 
-    }
+    }*/
 }

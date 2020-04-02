@@ -9,14 +9,6 @@ import "google/protobuf/timestamp.proto";
 
 // *** GENERAL ***
 
-// Message with no fields
-message EmptyMessage {}
-
-// Message with only one string
-message StringMessage {
-    string text = 1;
-}
-
 // Geolocation
 message Coordinates {
     double latitude = 1;
@@ -24,13 +16,12 @@ message Coordinates {
 }
 
 // Possible types of the observable objects
-
 enum ObjectType {
     PERSON = 0;
     CAR = 1;
 }
 
-// Information about an observable object
+// Data of an observed object
 message ObjectData {
     ObjectType type = 1;
     string id = 2;
@@ -39,17 +30,34 @@ message ObjectData {
 
 // *** EYE ***
 
-// Message sent by the Eye to request to be registered
-message EyeJoinRequest {
+// cam_join
+message CamJoinRequest {
     string camName = 1;
     Coordinates coordinates = 2;
 }
 
-// A batch of one or more observations made by an Eye
-message EyeObservation {
+message CamJoinReply {}
+
+// cam_info
+message CamInfoRequest {
     string camName = 1;
-    repeated ObjectData data = 2;
 }
+
+message CamInfoReply {
+    Coordinates coordinates = 1;
+}
+
+// report
+message ReportData {
+    ObjectType type = 1;
+    string id = 2;
+}
+message ReportRequest {
+    string camName = 1;
+    repeated ReportData data = 2;
+}
+
+message ReportReply {}
 
 
 // *** SPOTTER ***
@@ -62,24 +70,72 @@ message ObservationData {
     string camName = 4;
 }
 
-// A batch of zero or more observations requested by a Spotter
-message ObservationResponse {
+// track
+message TrackRequest {
+    ObjectData data = 1;
+}
+
+message TrackReply {
+    ObservationData data = 1;
+}
+
+// trackMatch
+message TrackMatchRequest {
+    ObjectData data = 1;
+}
+
+message TrackMatchReply {
     repeated ObservationData data = 1;
+}
+
+// trace
+message TraceRequest {
+    ObjectData data = 1;
+}
+
+message TraceReply {
+    repeated ObservationData data = 1;
+}
+
+
+// *** DEBUG ***
+
+// ctrlPing
+message CtrlPingRequest {
+    string text = 1;
+}
+
+message CtrlPingReply {
+    string text = 1;
+}
+
+// ctrlClear
+message CtrlClearRequest {}
+
+message CtrlClearReply {
+    string text = 1;
+}
+
+// ctrlInit
+message CtrlInitRequest {}
+
+message CtrlInitReply {
+    string text = 1;
 }
 
 
 // *** RPC SERVICE ***
 
 service SiloService {
-    rpc cam_join(EyeJoinRequest) returns (EmptyMessage);
-    rpc cam_info(StringMessage) returns (Coordinates);
-    rpc report(EyeObservation) returns (EmptyMessage);
-    rpc track (ObjectData) returns (ObservationResponse);
-    rpc trackMatch (ObjectData) returns (ObservationResponse);
-    rpc trace (ObjectData) returns (ObservationResponse);
-    rpc ctrlPing (StringMessage) returns (StringMessage);
-    rpc ctrlClear (EmptyMessage) returns (StringMessage);
-    rpc ctrlInit (EmptyMessage) returns (StringMessage);
+    rpc cam_join(CamJoinRequest) returns (CamJoinReply);
+    rpc cam_info(CamInfoRequest) returns (CamInfoReply);
+    rpc report(ReportRequest) returns (ReportReply);
+    rpc track (TrackRequest) returns (TrackReply);
+    rpc trackMatch (TrackMatchRequest) returns (TrackMatchReply);
+    rpc trace (TraceRequest) returns (TraceReply);
+    rpc ctrlPing (CtrlPingRequest) returns (CtrlPingReply);
+    rpc ctrlClear (CtrlClearRequest) returns (CtrlClearReply);
+    rpc ctrlInit (CtrlInitRequest) returns (CtrlInitReply);
 }
 
 // *** END ***

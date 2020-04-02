@@ -26,7 +26,7 @@ public class SiloClientApp {
 		port = Integer.parseInt(args[1]);
 
 		SiloFrontend frontend = new SiloFrontend(host, port);
-
+/*
 		EmptyMessage request = EmptyMessage.getDefaultInstance();
 
 		StringMessage response = frontend.ctrlClear(request);
@@ -47,6 +47,6 @@ public class SiloClientApp {
 			System.out.println("Id: " + od.getId());
 			String s = format.format(od.getTimestamp().getSeconds()*1000);
 			System.out.println(s);
-		}
+		}*/
 	}
 }
