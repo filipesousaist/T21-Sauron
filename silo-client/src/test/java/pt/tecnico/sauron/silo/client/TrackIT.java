@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class TrackIT extends BaseIT {
     //static members
-    static final String SERVER_STATUS = "Server has been cleared";
+    /*static final String SERVER_STATUS = "Server has been cleared";
     static Date date;
     static final long DATE_TOLERANCE = 1;
 
@@ -65,5 +65,5 @@ public class TrackIT extends BaseIT {
     @Test
     public void invalidType(){
 
-    }
+    }*/
 }
