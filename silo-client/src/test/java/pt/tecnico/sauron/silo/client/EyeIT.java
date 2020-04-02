@@ -19,9 +19,6 @@ public class EyeIT extends BaseIT {
         frontend.ctrlClear(ctrlClearRequest);
     }
 
-
-
-
     @Test
     public void testOkJoin() {
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
@@ -214,15 +211,9 @@ public class EyeIT extends BaseIT {
     }
 
 
-
-
-
-
-
-
     @Test
     public void testOkInfo() {
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(0).build();
+        Coordinates coordinates = Coordinates.newBuilder().setLatitude(38.737613).setLongitude(-9.303164).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Tagus")
                 .setCoordinates(coordinates)
