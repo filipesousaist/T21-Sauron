@@ -52,8 +52,8 @@ public class ReportIT extends BaseIT {
 
     @Test
     public void invalidPersonIdsTest() {
-        BigInteger LARGEID = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
-        BigInteger LARGEID2 = LARGEID.add(BigInteger.valueOf(42153241));
+        final BigInteger LARGEID = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        final BigInteger LARGEID2 = LARGEID.add(BigInteger.valueOf(42153241));
         String[] personIds = {"-1", "-7828426", LARGEID.toString(), LARGEID2.toString(), "1.2",
             "abc", "/", "(Y#(F!H))", ""/*, null*/};
 

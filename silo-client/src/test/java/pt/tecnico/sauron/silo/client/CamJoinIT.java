@@ -1,4 +1,6 @@
+/*
 package pt.tecnico.sauron.silo.client;
+
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -158,7 +160,7 @@ public class CamJoinIT extends BaseIT{
     public void invalidName() {
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
         EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
-                .setCamName("Cam1*/*/")
+                .setCamName("Cam1/*")
                 .setCoordinates(coordinates)
                 .build();
 
@@ -167,3 +169,5 @@ public class CamJoinIT extends BaseIT{
                         () -> frontend.camJoin(eyeJoinRequest)).getStatus().getCode());
     }
 }
+
+ */
