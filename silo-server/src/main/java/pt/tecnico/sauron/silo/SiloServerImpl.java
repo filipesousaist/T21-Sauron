@@ -5,16 +5,13 @@ import io.grpc.stub.StreamObserver;
 import pt.tecnico.sauron.silo.domain.Observation;
 import pt.tecnico.sauron.silo.domain.SiloServer;
 import pt.tecnico.sauron.silo.domain.exception.*;
-import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 import com.google.protobuf.Timestamp;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 
-import javax.sound.midi.Track;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     private SiloServer siloServer = new SiloServer();
@@ -75,6 +72,9 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         }
+        catch (InvalidEyeNameException e) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
+        }
         catch (UnregisteredEyeException e) {
             responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
         }
@@ -120,7 +120,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         }catch (InvalidIdException e){
             responseObserver.onError(
                     Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
-        }catch (NoObservvationFoundException e){
+        }catch (NoObservationFoundException e){
             responseObserver.onError(
                     Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
         }
@@ -141,7 +141,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         }catch (InvalidIdException e){
             responseObserver.onError(
                     Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
-        }catch (NoObservvationFoundException e){
+        }catch (NoObservationFoundException e){
             responseObserver.onError(
                     Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
         }
@@ -163,7 +163,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         }catch (InvalidIdException e){
             responseObserver.onError(
                     Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
-        }catch (NoObservvationFoundException e){
+        }catch (NoObservationFoundException e){
             responseObserver.onError(
                     Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
         }

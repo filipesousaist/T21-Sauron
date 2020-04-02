@@ -12,15 +12,17 @@ public class SiloServer {
     private List<Observation> observations = new LinkedList<>();
     private Map<String, Coordinates> eyes = new HashMap<>();
 
-    public SiloServer() {
+    public SiloServer() {}
 
+    private boolean isValidCamName(String cam_name) {
+        return cam_name.matches("[0-9A-Za-z]{3,15}");
     }
 
     public void cam_join(String cam_name, Coordinates coordinates)
             throws InvalidEyeNameException, InvalidCoordinatesException,
             DuplicateJoinException, RepeatedNameException {
         // Check cam_name
-        if (!cam_name.matches("[0-9A-Za-z]{3,15}"))
+        if (!isValidCamName(cam_name))
             throw new InvalidEyeNameException();
 
         // Check coordinates
@@ -42,7 +44,10 @@ public class SiloServer {
             eyes.put(cam_name, coordinates);
     }
 
-    public Coordinates cam_info(String camName) throws UnregisteredEyeException {
+    public Coordinates cam_info(String camName)
+            throws UnregisteredEyeException, InvalidEyeNameException {
+        if (!isValidCamName(camName))
+            throw new InvalidEyeNameException();
         synchronized (this) {
             if (eyes.containsKey(camName))
                 return eyes.get(camName);
@@ -80,19 +85,19 @@ public class SiloServer {
 
 
 
-    public Observation track(String id, ObjectType type) throws NoObservvationFoundException, InvalidIdException {
+    public Observation track(String id, ObjectType type) throws NoObservationFoundException, InvalidIdException {
         validateId(id, type);
         synchronized (this) {
             return observations.stream()
                     .filter(o -> o.getType().equals(type))
                     .filter(o -> o.getStrId().equals(id))
                     .max(Comparator.comparing(Observation::getDate))
-                    .orElseThrow(() -> new NoObservvationFoundException(id, type));
+                    .orElseThrow(() -> new NoObservationFoundException(id, type));
 
         }
     }
 
-    public List<Observation> trackMatch(String id, ObjectType type) throws InvalidIdException, NoObservvationFoundException {
+    public List<Observation> trackMatch(String id, ObjectType type) throws InvalidIdException, NoObservationFoundException {
         String regex;
         switch (type) {
             case PERSON:
@@ -106,7 +111,7 @@ public class SiloServer {
                 regex = "[0-9A-Z]*";
                 break;
             default:
-                throw new NoObservvationFoundException(id, type);
+                throw new NoObservationFoundException(id, type);
         }
 
         String pattern = id.replace("*", regex);
@@ -122,7 +127,7 @@ public class SiloServer {
                     .map(Optional::get)
                     .collect(Collectors.toList());
         }
-        if (obss.isEmpty()) throw new NoObservvationFoundException(id, type);
+        if (obss.isEmpty()) throw new NoObservationFoundException(id, type);
 
         return obss;
 
@@ -134,7 +139,7 @@ public class SiloServer {
                 .max(Comparator.comparing(Observation::getDate));
     }
 
-    public List<Observation> trace(String id, ObjectType type) throws InvalidIdException, NoObservvationFoundException {
+    public List<Observation> trace(String id, ObjectType type) throws InvalidIdException, NoObservationFoundException {
         List<Observation> obss;
         validateId(id, type);
         synchronized (this) {
@@ -145,7 +150,7 @@ public class SiloServer {
                     .collect(Collectors.toList());
         }
 
-        if(obss.isEmpty()) throw new NoObservvationFoundException(id, type);
+        if(obss.isEmpty()) throw new NoObservationFoundException(id, type);
 
         return obss;
     }
