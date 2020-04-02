@@ -19,6 +19,8 @@ public abstract class Observation {
 
     public abstract String getStrId();
 
+    public abstract String getIdFormat();
+
     public Date getDate(){return date;}
 
     public ObjectType getType(){return type;}

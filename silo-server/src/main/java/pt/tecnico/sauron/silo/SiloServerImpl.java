@@ -5,11 +5,13 @@ import io.grpc.stub.StreamObserver;
 import pt.tecnico.sauron.silo.domain.Observation;
 import pt.tecnico.sauron.silo.domain.SiloServer;
 import pt.tecnico.sauron.silo.domain.exception.*;
+import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 import com.google.protobuf.Timestamp;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 
+import javax.sound.midi.Track;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -97,46 +99,58 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     }
 
     @Override
-    public void track(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
-        List<Observation> observations = new LinkedList<>();
-        Optional<Observation> result = siloServer.track(request.getId(), request.getType());
-        result.ifPresent(observations::add);
+    public void track(TrackRequest request, StreamObserver<TrackReply> responseObserver) {
+        Observation observation = siloServer.track(request.getData().getId(), request.getData().getType());
+        Timestamp ts = Timestamp.newBuilder().setSeconds(observation.getDate().getTime()/1000).setNanos(0).build();
 
-        ObservationResponse response = buildObservationResponse(observations);
+        ObservationData observationData = ObservationData.newBuilder()
+                .setType(observation.getType())
+                .setTimestamp(ts)
+                .setId(observation.getStrId())
+                .setCamName(observation.getCamName())
+                .build();
 
-        responseObserver.onNext(response);
+        TrackReply trackReply = TrackReply.newBuilder().setData(observationData).build();
+
+        responseObserver.onNext(trackReply);
 
         responseObserver.onCompleted();
     }
 
     @Override
-    public void trackMatch(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
-        List<Observation> observations = siloServer.trackMatch(request.getId(), request.getType());
-        ObservationResponse response = buildObservationResponse(observations);
-
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-
-    }
-    @Override
-    public void trace(ObjectData request, StreamObserver<ObservationResponse> responseObserver) {
-        List<Observation> observations = siloServer.trace(request.getId(), request.getType());
-        ObservationResponse response = buildObservationResponse(observations);
-
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-    }
-
-
-    private ObservationResponse buildObservationResponse(List<Observation> observations){
-        ObservationResponse.Builder builder = ObservationResponse.newBuilder();
+    public void trackMatch(TrackMatchRequest request, StreamObserver<TrackMatchReply> responseObserver) {
+        List<Observation> observations = siloServer.trackMatch(request.getData().getId(), request.getData().getType());
         List<ObservationData> observationDataList = new LinkedList<>();
+        buildObservationData(observations, observationDataList);
 
-        for(Observation obs : observations) {
+        TrackMatchReply trackMatchReply = TrackMatchReply.newBuilder().addAllData(observationDataList).build();
 
-            Timestamp ts = Timestamp.newBuilder().setSeconds(obs.getDate().getTime()/1000).setNanos(0).build();
+        responseObserver.onNext(trackMatchReply);
+        responseObserver.onCompleted();
+    }
 
-            ObservationData observationData = ObservationData.newBuilder()
+
+    @Override
+    public void trace(TraceRequest request, StreamObserver<TraceReply> responseObserver) {
+        List<Observation> observations = siloServer.trace(request.getData().getId(), request.getData().getType());
+        List<ObservationData> observationDataList = new LinkedList<>();
+        buildObservationData(observations, observationDataList);
+
+        TraceReply traceReply = TraceReply.newBuilder().addAllData(observationDataList).build();
+
+        responseObserver.onNext(traceReply);
+        responseObserver.onCompleted();
+    }
+
+
+    private void buildObservationData(List<Observation> observations, List<ObservationData> observationDataList) {
+        Timestamp ts;
+        ObservationData observationData;
+
+        for (Observation obs : observations) {
+            ts = Timestamp.newBuilder().setSeconds(obs.getDate().getTime() / 1000).setNanos(0).build();
+
+            observationData = ObservationData.newBuilder()
                     .setType(obs.getType())
                     .setTimestamp(ts)
                     .setId(obs.getStrId())
@@ -145,7 +159,6 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
             observationDataList.add(observationData);
         }
-        builder.addAllData(observationDataList);
-        return builder.build();
     }
+
 }
