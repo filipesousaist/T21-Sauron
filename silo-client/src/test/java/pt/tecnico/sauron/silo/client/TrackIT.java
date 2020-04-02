@@ -4,13 +4,11 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
-import java.sql.Timestamp;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public class TrackIT extends BaseIT {
     //static members
-    /*static final String SERVER_STATUS = "Server has been cleared";
+    static final String SERVER_STATUS = "Server has been cleared";
     static Date date;
     static final long DATE_TOLERANCE = 1;
 
@@ -67,6 +65,5 @@ public class TrackIT extends BaseIT {
     @Test
     public void invalidType(){
 
-    }*/
-
+    }
 }
