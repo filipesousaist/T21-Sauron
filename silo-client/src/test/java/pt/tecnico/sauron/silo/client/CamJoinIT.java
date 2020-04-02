@@ -155,7 +155,6 @@ public class CamJoinIT extends BaseIT{
                 .build();
         frontend.camJoin(camJoinRequest);
 
-
         CamJoinRequest camJoinRequest2 = CamJoinRequest.newBuilder()
                 .setCamName("Cam2")
                 .setCoordinates(coordinates)
@@ -173,6 +172,7 @@ public class CamJoinIT extends BaseIT{
                 .setCoordinates(coordinates)
                 .build();
         frontend.camJoin(camJoinRequest);
+
 
 
         CamJoinRequest camJoinRequest2 = CamJoinRequest.newBuilder()

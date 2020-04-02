@@ -30,6 +30,9 @@ public class PersonObservation extends Observation{
     }
 
     public static long getValidatedId(String id) throws InvalidIdException {
+        if (id.equals(""))
+            throw new InvalidIdException("Person ID does not match the specification");
+
         try {
             long personId = Long.parseLong(id);
             if (personId < 0)
