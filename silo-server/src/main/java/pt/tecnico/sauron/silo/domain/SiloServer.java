@@ -90,12 +90,15 @@ public class SiloServer {
         }
     }
 
-    public Optional<Observation> track(String id, ObjectType type) {
+    public Observation track(String id, ObjectType type) {
+
         synchronized (this) {
             return observations.stream()
                     .filter(o -> o.getType().equals(type))
                     .filter(o -> o.getStrId().equals(id))
-                    .max(Comparator.comparing(Observation::getDate));
+                    .max(Comparator.comparing(Observation::getDate))
+                    //.orElseThrow(() -> new ObservationNotFoundException(id));
+                    .get();
         }
     }
 
