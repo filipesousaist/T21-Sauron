@@ -1,5 +1,6 @@
 package pt.tecnico.sauron.silo.client;
 
+
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.*;

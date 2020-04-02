@@ -48,13 +48,9 @@ message CamInfoReply {
 }
 
 // report
-message ReportData {
-    ObjectType type = 1;
-    string id = 2;
-}
 message ReportRequest {
     string camName = 1;
-    repeated ReportData data = 2;
+    repeated ObjectData data = 2;
 }
 
 message ReportReply {}

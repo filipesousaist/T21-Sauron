@@ -143,18 +143,15 @@ public class EyeApp {
 
 	private static void sendObservations(SiloFrontend frontend, Eye eye)
 			throws InvalidIdException, UnregisteredEyeException {
-		// Assemble observations to send to server
-		EyeObservation.Builder eyeObservationBuilder = EyeObservation.newBuilder();
+		// Assemble report to send to server
+		ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName(eye.getName());
 		while (eye.hasObservation())
-			eyeObservationBuilder.addData(eye.getNextObservation().toObjectData());
+			reportRequestBuilder.addData(eye.getNextObservation().toObjectData());
 		eye.clearObservations();
 
 		// Report observations to server and check for status
 		try {
-			System.out.println("Before report");
-			frontend.report(
-				eyeObservationBuilder.setCamName(eye.getName()).build());
-			System.out.println("Client didn't catch exception");
+			frontend.report(reportRequestBuilder.build());
 		}
 		catch (StatusRuntimeException e) {
 			Status.Code code = e.getStatus().getCode();
