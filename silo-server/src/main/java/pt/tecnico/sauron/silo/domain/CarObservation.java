@@ -1,5 +1,6 @@
 package pt.tecnico.sauron.silo.domain;
 
+import pt.tecnico.sauron.silo.domain.exception.InvalidIdException;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 import java.util.Date;
@@ -32,5 +33,14 @@ public class CarObservation extends Observation {
     @Override
     public String getIdFormat() {
         return idFormat;
+    }
+
+
+    public static String getValidatedId(String id) throws InvalidIdException {
+        int numNonDigits = id.replaceAll("[0-9]", "").length();
+        if (id.matches("([0-9]{2}|[A-Z]{2}){3}") && (numNonDigits == 2 || numNonDigits == 4))
+            return id;
+        else
+            throw new InvalidIdException("Car ID does not match the specification");
     }
 }
