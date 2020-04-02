@@ -60,55 +60,49 @@ public class SiloServer {
         for (ObjectData object : data) {
             switch (object.getType()) {
                 case PERSON:
-                    try {
-                        long personId = Long.parseLong(object.getId());
-                        if (personId < 0)
-                            throw new InvalidIdException("Person ID does not match the specification");
-                        synchronized (this) {
-                            observations.add(new PersonObservation(personId, camName, date));
-                        }
-                    }
-                    catch (NumberFormatException e) {
-                        throw new InvalidIdException("Person ID does not match the specification");
+                    long id = PersonObservation.getValidatedId(object.getId());
+                    synchronized (this) {
+                        observations.add(new PersonObservation(id, camName, date));
                     }
                     break;
                 case CAR:
-                    String carId = object.getId();
-                    int numNonDigits = carId.replaceAll("[0-9]", "").length();
-                    if (carId.matches("([0-9]{2}|[A-Z]{2}){3}") &&
-                        numNonDigits == 2 || numNonDigits == 4) {
-                        synchronized (this) {
-                            observations.add(new CarObservation(object.getId(), camName, date));
-                        }
-                        break;
+                    String carId = CarObservation.getValidatedId(object.getId());
+                    synchronized (this) {
+                        observations.add(new CarObservation(carId, camName, date));
                     }
-                    else
-                        throw new InvalidIdException("Car ID does not match the specification");
+                    break;
                 default:
                     throw new RuntimeException("Invalid type");
             }
         }
     }
 
-    public Observation track(String id, ObjectType type) {
 
+
+
+    public Observation track(String id, ObjectType type) throws NoObservvationFoundException, InvalidIdException {
+        validateId(id, type);
         synchronized (this) {
             return observations.stream()
                     .filter(o -> o.getType().equals(type))
                     .filter(o -> o.getStrId().equals(id))
                     .max(Comparator.comparing(Observation::getDate))
-                    //.orElseThrow(() -> new ObservationNotFoundException(id));
-                    .get();
+                    .orElseThrow(() -> new NoObservvationFoundException(id));
+
         }
     }
 
-    public List<Observation> trackMatch(String id, ObjectType type) {
+    public List<Observation> trackMatch(String id, ObjectType type) throws InvalidIdException, NoObservvationFoundException {
         String regex;
         switch (type) {
             case PERSON:
+                if(!id.matches("[1-9*]*"))
+                    throw new InvalidIdException("Person ID does not match the specification");
                 regex = "[0-9]*";
                 break;
             case CAR:
+                if(!id.matches("[1-9A-Z*]*"))
+                    throw new InvalidIdException("CAR ID does not match the specification");
                 regex = "[0-9A-Z]*";
                 break;
             default:
@@ -116,8 +110,9 @@ public class SiloServer {
         }
 
         String pattern = id.replace("*", regex);
+        List<Observation> obss;
         synchronized (this) {
-            return observations.stream()
+            obss = observations.stream()
                     .filter(o -> o.getType() == type)
                     .filter(o -> o.getStrId().matches(pattern))
                     .map(Observation::getStrId)
@@ -127,6 +122,9 @@ public class SiloServer {
                     .map(Optional::get)
                     .collect(Collectors.toList());
         }
+        if (obss.isEmpty()) throw new NoObservvationFoundException(id);
+
+        return obss;
 
     }
 
@@ -136,13 +134,33 @@ public class SiloServer {
                 .max(Comparator.comparing(Observation::getDate));
     }
 
-    public List<Observation> trace(String id, ObjectType type) {
+    public List<Observation> trace(String id, ObjectType type) throws InvalidIdException, NoObservvationFoundException {
+        List<Observation> obss;
+        validateId(id, type);
         synchronized (this) {
-            return observations.stream()
+            obss = observations.stream()
                     .filter(o -> o.getType().equals(type))
                     .filter(o -> o.getStrId().equals(id))
                     .sorted(Comparator.comparing(Observation::getDate))
                     .collect(Collectors.toList());
+        }
+
+        if(obss.isEmpty()) throw new NoObservvationFoundException(id);
+
+        return obss;
+    }
+
+    private void validateId(String id, ObjectType type) throws InvalidIdException {
+        switch (type){
+            case PERSON:
+                PersonObservation.getValidatedId(id);
+                break;
+            case CAR:
+                CarObservation.getValidatedId(id);
+                break;
+            default:
+                throw new RuntimeException("Invalid type");
+
         }
     }
 
