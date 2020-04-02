@@ -50,14 +50,14 @@ public class SiloServer {
         throw new UnregisteredEyeException();
     }
 
-    public void report(List<ReportData> data, String camName)
+    public void report(List<ObjectData> data, String camName)
             throws InvalidIdException, UnregisteredEyeException {
         if (!eyes.containsKey(camName))
             throw new UnregisteredEyeException();
 
         Date date = new Date();
 
-        for (ReportData object : data) {
+        for (ObjectData object : data) {
             switch (object.getType()) {
                 case PERSON:
                     long id = PersonObservation.getValidatedId(object.getId());
@@ -96,12 +96,12 @@ public class SiloServer {
         String regex;
         switch (type) {
             case PERSON:
-                if(!id.matches("[1-9*]*"))
+                if(!id.matches("[0-9*]+"))
                     throw new InvalidIdException("Person ID does not match the specification");
                 regex = "[0-9]*";
                 break;
             case CAR:
-                if(!id.matches("[1-9A-Z*]*"))
+                if(!id.matches("[0-9A-Z*]+"))
                     throw new InvalidIdException("CAR ID does not match the specification");
                 regex = "[0-9A-Z]*";
                 break;

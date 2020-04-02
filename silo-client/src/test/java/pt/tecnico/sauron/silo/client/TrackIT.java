@@ -1,5 +1,6 @@
 package pt.tecnico.sauron.silo.client;
 
+import com.google.protobuf.util.Timestamps;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.*;
@@ -7,22 +8,25 @@ import static org.junit.jupiter.api.Assertions.*;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 import java.math.BigInteger;
-import java.sql.Timestamp;
+import com.google.protobuf.Timestamp;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public class TrackIT extends BaseIT {
     //static members
-    static final String SERVER_STATUS = "Server has been cleared";
-    static Date date;
-    static final long DATE_TOLERANCE = 1;
+    static Timestamp ts;
+    private static int maxDelay;
+
 
     // initialization and clean-up for each test
+    @BeforeAll
+    public static void beforeAll() {
+        maxDelay = Integer.parseInt(testProps.getProperty("server.maxdelay"));
+    }
 
     @BeforeEach
     public void setUp() {
+        ts = Timestamp.newBuilder().setSeconds((new Date()).getTime() / 1000).setNanos(0).build();
         frontend.ctrlInit(CtrlInitRequest.newBuilder().getDefaultInstanceForType());
-        date = new Date();
     }
 
     @AfterEach
@@ -42,7 +46,7 @@ public class TrackIT extends BaseIT {
         ObservationData resultData = result.getData();
 
         assertEquals(ObjectType.PERSON, resultData.getType());
-        assertTrue(resultData.getTimestamp().getSeconds() - date.getTime() < DATE_TOLERANCE);
+        assertTrue(Timestamps.between(ts, resultData.getTimestamp()).getSeconds() <= maxDelay);
         assertEquals("123456", resultData.getId());
         assertEquals("Tagus", resultData.getCamName());
     }

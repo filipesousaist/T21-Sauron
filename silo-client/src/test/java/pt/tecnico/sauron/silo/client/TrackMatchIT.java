@@ -1,5 +1,7 @@
 package pt.tecnico.sauron.silo.client;
 
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.*;
@@ -9,19 +11,21 @@ import pt.tecnico.sauron.silo.grpc.Silo.*;
 import java.math.BigInteger;
 import java.util.Date;
 
-
 public class TrackMatchIT extends BaseIT {
 
-    static Date date;
-    static final long DATE_TOLERANCE = 1;
+    static Timestamp ts;
+    private static int maxDelay;
 
 
-    // initialization and clean-up for each test
+    @BeforeAll
+    public static void beforeAll() {
+        maxDelay = Integer.parseInt(testProps.getProperty("server.maxdelay"));
+    }
 
     @BeforeEach
     public void setUp() {
+        ts = Timestamp.newBuilder().setSeconds((new Date()).getTime() / 1000).setNanos(0).build();
         frontend.ctrlInit(CtrlInitRequest.getDefaultInstance());
-        date = new Date();
     }
 
     @AfterEach
@@ -39,15 +43,16 @@ public class TrackMatchIT extends BaseIT {
         TrackMatchRequest request = TrackMatchRequest.newBuilder().setData(data).build();
         TrackMatchReply reply = frontend.trackMatch(request);
 
-        assertEquals(ObjectType.PERSON, reply.getData(1).getType());
-        assertTrue(reply.getData(1).getTimestamp().getSeconds() - date.getTime() < DATE_TOLERANCE);
-        assertEquals("123456", reply.getData(1).getId());
-        assertEquals("Tagus", reply.getData(1).getCamName());
+        assertEquals(ObjectType.PERSON, reply.getData(0).getType());
+        assertTrue(Timestamps.between(ts, reply.getData(0).getTimestamp()).getSeconds() <= maxDelay);
+        assertEquals("123456", reply.getData(0).getId());
+        assertEquals("Tagus", reply.getData(0).getCamName());
 
         assertEquals(ObjectType.PERSON, reply.getData(1).getType());
-        assertTrue(reply.getData(1).getTimestamp().getSeconds() - date.getTime() < DATE_TOLERANCE);
+        assertTrue(Timestamps.between(ts, reply.getData(1).getTimestamp()).getSeconds() <= maxDelay);
         assertEquals("12344321", reply.getData(1).getId());
         assertEquals("Alameda", reply.getData(1).getCamName());
+
 
     }
 
@@ -67,10 +72,7 @@ public class TrackMatchIT extends BaseIT {
 
     @Test
     public void invalidPersonIdsTest() {
-        BigInteger LARGEID = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
-        BigInteger LARGEID2 = LARGEID.add(BigInteger.valueOf(42153241));
-        String[] personIds = {"-1*", "-7828*", LARGEID.toString() + "*", LARGEID2.toString() + "*", "1.2*",
-                "ab*c", "*/", "(Y#(F!H*))", ""/*, null*/};
+        String[] personIds = {"-1*", "-7828*", "1.2*", "ab*c", "*/", "(Y#(F!H*))", ""/*, null*/};
 
         for (String id : personIds){
             ObjectData data = ObjectData.newBuilder()
@@ -86,7 +88,7 @@ public class TrackMatchIT extends BaseIT {
 
     @Test
     public void invalidCarIdsTest() {
-        String[] carIds = {"a*", "aa*aa", "-12*BB", "SS44S*S4", ""/*, null*/};
+        String[] carIds = {"a*", "aa*aa", "-12*BB", ""/*, null*/};
 
         for (String id : carIds) {
             ObjectData data = ObjectData.newBuilder()
