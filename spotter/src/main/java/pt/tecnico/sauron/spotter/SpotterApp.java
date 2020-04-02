@@ -142,12 +142,13 @@ public class SpotterApp {
 
 			printResult(reply.getDataList(), frontend);
 
-		} catch (StatusRuntimeException e) {
-		Status.Code code = e.getStatus().getCode();
-		if (Status.INVALID_ARGUMENT.getCode().equals(code) ||
-				Status.NOT_FOUND.getCode().equals(code)) {
 		}
-	}
+		catch (StatusRuntimeException e) {
+			Status.Code code = e.getStatus().getCode();
+			if (Status.INVALID_ARGUMENT.getCode().equals(code) ||
+					Status.NOT_FOUND.getCode().equals(code)) {
+			}
+		}
 	}
 
 	private static ObjectType getObjectType(String[] lineArgs) throws InvalidLineException {
@@ -166,10 +167,11 @@ public class SpotterApp {
 	}
 
 	private static void printResult(List<ObservationData> reply, SiloFrontend frontend){
-		reply.sort(Comparator.comparing(ObservationData::getId));
+		List<ObservationData> replyCopy = new ArrayList<>();
+		replyCopy.addAll(reply);
+		replyCopy.sort(Comparator.comparing(ObservationData::getId));
 
-		for (int i = 0; i < reply.size(); i++) {
-			ObservationData responseData = reply.get(i);
+		for (ObservationData responseData: replyCopy) {
 			Coordinates camCoords = camInfo(responseData.getCamName(), frontend).getCoordinates();
 
 			SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
