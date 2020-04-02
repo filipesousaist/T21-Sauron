@@ -196,6 +196,4 @@ public class CamJoinIT extends BaseIT{
                 assertThrows(StatusRuntimeException.class,
                         () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
     }
-
-
 }

@@ -1,16 +1,6 @@
 package pt.tecnico.sauron.silo.client;
 
-
-import com.google.protobuf.Timestamp;
-import pt.tecnico.sauron.silo.grpc.Silo;
-import pt.tecnico.sauron.silo.grpc.Silo.*;
-
-import java.text.SimpleDateFormat;
-import java.util.List;
-
 public class SiloClientApp {
-
-
 	public static void main(String[] args) {
 		String host;
 		int port;
