@@ -101,46 +101,72 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
     @Override
     public void track(TrackRequest request, StreamObserver<TrackReply> responseObserver) {
-        Observation observation = siloServer.track(request.getData().getId(), request.getData().getType());
-        Timestamp ts = Timestamp.newBuilder().setSeconds(observation.getDate().getTime()/1000).setNanos(0).build();
+        try {
+            Observation observation = siloServer.track(request.getData().getId(), request.getData().getType());
+            Timestamp ts = Timestamp.newBuilder().setSeconds(observation.getDate().getTime() / 1000).setNanos(0).build();
 
-        ObservationData observationData = ObservationData.newBuilder()
-                .setType(observation.getType())
-                .setTimestamp(ts)
-                .setId(observation.getStrId())
-                .setCamName(observation.getCamName())
-                .build();
+            ObservationData observationData = ObservationData.newBuilder()
+                    .setType(observation.getType())
+                    .setTimestamp(ts)
+                    .setId(observation.getStrId())
+                    .setCamName(observation.getCamName())
+                    .build();
 
-        TrackReply trackReply = TrackReply.newBuilder().setData(observationData).build();
+            TrackReply trackReply = TrackReply.newBuilder().setData(observationData).build();
 
-        responseObserver.onNext(trackReply);
+            responseObserver.onNext(trackReply);
+            responseObserver.onCompleted();
 
-        responseObserver.onCompleted();
+        }catch (InvalidIdException e){
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+        }catch (NoObservvationFoundException e){
+            responseObserver.onError(
+                    Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
+        }
     }
 
     @Override
     public void trackMatch(TrackMatchRequest request, StreamObserver<TrackMatchReply> responseObserver) {
-        List<Observation> observations = siloServer.trackMatch(request.getData().getId(), request.getData().getType());
-        List<ObservationData> observationDataList = new LinkedList<>();
-        buildObservationData(observations, observationDataList);
+        try {
+            List<Observation> observations = siloServer.trackMatch(request.getData().getId(), request.getData().getType());
+            List<ObservationData> observationDataList = new LinkedList<>();
+            buildObservationData(observations, observationDataList);
 
-        TrackMatchReply trackMatchReply = TrackMatchReply.newBuilder().addAllData(observationDataList).build();
+            TrackMatchReply trackMatchReply = TrackMatchReply.newBuilder().addAllData(observationDataList).build();
 
-        responseObserver.onNext(trackMatchReply);
-        responseObserver.onCompleted();
+            responseObserver.onNext(trackMatchReply);
+            responseObserver.onCompleted();
+
+        }catch (InvalidIdException e){
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+        }catch (NoObservvationFoundException e){
+            responseObserver.onError(
+                    Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
+        }
     }
 
 
     @Override
     public void trace(TraceRequest request, StreamObserver<TraceReply> responseObserver) {
-        List<Observation> observations = siloServer.trace(request.getData().getId(), request.getData().getType());
-        List<ObservationData> observationDataList = new LinkedList<>();
-        buildObservationData(observations, observationDataList);
+        try {
+            List<Observation> observations = siloServer.trace(request.getData().getId(), request.getData().getType());
+            List<ObservationData> observationDataList = new LinkedList<>();
+            buildObservationData(observations, observationDataList);
 
-        TraceReply traceReply = TraceReply.newBuilder().addAllData(observationDataList).build();
+            TraceReply traceReply = TraceReply.newBuilder().addAllData(observationDataList).build();
 
-        responseObserver.onNext(traceReply);
-        responseObserver.onCompleted();
+            responseObserver.onNext(traceReply);
+            responseObserver.onCompleted();
+
+        }catch (InvalidIdException e){
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+        }catch (NoObservvationFoundException e){
+            responseObserver.onError(
+                    Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
+        }
     }
 
 
