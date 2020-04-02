@@ -19,7 +19,7 @@ public class CamJoinIT extends BaseIT{
     // clean-up for each test
     @AfterEach
     public void tearDown() {
-        frontend.ctrlClear(EmptyMessage.newBuilder().getDefaultInstanceForType());
+        frontend.ctrlClear(CtrlClearRequest.newBuilder().getDefaultInstanceForType());
     }
 
     // tests
@@ -27,7 +27,7 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void testOk() {
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
@@ -40,7 +40,7 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void invalidCoordindates1(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(-91).setLongitude(0).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
@@ -54,7 +54,7 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void invalidCoordindates2(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(-181).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
@@ -69,7 +69,7 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void invalidCoordindates3(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(91).setLongitude(0).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
@@ -83,7 +83,7 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void invalidCoordindates4(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(181).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
@@ -97,7 +97,7 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void sameNameDifferentCoords() {
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(5).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
@@ -105,7 +105,7 @@ public class CamJoinIT extends BaseIT{
 
 
         coordinates = Coordinates.newBuilder().setLatitude(45).setLongitude(20).build();
-        EyeJoinRequest eyeJoinRequest2 = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest2 = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
@@ -118,14 +118,14 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void sameCoordsDifferentName() {
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(0).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
         frontend.camJoin(eyeJoinRequest);
 
 
-        EyeJoinRequest eyeJoinRequest2 = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest2 = CamJoinRequest.newBuilder()
                 .setCamName("Cam2")
                 .setCoordinates(coordinates)
                 .build();
@@ -137,14 +137,14 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void sameCoordsSameName() {
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(0).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
         frontend.camJoin(eyeJoinRequest);
 
 
-        EyeJoinRequest eyeJoinRequest2 = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest2 = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
@@ -157,7 +157,7 @@ public class CamJoinIT extends BaseIT{
     @Test
     public void invalidName() {
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
-        EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+        CamJoinRequest eyeJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1*/*/")
                 .setCoordinates(coordinates)
                 .build();

@@ -2,6 +2,8 @@ package pt.tecnico.sauron.spotter;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import pt.tecnico.sauron.silo.client.SiloFrontend;
 import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
@@ -108,16 +110,21 @@ public class SpotterApp {
 
 		ObjectData objectData = ObjectData.newBuilder().setType(type).setId(lineArgs[2]).build();
 
-
-		if (lineArgs[2].indexOf('*') != -1){
-			TrackMatchReply reply = frontend.trackMatch(TrackMatchRequest.newBuilder().setData(objectData).build());
-			printResult(reply.getDataList(), frontend);
-		} else {
-			List<ObservationData> reply = new ArrayList<>();
-			reply.add(frontend.track(TrackRequest.newBuilder().setData(objectData).build()).getData());
-			printResult(reply, frontend);
+		try {
+			if (lineArgs[2].indexOf('*') != -1) {
+				TrackMatchReply reply = frontend.trackMatch(TrackMatchRequest.newBuilder().setData(objectData).build());
+				printResult(reply.getDataList(), frontend);
+			} else {
+				List<ObservationData> reply = new ArrayList<>();
+				reply.add(frontend.track(TrackRequest.newBuilder().setData(objectData).build()).getData());
+				printResult(reply, frontend);
+			}
+		} catch (StatusRuntimeException e) {
+			Status.Code code = e.getStatus().getCode();
+			if (Status.INVALID_ARGUMENT.getCode().equals(code) ||
+				Status.NOT_FOUND.getCode().equals(code)) {
+			}
 		}
-
 	}
 
 	private static void parseTrail(String[] lineArgs, SiloFrontend frontend)
@@ -129,9 +136,18 @@ public class SpotterApp {
 		ObjectType type = getObjectType(lineArgs);
 
 		ObjectData objectData = ObjectData.newBuilder().setType(type).setId(lineArgs[2]).build();
-		TraceReply reply = frontend.trace(TraceRequest.newBuilder().setData(objectData).build());
 
-		printResult(reply.getDataList(), frontend);
+		try {
+			TraceReply reply = frontend.trace(TraceRequest.newBuilder().setData(objectData).build());
+
+			printResult(reply.getDataList(), frontend);
+
+		} catch (StatusRuntimeException e) {
+		Status.Code code = e.getStatus().getCode();
+		if (Status.INVALID_ARGUMENT.getCode().equals(code) ||
+				Status.NOT_FOUND.getCode().equals(code)) {
+		}
+	}
 	}
 
 	private static ObjectType getObjectType(String[] lineArgs) throws InvalidLineException {
