@@ -13,6 +13,7 @@ import java.util.Date;
 
 public class TrackIT extends BaseIT {
     //static members
+
     static Timestamp ts;
     private static int maxDelay;
 
