@@ -150,7 +150,7 @@ public class SpotterApp {
 	private static void printResult(ObservationResponse response, SiloFrontend frontend){
 		for (int i = 0; i < response.getDataCount(); i++) {
 			ObservationData responseData = response.getData(i);
-			Coordinates camCoords = camInfo(responseData.getCamName(), frontend);
+			Coordinates camCoords = camInfo(responseData.getCamName(), frontend).getCoordinates();
 
 			SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 			String timeString = timeFormat.format(responseData.getTimestamp().getSeconds() * 1000);
@@ -165,20 +165,20 @@ public class SpotterApp {
 	}
 
 	private static void ping(String message, SiloFrontend frontend){
-		StringMessage request = StringMessage.newBuilder().setText(message).build();
-		StringMessage response = frontend.ctrlPing(request);
+		CtrlPingRequest request = CtrlPingRequest.newBuilder().setText(message).build();
+		CtrlPingReply response = frontend.ctrlPing(request);
 		System.out.println(response.getText());
 	}
 
 	private static void clear(SiloFrontend frontend){
-		EmptyMessage request = EmptyMessage.newBuilder().build();
-		StringMessage response = frontend.ctrlClear(request);
+		CtrlClearRequest request = CtrlClearRequest.newBuilder().build();
+		CtrlClearReply response = frontend.ctrlClear(request);
 		System.out.println(response.getText());
 	}
 
 	private static void init(SiloFrontend frontend){
-		EmptyMessage request = EmptyMessage.newBuilder().build();
-		StringMessage response = frontend.ctrlInit(request);
+		CtrlInitRequest request = CtrlInitRequest.newBuilder().build();
+		CtrlInitReply response = frontend.ctrlInit(request);
 		System.out.println(response.getText());
 	}
 
@@ -192,8 +192,8 @@ public class SpotterApp {
 				"exit (exits Spotter)");
 	}
 
-	private static Coordinates camInfo(String camName, SiloFrontend frontend){
-		StringMessage request = StringMessage.newBuilder().setText(camName).build();
+	private static CamInfoReply camInfo(String camName, SiloFrontend frontend){
+		CamInfoRequest request = CamInfoRequest.newBuilder().setCamName(camName).build();
 		return frontend.camInfo(request);
 	}
 }

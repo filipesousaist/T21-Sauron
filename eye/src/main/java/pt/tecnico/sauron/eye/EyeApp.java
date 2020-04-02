@@ -60,12 +60,12 @@ public class EyeApp {
 
 	private static void registerOnServer(SiloFrontend frontend, Eye eye)
 			throws RegistrationException {
-		EyeJoinRequest eyeJoinRequest = EyeJoinRequest.newBuilder()
+		CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
 			.setCamName(eye.getName())
 			.setCoordinates(eye.getCoordinates())
 			.build();
 		try {
-			frontend.camJoin(eyeJoinRequest);
+			frontend.camJoin(camJoinRequest);
 			System.out.println("Registration successful. Proceeding...");
 		}
 		catch (StatusRuntimeException e) {

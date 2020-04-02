@@ -29,11 +29,6 @@ public class SiloServerApp {
 
 		server.start();
 
-		Date date = new Date();
-		Timestamp  ts = new Timestamp(date.getTime());
-		String s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(ts);
-		System.out.println(s);
-
 		server.awaitTermination();
 	}
 }

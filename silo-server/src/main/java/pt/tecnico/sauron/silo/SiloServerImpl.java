@@ -18,37 +18,37 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     private SiloServer siloServer = new SiloServer();
 
     @Override
-    public void ctrlPing(StringMessage request, StreamObserver<StringMessage> responseObserver) {
+    public void ctrlPing(CtrlPingRequest request, StreamObserver<CtrlPingReply> responseObserver) {
         String msg = siloServer.ping(request.getText());
-        StringMessage response = StringMessage.newBuilder().setText(msg).build();
+        CtrlPingReply response = CtrlPingReply.newBuilder().setText(msg).build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void ctrlClear(EmptyMessage request, StreamObserver<StringMessage> responseObserver) {
+    public void ctrlClear(CtrlClearRequest request, StreamObserver<CtrlClearReply> responseObserver) {
         String msg  = siloServer.clear();
-        StringMessage clearResponse = StringMessage.newBuilder().setText(msg).build();
+        CtrlClearReply clearResponse = CtrlClearReply.newBuilder().setText(msg).build();
 
         responseObserver.onNext(clearResponse);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void ctrlInit(EmptyMessage request, StreamObserver<StringMessage> responseObserver) {
+    public void ctrlInit(CtrlInitRequest request, StreamObserver<CtrlInitReply> responseObserver) {
         String msg  = siloServer.init();
-        StringMessage clearResponse = StringMessage.newBuilder().setText(msg).build();
+        CtrlInitReply initResponse = CtrlInitReply.newBuilder().setText(msg).build();
 
-        responseObserver.onNext(clearResponse);
+        responseObserver.onNext(initResponse);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void camJoin(EyeJoinRequest request, StreamObserver<EmptyMessage> responseObserver) {
+    public void camJoin(CamJoinRequest request, StreamObserver<CamJoinReply> responseObserver) {
         try {
             siloServer.cam_join(request.getCamName(), request.getCoordinates());
-            responseObserver.onNext(EmptyMessage.getDefaultInstance());
+            responseObserver.onNext(CamJoinReply.getDefaultInstance());
             responseObserver.onCompleted();
         }
         catch (InvalidEyeNameException e) {
@@ -66,9 +66,10 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     }
 
     @Override
-    public void camInfo(StringMessage request, StreamObserver<Coordinates> responseObserver) {
+    public void camInfo(CamInfoRequest request, StreamObserver<CamInfoReply> responseObserver) {
         try {
-            Coordinates response = siloServer.cam_info(request.getText());
+            Coordinates coordinates = siloServer.cam_info(request.getCamName());
+            CamInfoReply response = CamInfoReply.newBuilder().setCoordinates(coordinates).build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         }
