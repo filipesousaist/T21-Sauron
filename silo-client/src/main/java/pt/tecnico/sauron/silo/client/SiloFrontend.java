@@ -16,36 +16,36 @@ public class SiloFrontend implements AutoCloseable {
         stub = SiloServiceGrpc.newBlockingStub(channel);
     }
 
-    public EmptyMessage camJoin(EyeJoinRequest eyeJoinRequest) {
-        return stub.camJoin(eyeJoinRequest);
+    public CamJoinReply camJoin(CamJoinRequest request) {
+        return stub.camJoin(request);
     }
 
-    public Coordinates camInfo(StringMessage eyeName) {
-        return stub.camInfo(eyeName);
+    public CamInfoReply camInfo(CamInfoRequest request) {
+        return stub.camInfo(request);
     }
 
-    public EmptyMessage report(EyeObservation eyeObservation) {
-        return stub.report(eyeObservation);
+    public ReportReply report(ReportRequest request) {
+        return stub.report(request);
     }
 
-    public StringMessage ctrlPing(StringMessage request){ return stub.ctrlPing(request); }
-
-    public StringMessage ctrlClear(EmptyMessage request){ return stub.ctrlClear(request); }
-
-    public StringMessage ctrlInit(EmptyMessage request){ return stub.ctrlInit(request); }
-
-    public ObservationResponse track(ObjectData objectData){
-        return stub.track(objectData);
+    public TrackReply track(TrackRequest request){
+        return stub.track(request);
     }
 
-    public ObservationResponse trackMatch(ObjectData objectData){
-        return stub.trackMatch(objectData);
+    public TrackMatchReply trackMatch(TrackMatchRequest request){
+        return stub.trackMatch(request);
     }
 
-    public ObservationResponse trace(ObjectData objectData){
-        return stub.trace(objectData);
+    public TraceReply trace(TraceRequest request){
+        return stub.trace(request);
     }
 
+    public CtrlPingReply ctrlPing(CtrlPingRequest request){ return stub.ctrlPing(request); }
+
+    public CtrlClearReply ctrlClear(CtrlClearRequest request){ return stub.ctrlClear(request); }
+
+    public CtrlInitReply ctrlInit(CtrlInitRequest request){ return stub.ctrlInit(request); }
+    
     @Override
     public void close(){
         channel.shutdown();

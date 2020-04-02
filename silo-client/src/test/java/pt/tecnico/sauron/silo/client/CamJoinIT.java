@@ -16,40 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 //@RunWith(Parameterized.class)
 public class CamJoinIT extends BaseIT{
-    // static members
-    // TODO
-    static final String SERVER_STATUS = "Server has been cleared.";
-
-    /*@Parameterized.Parameter(0)
-    public double lat;
-
-    @Parameterized.Parameter(1)
-    public double lon;
-
-    @Parameterized.Parameters(name = "{index}: Test with lat = {0}, lon = {1}")
-    public static Collection<Object[]> data() {
-        Object[][] data = new Object[][]{{-915, 50}, {50, -181}, {91, 4}};
-        return Arrays.asList(data);
-    }*/
-
-    // one-time initialization and clean-up
-    @BeforeAll
-    public static void oneTimeSetUp(){
-
-    }
-
-    @AfterAll
-    public static void oneTimeTearDown() {
-
-    }
-
-    // initialization and clean-up for each test
-
-    @BeforeEach
-    public void setUp() {
-
-    }
-
+    // clean-up for each test
     @AfterEach
     public void tearDown() {
         frontend.ctrlClear(EmptyMessage.newBuilder().getDefaultInstanceForType());

@@ -48,7 +48,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     public void camJoin(EyeJoinRequest request, StreamObserver<EmptyMessage> responseObserver) {
         try {
             siloServer.cam_join(request.getCamName(), request.getCoordinates());
-            responseObserver.onNext(EmptyMessage.newBuilder().build());
+            responseObserver.onNext(EmptyMessage.getDefaultInstance());
             responseObserver.onCompleted();
         }
         catch (InvalidEyeNameException e) {
@@ -82,7 +82,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         try {
             siloServer.report(request.getDataList(), request.getCamName());
 
-            responseObserver.onNext(EmptyMessage.newBuilder().build());
+            responseObserver.onNext(EmptyMessage.getDefaultInstance());
 
             responseObserver.onCompleted();
         }
