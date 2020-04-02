@@ -50,14 +50,14 @@ public class SiloServer {
         throw new UnregisteredEyeException();
     }
 
-    public void report(List<ObjectData> data, String camName)
+    public void report(List<ReportData> data, String camName)
             throws InvalidIdException, UnregisteredEyeException {
         if (!eyes.containsKey(camName))
             throw new UnregisteredEyeException();
 
         Date date = new Date();
 
-        for (ObjectData object : data) {
+        for (ReportData object : data) {
             switch (object.getType()) {
                 case PERSON:
                     try {

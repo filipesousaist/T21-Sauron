@@ -78,11 +78,11 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     }
 
     @Override
-    public void report(EyeObservation request, StreamObserver<EmptyMessage> responseObserver) {
+    public void report(ReportRequest request, StreamObserver<ReportReply> responseObserver) {
         try {
             siloServer.report(request.getDataList(), request.getCamName());
 
-            responseObserver.onNext(EmptyMessage.getDefaultInstance());
+            responseObserver.onNext(ReportReply.getDefaultInstance());
 
             responseObserver.onCompleted();
         }

@@ -10,8 +10,8 @@ import pt.tecnico.sauron.spotter.domain.exception.*;
 
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SpotterApp {
 	private static final int NUM_ARGS = 2;
@@ -106,16 +106,18 @@ public class SpotterApp {
 		}
 		ObjectType type = getObjectType(lineArgs);
 
-		ObjectData request = ObjectData.newBuilder().setType(type).setId(lineArgs[2]).build();
-		ObservationResponse response;
+		ObjectData objectData = ObjectData.newBuilder().setType(type).setId(lineArgs[2]).build();
+
 
 		if (lineArgs[2].indexOf('*') != -1){
-			response = frontend.trackMatch(request);
+			TrackMatchReply reply = frontend.trackMatch(TrackMatchRequest.newBuilder().setData(objectData).build());
+			printResult(reply.getDataList(), frontend);
 		} else {
-			response = frontend.track(request);
-			}
+			List<ObservationData> reply = new ArrayList<>();
+			reply.add(frontend.track(TrackRequest.newBuilder().setData(objectData).build()).getData());
+			printResult(reply, frontend);
+		}
 
-		printResult(response, frontend);
 	}
 
 	private static void parseTrail(String[] lineArgs, SiloFrontend frontend)
@@ -126,10 +128,10 @@ public class SpotterApp {
 		}
 		ObjectType type = getObjectType(lineArgs);
 
-		ObjectData request = ObjectData.newBuilder().setType(type).setId(lineArgs[2]).build();
-		ObservationResponse response = frontend.trace(request);
+		ObjectData objectData = ObjectData.newBuilder().setType(type).setId(lineArgs[2]).build();
+		TraceReply reply = frontend.trace(TraceRequest.newBuilder().setData(objectData).build());
 
-		printResult(response, frontend);
+		printResult(reply.getDataList(), frontend);
 	}
 
 	private static ObjectType getObjectType(String[] lineArgs) throws InvalidLineException {
@@ -147,9 +149,12 @@ public class SpotterApp {
 		return type;
 	}
 
-	private static void printResult(ObservationResponse response, SiloFrontend frontend){
-		for (int i = 0; i < response.getDataCount(); i++) {
-			ObservationData responseData = response.getData(i);
+	private static void printResult(List<ObservationData> reply, SiloFrontend frontend){
+		reply.sort(Comparator.comparing(ObservationData::getId));
+
+		for (int i = 0; i < reply.size(); i++) {
+			ObservationData responseData = reply.get(i);
+			System.out.println(responseData);
 			Coordinates camCoords = camInfo(responseData.getCamName(), frontend);
 
 			SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
