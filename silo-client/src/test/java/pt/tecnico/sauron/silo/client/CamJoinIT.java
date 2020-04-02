@@ -186,13 +186,24 @@ public class CamJoinIT extends BaseIT{
     }
 
     @Test
-    public void invalidName() {
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1()[/")
-                .setCoordinates(coordinates)
-                .build();
+    public void nameTooShort(){
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder().setCamName("Ta").build();
+        assertEquals(Status.INVALID_ARGUMENT.getCode(),
+                assertThrows(StatusRuntimeException.class,
+                        () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
+    }
 
+    @Test
+    public void nameTooLong(){
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder().setCamName("Tacsdcsdsdcscsscscsdcsdcsdcsd").build();
+        assertEquals(Status.INVALID_ARGUMENT.getCode(),
+                assertThrows(StatusRuntimeException.class,
+                        () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
+    }
+
+    @Test
+    public void invalidCharsInName(){
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder().setCamName("Tagus[{").build();
         assertEquals(Status.INVALID_ARGUMENT.getCode(),
                 assertThrows(StatusRuntimeException.class,
                         () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());

@@ -159,7 +159,7 @@ public class SiloServer {
                 CarObservation.getValidatedId(id);
                 break;
             default:
-                throw new RuntimeException("Invalid type");
+                break;
 
         }
     }
