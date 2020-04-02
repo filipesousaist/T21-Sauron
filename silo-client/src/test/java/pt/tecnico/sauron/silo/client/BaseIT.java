@@ -37,13 +37,4 @@ public class BaseIT {
 	public static void cleanup() {
 		
 	}
-
-	protected Silo.EmptyMessage buildEmptyMessage(){
-		return Silo.EmptyMessage.getDefaultInstance();
-	}
-
-	/*protected Silo.EyeJoinRequest buildEyeJoinRequest(){
-
-	}*/
-
 }

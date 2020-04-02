@@ -76,7 +76,7 @@ public class SiloServer {
                     String carId = object.getId();
                     int numNonDigits = carId.replaceAll("[0-9]", "").length();
                     if (carId.matches("([0-9]{2}|[A-Z]{2}){3}") &&
-                        numNonDigits == 2 || numNonDigits == 4) {
+                        (numNonDigits == 2 || numNonDigits == 4)) {
                         synchronized (this) {
                             observations.add(new CarObservation(object.getId(), camName, date));
                         }
