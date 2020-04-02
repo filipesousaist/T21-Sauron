@@ -96,12 +96,12 @@ public class SiloServer {
         String regex;
         switch (type) {
             case PERSON:
-                if(!id.matches("[1-9*]*"))
+                if(!id.matches("[0-9*]+"))
                     throw new InvalidIdException("Person ID does not match the specification");
                 regex = "[0-9]*";
                 break;
             case CAR:
-                if(!id.matches("[1-9A-Z*]*"))
+                if(!id.matches("[0-9A-Z*]+"))
                     throw new InvalidIdException("CAR ID does not match the specification");
                 regex = "[0-9A-Z]*";
                 break;
@@ -159,7 +159,7 @@ public class SiloServer {
                 CarObservation.getValidatedId(id);
                 break;
             default:
-                throw new RuntimeException("Invalid type");
+                break;
 
         }
     }
