@@ -37,6 +37,8 @@ public class CarObservation extends Observation {
 
 
     public static String getValidatedId(String id) throws InvalidIdException {
+        if (id.equals(""))
+            throw new InvalidIdException("Car ID does not matvh the specification");
         int numNonDigits = id.replaceAll("[0-9]", "").length();
         if (id.matches("([0-9]{2}|[A-Z]{2}){3}") && (numNonDigits == 2 || numNonDigits == 4))
             return id;

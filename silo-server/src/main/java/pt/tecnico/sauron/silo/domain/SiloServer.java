@@ -87,7 +87,7 @@ public class SiloServer {
                     .filter(o -> o.getType().equals(type))
                     .filter(o -> o.getStrId().equals(id))
                     .max(Comparator.comparing(Observation::getDate))
-                    .orElseThrow(() -> new NoObservvationFoundException(id));
+                    .orElseThrow(() -> new NoObservvationFoundException(id, type));
 
         }
     }
@@ -106,7 +106,7 @@ public class SiloServer {
                 regex = "[0-9A-Z]*";
                 break;
             default:
-                throw new RuntimeException("Invalid type");
+                throw new NoObservvationFoundException(id, type);
         }
 
         String pattern = id.replace("*", regex);
@@ -122,7 +122,7 @@ public class SiloServer {
                     .map(Optional::get)
                     .collect(Collectors.toList());
         }
-        if (obss.isEmpty()) throw new NoObservvationFoundException(id);
+        if (obss.isEmpty()) throw new NoObservvationFoundException(id, type);
 
         return obss;
 
@@ -145,7 +145,7 @@ public class SiloServer {
                     .collect(Collectors.toList());
         }
 
-        if(obss.isEmpty()) throw new NoObservvationFoundException(id);
+        if(obss.isEmpty()) throw new NoObservvationFoundException(id, type);
 
         return obss;
     }

@@ -10,33 +10,6 @@ import java.math.BigInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportIT extends BaseIT {
-    @BeforeEach
-    public void setup() {
-        frontend.ctrlInit(CtrlInitRequest.getDefaultInstance());
-    }
-
-    @AfterEach
-    public void tearDown() {
-        frontend.ctrlClear(CtrlClearRequest.getDefaultInstance());
-    }
-
-    @Test
-    public void validTest() {
-        String[] personIds = {"0", "1", "36517", Long.toString(Long.MAX_VALUE)};
-        String[] carIds = {"ABCD12", "EF34GH", "56IJKL", "0000ZZ", "67LC95", "XY3774"};
-
-        ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Tagus");
-
-        for (String id: personIds)
-            reportRequestBuilder.addData(
-                ReportData.newBuilder().setType(ObjectType.PERSON).setId(id));
-        for (String id: carIds)
-            reportRequestBuilder.addData(
-                ReportData.newBuilder().setType(ObjectType.CAR).setId(id));
-
-        frontend.report(reportRequestBuilder.build());
-    }
-
     @Test
     public void unregisteredCamNameTest() {
         ReportRequest.Builder reportRequestBuilder =
