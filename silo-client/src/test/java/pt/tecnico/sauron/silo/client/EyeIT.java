@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,108 +32,47 @@ public class EyeIT extends BaseIT {
     }
 
     @Test
-    public void invalidCoordinates1(){
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(-90.000001).setLongitude(0).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1")
-                .setCoordinates(coordinates)
-                .build();
+    public void invalidCoordinates(){
+        List<Double[]> doubles = new LinkedList<>();
+        doubles.add(new Double[]{-90.000001, 0.0});
+        doubles.add(new Double[]{0.0, -180.000001});
+        doubles.add(new Double[]{90.000001, 0.0});
+        doubles.add(new Double[]{0.0, 180.000001});
+
+        for(Double[] d : doubles) {
+            Coordinates coordinates = Coordinates.newBuilder().setLatitude(d[0]).setLongitude(d[1]).build();
+            CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
+                    .setCamName("Cam1")
+                    .setCoordinates(coordinates)
+                    .build();
 
 
-        assertEquals(Status.OUT_OF_RANGE.getCode(),
-                assertThrows(StatusRuntimeException.class,
-                        () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
+            assertEquals(Status.OUT_OF_RANGE.getCode(),
+                    assertThrows(StatusRuntimeException.class,
+                            () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
+        }
     }
 
     @Test
-    public void invalidCoordinates2(){
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(-180.000001).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1")
-                .setCoordinates(coordinates)
-                .build();
+    public void validCoordinates(){
+        List<Double[]> doubles = new LinkedList<>();
+        doubles.add(new Double[]{-89.999999, 0.0});
+        doubles.add(new Double[]{0.0, -179.999999});
+        doubles.add(new Double[]{89.999999, 0.0});
+        doubles.add(new Double[]{0.0, 179.999999});
 
+        for(Double[] d : doubles) {
+            frontend.ctrlClear(CtrlClearRequest.newBuilder().getDefaultInstanceForType());
+            Coordinates coordinates = Coordinates.newBuilder().setLatitude(d[0]).setLongitude(d[1]).build();
+            CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
+                    .setCamName("Cam1")
+                    .setCoordinates(coordinates)
+                    .build();
 
-        assertEquals(Status.OUT_OF_RANGE.getCode(),
-                assertThrows(StatusRuntimeException.class,
-                        () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
+            frontend.camJoin(camJoinRequest);
+        }
     }
-
-
-    @Test
-    public void invalidCoordinates3(){
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(90.000001).setLongitude(0).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1")
-                .setCoordinates(coordinates)
-                .build();
-
-
-        assertEquals(Status.OUT_OF_RANGE.getCode(),
-                assertThrows(StatusRuntimeException.class,
-                        () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
-    }
-
-    @Test
-    public void invalidCoordinates4(){
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(180.000001).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1")
-                .setCoordinates(coordinates)
-                .build();
-
-
-        assertEquals(Status.OUT_OF_RANGE.getCode(),
-                assertThrows(StatusRuntimeException.class,
-                        () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
-    }
-
-    @Test
-    public void validCoordinates1(){
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(-89.999999).setLongitude(0).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1")
-                .setCoordinates(coordinates)
-                .build();
-
-        frontend.camJoin(camJoinRequest);
-    }
-
-    @Test
-    public void validCoordinates2(){
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(-179.999999).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1")
-                .setCoordinates(coordinates)
-                .build();
-
-        frontend.camJoin(camJoinRequest);
-
-    }
-
-
-    @Test
-    public void validCoordinates3(){
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.999999).setLongitude(0).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1")
-                .setCoordinates(coordinates)
-                .build();
-
-        frontend.camJoin(camJoinRequest);
-
-    }
-
-    @Test
-    public void validCoordinates4(){
-        Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(179.999999).build();
-        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
-                .setCamName("Cam1")
-                .setCoordinates(coordinates)
-                .build();
-
-        frontend.camJoin(camJoinRequest);
-    }
+    
 
     @Test
     public void sameNameDifferentCoords() {

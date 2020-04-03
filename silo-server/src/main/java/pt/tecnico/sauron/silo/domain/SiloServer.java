@@ -31,28 +31,31 @@ public class SiloServer {
         if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180)
             throw new InvalidCoordinatesException();
 
-        // Try to add Eye to the "database"
-        if (eyes.containsKey(cam_name)) {
-            Coordinates dbCoords = eyes.get(cam_name);
-            if (Math.abs(latitude - dbCoords.getLatitude()) < ADMISSIBLE_ERROR &&
-                Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR)
-                throw new DuplicateJoinException();
-            else
-                throw new RepeatedNameException();
+        synchronized (this) {
+            // Try to add Eye to the "database"
+            if (eyes.containsKey(cam_name)) {
+                Coordinates dbCoords = eyes.get(cam_name);
+                if (Math.abs(latitude - dbCoords.getLatitude()) < ADMISSIBLE_ERROR &&
+                        Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR)
+                    throw new DuplicateJoinException();
+                else
+                    throw new RepeatedNameException();
+            } else
+                eyes.put(cam_name, coordinates);
         }
-        else
-            eyes.put(cam_name, coordinates);
     }
 
     public Coordinates cam_info(String camName)
             throws UnregisteredEyeException, InvalidEyeNameException {
-        if (!isValidCamName(camName))
-            throw new InvalidEyeNameException();
         synchronized (this) {
-            if (eyes.containsKey(camName))
-                return eyes.get(camName);
+            if (!isValidCamName(camName))
+                throw new InvalidEyeNameException();
+            synchronized (this) {
+                if (eyes.containsKey(camName))
+                    return eyes.get(camName);
+            }
+            throw new UnregisteredEyeException();
         }
-        throw new UnregisteredEyeException();
     }
 
     public void report(List<ObjectData> data, String camName)
@@ -174,8 +177,11 @@ public class SiloServer {
     }
 
     public String clear() {
-        observations.clear();
-        eyes.clear();
+        synchronized (this){
+            observations.clear();
+            eyes.clear();
+        }
+
         return "Server has been cleared.";
     }
 
@@ -185,17 +191,19 @@ public class SiloServer {
         String camName2 = "Alameda";
         Coordinates coordinates2 = Coordinates.newBuilder().setLatitude(38.736748).setLongitude(-9.138908).build();
 
-        eyes.put(camName1, coordinates1);
-        eyes.put(camName2, coordinates2);
+        synchronized (this) {
+            eyes.put(camName1, coordinates1);
+            eyes.put(camName2, coordinates2);
 
-        observations.add(new CarObservation("AA00BB", camName1, new Date()));
-        observations.add(new CarObservation("LD04BY", camName2, new Date()));
-        observations.add(new PersonObservation(123456, camName1, new Date()));
-        observations.add(new CarObservation("4502GS", camName1, new Date()));
-        observations.add(new PersonObservation(654321, camName2, new Date()));
-        observations.add(new CarObservation("AA43BY", camName2, new Date()));
-        observations.add(new PersonObservation(2568628, camName1, new Date()));
-        observations.add(new PersonObservation(12344321, camName2, new Date()));
+            observations.add(new CarObservation("AA00BB", camName1, new Date()));
+            observations.add(new CarObservation("LD04BY", camName2, new Date()));
+            observations.add(new PersonObservation(123456, camName1, new Date()));
+            observations.add(new CarObservation("4502GS", camName1, new Date()));
+            observations.add(new PersonObservation(654321, camName2, new Date()));
+            observations.add(new CarObservation("AA43BY", camName2, new Date()));
+            observations.add(new PersonObservation(2568628, camName1, new Date()));
+            observations.add(new PersonObservation(12344321, camName2, new Date()));
+        }
 
         return "Observations added.";
     }
