@@ -2,6 +2,8 @@ package pt.tecnico.sauron.silo.client;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,8 +13,7 @@ import pt.tecnico.sauron.silo.grpc.Silo.*;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CompleteIT extends BaseIT {
     static Timestamp ts;
@@ -84,7 +85,7 @@ public class CompleteIT extends BaseIT {
 
         String[] personIds = {"123456", "1234321", "12456"};
 
-        ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Tagus");
+        ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Cam1");
 
         for (String id : personIds)
             reportRequestBuilder.addData(
@@ -110,7 +111,7 @@ public class CompleteIT extends BaseIT {
 
         assertEquals(ObjectType.PERSON, reply.getData(1).getType());
         assertTrue(Timestamps.between(ts, reply.getData(1).getTimestamp()).getSeconds() <= maxDelay);
-        assertEquals("12344321", reply.getData(1).getId());
+        assertEquals("1234321", reply.getData(1).getId());
         assertEquals("Cam1", reply.getData(1).getCamName());
 
         assertEquals(ObjectType.PERSON, reply.getData(2).getType());
@@ -136,7 +137,7 @@ public class CompleteIT extends BaseIT {
 
         String[] personIds = {"123456", "123456", "12456"};
 
-        ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Tagus");
+        ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Cam1");
 
         for (String id : personIds)
             reportRequestBuilder.addData(
@@ -145,8 +146,11 @@ public class CompleteIT extends BaseIT {
         frontend.report(reportRequestBuilder.build());
 
         TraceRequest traceRequest = TraceRequest.newBuilder().setData(
-                ObjectData.newBuilder().setType(ObjectType.PERSON).setId("2568628").build()).build();
+                ObjectData.newBuilder().setType(ObjectType.PERSON).setId("123456").build()).build();
         TraceReply traceReply = frontend.trace(traceRequest);
+
+        CamInfoReply camInfoReply = frontend.camInfo(CamInfoRequest.newBuilder()
+                .setCamName(traceReply.getData(0).getCamName()).build());
 
         List<ObservationData> dataList = traceReply.getDataList();
 
@@ -160,6 +164,9 @@ public class CompleteIT extends BaseIT {
             assertEquals("123456", data.getId());
 
         }
+
+        assertEquals(89.2315, camInfoReply.getCoordinates().getLatitude());
+        assertEquals(55.669, camInfoReply.getCoordinates().getLongitude());
     }
 
     private boolean isSortedByDate(List<ObservationData> list) {
@@ -172,6 +179,118 @@ public class CompleteIT extends BaseIT {
 
     @Test
     public void invalidReportTest() {
+        Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
+                .setCamName("Cam1")
+                .setCoordinates(coordinates)
+                .build();
+
+        frontend.camJoin(camJoinRequest);
+
+        ReportRequest reportRequest = ReportRequest.newBuilder().setCamName("Cam1")
+                .addData(ObjectData.newBuilder().setType(ObjectType.PERSON).setId("A").build()).build();
+        assertEquals(Status.Code.INVALID_ARGUMENT,
+                assertThrows(StatusRuntimeException.class, () -> frontend.report(reportRequest))
+                        .getStatus().getCode());
+
+        ObjectData data = ObjectData.newBuilder()
+                .setType(ObjectType.CAR)
+                .setId("A*")
+                .build();
+
+        TrackMatchRequest request = TrackMatchRequest.newBuilder().setData(data).build();
+        assertEquals(Status.Code.NOT_FOUND,
+                assertThrows(StatusRuntimeException.class, () -> frontend.trackMatch(request))
+                        .getStatus().getCode());
+
+    }
+
+    @Test
+    public void invalidTrackTest() {
+        Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
+                .setCamName("Cam1")
+                .setCoordinates(coordinates)
+                .build();
+
+        frontend.camJoin(camJoinRequest);
+
+        ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Cam1");
+
+        reportRequestBuilder.addData(ObjectData.newBuilder().setType(ObjectType.PERSON).setId("123456"));
+
+        frontend.report(reportRequestBuilder.build());
+
+        ObjectData data = ObjectData.newBuilder()
+                .setType(ObjectType.PERSON)
+                .setId("123556")
+                .build();
+        TrackRequest request = TrackRequest.newBuilder().setData(data).build();
+
+        assertEquals(Status.Code.NOT_FOUND,
+                assertThrows(StatusRuntimeException.class, () -> frontend.track(request))
+                        .getStatus().getCode());
+
+    }
+
+    @Test
+    public void invalidTrackMatchTest() {
+        Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
+                .setCamName("Cam1")
+                .setCoordinates(coordinates)
+                .build();
+
+        frontend.camJoin(camJoinRequest);
+
+        String[] personIds = {"123456", "1234321", "12456"};
+
+        ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Cam1");
+
+        for (String id : personIds)
+            reportRequestBuilder.addData(
+                    ObjectData.newBuilder().setType(ObjectType.PERSON).setId(id));
+
+        frontend.report(reportRequestBuilder.build());
+
+        ObjectData data = ObjectData.newBuilder()
+                .setType(ObjectType.PERSON)
+                .setId("12*4")
+                .build();
+
+        TrackMatchRequest request = TrackMatchRequest.newBuilder().setData(data).build();
+
+        assertEquals(Status.Code.NOT_FOUND,
+                assertThrows(StatusRuntimeException.class, () -> frontend.trackMatch(request))
+                        .getStatus().getCode());
+    }
+
+    @Test
+    public void invalidTraceTest() {
+        Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.2315).setLongitude(55.669).build();
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
+                .setCamName("Cam1")
+                .setCoordinates(coordinates)
+                .build();
+
+        frontend.camJoin(camJoinRequest);
+
+        String[] personIds = {"123456", "123456", "12456"};
+
+        ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Cam1");
+
+        for (String id : personIds)
+            reportRequestBuilder.addData(
+                    ObjectData.newBuilder().setType(ObjectType.PERSON).setId(id));
+
+        frontend.report(reportRequestBuilder.build());
+
+        TraceRequest traceRequest = TraceRequest.newBuilder().setData(
+                ObjectData.newBuilder().setType(ObjectType.PERSON).setId("123556").build()).build();
+
+        assertEquals(Status.Code.NOT_FOUND,
+                assertThrows(StatusRuntimeException.class, () -> frontend.trace(traceRequest))
+                        .getStatus().getCode());
 
     }
 }
