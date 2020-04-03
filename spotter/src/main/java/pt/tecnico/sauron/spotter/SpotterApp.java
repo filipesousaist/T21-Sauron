@@ -158,13 +158,17 @@ public class SpotterApp {
 		}
 		return type;
 	}
+	
+	private static void printResult(List<ObservationData> reply, SiloFrontend frontend) {
+		List<ObservationData> replyCopy = new ArrayList<>(reply);
 
-	private static void printResult(List<ObservationData> reply, SiloFrontend frontend){
-		List<ObservationData> replyCopy = new ArrayList<>();
-		replyCopy.addAll(reply);
-		replyCopy.sort(Comparator.comparing(ObservationData::getId));
+		if (replyCopy.get(0).getType().equals(ObjectType.CAR))
+			replyCopy.sort(Comparator.comparing(ObservationData::getId));
 
-		for (ObservationData responseData: replyCopy) {
+		else if (replyCopy.get(0).getType().equals(ObjectType.PERSON))
+			replyCopy.sort(Comparator.comparing(id -> Long.parseLong(id.getId())));
+
+		for (ObservationData responseData : replyCopy) {
 			Coordinates camCoords = camInfo(responseData.getCamName(), frontend).getCoordinates();
 
 			SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -177,6 +181,7 @@ public class SpotterApp {
 				+ camCoords.getLatitude() + ","
 				+ camCoords.getLongitude());
 		}
+
 	}
 
 	private static void ping(String message, SiloFrontend frontend){
