@@ -4,4 +4,5 @@ spot boat 123
 abc
 trail car A*
 spot car XX00HH
+clear
 exit
