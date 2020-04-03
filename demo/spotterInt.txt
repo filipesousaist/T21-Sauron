@@ -1,0 +1,9 @@
+spot person 123456
+spot car AALS00
+spot person 12*
+spot person *56
+spot car AA*
+trail person 123456
+trail car AALS00
+clear
+exit

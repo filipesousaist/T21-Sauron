@@ -76,9 +76,30 @@ mvn clean install -DskipTests
 * Run the following commands in the terminal, in the project root:
 ```
 ./eye/target/appassembler/bin/eye localhost 8080 Cam1 45 45 < demo/eyeInt.txt
-./spotter/target/appassemler/bin/spotter localhost 8080 < demo/spotterInt.txt
+./spotter/target/appassembler/bin/spotter localhost 8080 < demo/spotterInt.txt
 ```
-* Expected output:
+* Expected output(eye):
 ```
+Registration successful. Proceeding...
+End
 ```
+* Expected output(spotter):
+```
+123456,PERSON,2020-04-03T09:24:08,Cam1,45.0,45.0
+AALS00,CAR,2020-04-03T09:24:07,Cam1,45.0,45.0
+123456,PERSON,2020-04-03T09:24:08,Cam1,45.0,45.0
+12344321,PERSON,2020-04-03T09:24:07,Cam1,45.0,45.0
+456,PERSON,2020-04-03T09:24:07,Cam1,45.0,45.0
+11256,PERSON,2020-04-03T09:24:08,Cam1,45.0,45.0
+123456,PERSON,2020-04-03T09:24:08,Cam1,45.0,45.0
+AA6223,CAR,2020-04-03T09:24:08,Cam1,45.0,45.0
+AABC34,CAR,2020-04-03T09:24:08,Cam1,45.0,45.0
+AALS00,CAR,2020-04-03T09:24:07,Cam1,45.0,45.0
+123456,PERSON,2020-04-03T09:24:06,Cam1,45.0,45.0
+123456,PERSON,2020-04-03T09:24:08,Cam1,45.0,45.0
+AALS00,CAR,2020-04-03T09:24:06,Cam1,45.0,45.0
+AALS00,CAR,2020-04-03T09:24:07,Cam1,45.0,45.0
+Server has been cleared.
+```
+* Note: The date in the spotter's expected output may vary according to the computer clock
 
