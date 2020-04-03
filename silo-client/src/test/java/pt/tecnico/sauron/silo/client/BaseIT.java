@@ -2,7 +2,7 @@ package pt.tecnico.sauron.silo.client;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import pt.tecnico.sauron.silo.grpc.Silo;
+import pt.tecnico.sauron.silo.grpc.Silo.*;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -31,6 +31,7 @@ public class BaseIT {
 		final String host = testProps.getProperty("server.host");
 		final int port = Integer.parseInt(testProps.getProperty("server.port"));
 		frontend = new SiloFrontend(host, port);
+		frontend.ctrlClear(CtrlClearRequest.newBuilder().getDefaultInstanceForType());
 	}
 	
 	@AfterAll

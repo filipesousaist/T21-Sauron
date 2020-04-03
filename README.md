@@ -65,6 +65,24 @@ mvn clean install -DskipTests
 
 The integration tests are skipped because they require the servers to be running.
 
+##Running Instructions
+
+In order to try the application start by running the following command in the /silo-server directory:
+```
+mvn compile exec:java
+``` 
+
+If you want to try out the Eye, run the following command in the /eye directory and replace camName, latitude and longitude by actual values:
+```
+./target/appassembler/bin/eye localhost 8080 camName latitude longitude
+```
+
+If you want to try out the Spotter, run the following command in the /spotter directory:
+```
+mvn compile  exec:java
+```
+
+We have created a demo that allows to see the application working. See demo/README.md for further instructions.
 
 ## Built With
 
