@@ -1,0 +1,13 @@
+# registering 1 person observation
+person,123456
+
+#registering 1 car observation
+car,51ATRT
+
+# sleep for 2 seconds
+zzz,2000
+
+#registering 1 person and 1 car obsertvation in a row        
+person,741258
+car,11ATAT
+

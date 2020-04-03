@@ -1,0 +1,8 @@
+#invalid person argument
+person,-789456
+
+#invalid car argument
+car,AAA111
+
+#invalid type
+airplane,4815613
