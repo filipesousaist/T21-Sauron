@@ -87,8 +87,8 @@ Observations added.
 123456,PERSON,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
 AA43BY,CAR,2020-04-03T15:13:16,Alameda,38.736748,-9.138908
 LD04BY,CAR,2020-04-03T15:13:16,Alameda,38.736748,-9.138908
-12344321,PERSON,2020-04-03T15:13:16,Alameda,38.736748,-9.138908
 123456,PERSON,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
+12344321,PERSON,2020-04-03T15:13:16,Alameda,38.736748,-9.138908
 AA00BB,CAR,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
 AA00BB,CAR,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
 AA00BB,CAR,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
@@ -109,6 +109,7 @@ Observations added.
 Wrong number of arguments. Expected 3, but 2 were given.
 Unknown command: boat
 Unknown command: abc
+Server has been cleared.
 ```
 
 ---
@@ -119,12 +120,12 @@ Unknown command: abc
 ./eye/target/appassembler/bin/eye localhost 8080 Cam1 45 45 < demo/eyeInt.txt
 ./spotter/target/appassembler/bin/spotter localhost 8080 < demo/spotterInt.txt
 ```
-* Expected output(eye):
+* Expected output (eye):
 ```
 Registration successful. Proceeding...
 End
 ```
-* Expected output(spotter):
+* Expected output (spotter):
 ```
 123456,PERSON,2020-04-03T09:24:08,Cam1,45.0,45.0
 AALS00,CAR,2020-04-03T09:24:07,Cam1,45.0,45.0

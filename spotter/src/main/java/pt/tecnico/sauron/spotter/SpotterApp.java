@@ -124,7 +124,7 @@ public class SpotterApp {
 			throws InvalidLineException {
 		if (lineArgs.length != 3){
 			throw new InvalidLineException(
-					"Wrong number of arguments. Expected 3, but " + lineArgs.length + " were given.");
+				"Wrong number of arguments. Expected 3, but " + lineArgs.length + " were given.");
 		}
 		ObjectType type = getObjectType(lineArgs);
 
@@ -181,7 +181,6 @@ public class SpotterApp {
 				+ camCoords.getLatitude() + ","
 				+ camCoords.getLongitude());
 		}
-
 	}
 
 
