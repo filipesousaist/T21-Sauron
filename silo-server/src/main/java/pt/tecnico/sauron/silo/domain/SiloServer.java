@@ -15,7 +15,7 @@ public class SiloServer {
     public SiloServer() {}
 
     private boolean isValidCamName(String cam_name) {
-        return cam_name.matches("[0-9A-Za-z]{3,15}");
+        return cam_name != null && cam_name.matches("[0-9A-Za-z]{3,15}");
     }
 
     public void cam_join(String cam_name, Coordinates coordinates)
@@ -89,10 +89,10 @@ public class SiloServer {
         validateId(id, type);
         synchronized (this) {
             return observations.stream()
-                    .filter(o -> o.getType().equals(type))
-                    .filter(o -> o.getStrId().equals(id))
-                    .max(Comparator.comparing(Observation::getDate))
-                    .orElseThrow(() -> new NoObservationFoundException(id, type));
+                .filter(o -> o.getType().equals(type))
+                .filter(o -> o.getStrId().equals(id))
+                .max(Comparator.comparing(Observation::getDate))
+                .orElseThrow(() -> new NoObservationFoundException(id, type));
 
         }
     }

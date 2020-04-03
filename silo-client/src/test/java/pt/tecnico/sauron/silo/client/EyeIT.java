@@ -3,8 +3,6 @@ package pt.tecnico.sauron.silo.client;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 

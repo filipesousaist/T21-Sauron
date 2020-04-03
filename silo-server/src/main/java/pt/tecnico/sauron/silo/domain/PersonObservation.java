@@ -8,20 +8,20 @@ import java.util.Date;
 public class PersonObservation extends Observation{
 
     private long id;
-    static private String idFormat = "[0-9]*";
+    private static String idFormat = "[0-9]*";
 
     public PersonObservation(long id, String camName, Date date){
         super(ObjectType.PERSON, camName, date);
         this.id = id;
     }
 
-    public long getId(){
+    public long getId() {
         return id;
     }
 
     @Override
     public String getStrId() {
-        return ""+id;
+        return "" + id;
     }
 
     @Override
@@ -30,12 +30,12 @@ public class PersonObservation extends Observation{
     }
 
     public static long getValidatedId(String id) throws InvalidIdException {
-        if (id.equals(""))
+        if (id == null || id.equals(""))
             throw new InvalidIdException("Person ID does not match the specification");
 
         try {
             long personId = Long.parseLong(id);
-            if (personId < 0)
+            if (personId <= 0)
                 throw new InvalidIdException("Person ID does not match the specification");
             return personId;
         }

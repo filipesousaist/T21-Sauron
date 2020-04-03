@@ -60,42 +60,42 @@ public class SpotterIT extends BaseIT {
             TrackRequest request = TrackRequest.newBuilder().setData(data).build();
 
             assertEquals(Status.Code.NOT_FOUND,
-                    assertThrows(StatusRuntimeException.class, () -> frontend.track(request))
-                            .getStatus().getCode());
+                assertThrows(StatusRuntimeException.class, () -> frontend.track(request))
+                    .getStatus().getCode());
         }
 
         @Test
         public void trackInvalidPersonIdsTest() {
             BigInteger LARGEID = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
             BigInteger LARGEID2 = LARGEID.add(BigInteger.valueOf(42153241));
-            String[] personIds = {"-1", "-7828426", LARGEID.toString(), LARGEID2.toString(), "1.2",
-                    "abc", "/", "(Y#(F!H))", ""/*, null*/};
+            String[] personIds = {"-1", "0", "-7828426", LARGEID.toString(), LARGEID2.toString(), "1.2",
+                "abc", "/", "(Y#(F!H))", ""};
 
             for (String id : personIds){
                 ObjectData data = ObjectData.newBuilder()
-                        .setType(ObjectType.PERSON)
-                        .setId(id)
-                        .build();
+                    .setType(ObjectType.PERSON)
+                    .setId(id)
+                    .build();
                 TrackRequest request = TrackRequest.newBuilder().setData(data).build();
                 assertEquals(Status.Code.INVALID_ARGUMENT,
-                        assertThrows(StatusRuntimeException.class, () -> frontend.track(request))
-                                .getStatus().getCode());
+                    assertThrows(StatusRuntimeException.class, () -> frontend.track(request))
+                        .getStatus().getCode());
             }
         }
 
         @Test
         public void trackInvalidCarIdsTest() {
-            String[] carIds = {"A", "aa11aa", "-12AABB", "CCCCFF", "36CF2", "SS44SS4", "K4BB00", ""/*, null*/};
+            String[] carIds = {"A", "aa11aa", "-12AABB", "CCCCFF", "36CF2", "SS44SS4", "K4BB00", ""};
 
             for (String id : carIds) {
                 ObjectData data = ObjectData.newBuilder()
-                        .setType(ObjectType.CAR)
-                        .setId(id)
-                        .build();
+                    .setType(ObjectType.CAR)
+                    .setId(id)
+                    .build();
                 TrackRequest request = TrackRequest.newBuilder().setData(data).build();
                 assertEquals(Status.Code.INVALID_ARGUMENT,
-                        assertThrows(StatusRuntimeException.class, () -> frontend.track(request))
-                                .getStatus().getCode());
+                    assertThrows(StatusRuntimeException.class, () -> frontend.track(request))
+                        .getStatus().getCode());
             }
         }
 
@@ -104,9 +104,9 @@ public class SpotterIT extends BaseIT {
         @Test
         public void trackMatchValidTest() {
             ObjectData data = ObjectData.newBuilder()
-                    .setType(ObjectType.PERSON)
-                    .setId("12*")
-                    .build();
+                .setType(ObjectType.PERSON)
+                .setId("12*")
+                .build();
 
             TrackMatchRequest request = TrackMatchRequest.newBuilder().setData(data).build();
             TrackMatchReply reply = frontend.trackMatch(request);
@@ -125,46 +125,46 @@ public class SpotterIT extends BaseIT {
         @Test
         public void trackMatchIdNotFoundTest(){
             ObjectData data = ObjectData.newBuilder()
-                    .setType(ObjectType.PERSON)
-                    .setId("3*")
-                    .build();
+                .setType(ObjectType.PERSON)
+                .setId("3*")
+                .build();
 
             TrackMatchRequest request = TrackMatchRequest.newBuilder().setData(data).build();
 
             assertEquals(Status.Code.NOT_FOUND,
-                    assertThrows(StatusRuntimeException.class, () -> frontend.trackMatch(request))
-                            .getStatus().getCode());
+                assertThrows(StatusRuntimeException.class, () -> frontend.trackMatch(request))
+                    .getStatus().getCode());
         }
 
         @Test
         public void trackMatchInvalidPersonIdsTest() {
-            String[] personIds = {"-1*", "-7828*", "1.2*", "ab*c", "*/", "(Y#(F!H*))", ""/*, null*/};
+            String[] personIds = {"-1*", "-7828*", "1.2*", "ab*c", "*/", "(Y#(F!H*))", ""};
 
             for (String id : personIds){
                 ObjectData data = ObjectData.newBuilder()
-                        .setType(ObjectType.PERSON)
-                        .setId(id)
-                        .build();
+                    .setType(ObjectType.PERSON)
+                    .setId(id)
+                    .build();
                 TrackMatchRequest request = TrackMatchRequest.newBuilder().setData(data).build();
                 assertEquals(Status.Code.INVALID_ARGUMENT,
-                        assertThrows(StatusRuntimeException.class, () -> frontend.trackMatch(request))
-                                .getStatus().getCode());
+                    assertThrows(StatusRuntimeException.class, () -> frontend.trackMatch(request))
+                        .getStatus().getCode());
             }
         }
 
         @Test
         public void trackMatchInvalidCarIdsTest() {
-            String[] carIds = {"a*", "aa*aa", "-12*BB", ""/*, null*/};
+            String[] carIds = {"a*", "aa*aa", "-12*BB", ""};
 
             for (String id : carIds) {
                 ObjectData data = ObjectData.newBuilder()
-                        .setType(ObjectType.CAR)
-                        .setId(id)
-                        .build();
+                    .setType(ObjectType.CAR)
+                    .setId(id)
+                    .build();
                 TrackMatchRequest request = TrackMatchRequest.newBuilder().setData(data).build();
                 assertEquals(Status.Code.INVALID_ARGUMENT,
-                        assertThrows(StatusRuntimeException.class, () -> frontend.trackMatch(request))
-                                .getStatus().getCode());
+                    assertThrows(StatusRuntimeException.class, () -> frontend.trackMatch(request))
+                        .getStatus().getCode());
             }
         }
     }
@@ -183,59 +183,59 @@ public class SpotterIT extends BaseIT {
         @Test
         public void validTest() {
             TraceRequest traceRequest = TraceRequest.newBuilder().setData(
-                    ObjectData.newBuilder().setType(ObjectType.PERSON).setId("2568628").build()).build();
+                ObjectData.newBuilder().setType(ObjectType.PERSON).setId("2568628").build()).build();
             TraceReply traceReply = frontend.trace(traceRequest);
 
             List<ObservationData> dataList = traceReply.getDataList();
 
-            assertEquals(dataList.size(), NUMINIT);
+            assertEquals(NUMINIT, dataList.size());
             assertTrue(isSortedByDate(dataList));
 
             for (ObservationData data: dataList) {
-                assertEquals(data.getType(), ObjectType.PERSON);
+                assertEquals(ObjectType.PERSON, data.getType());
                 assertTrue(Timestamps.between(ts, data.getTimestamp()).getSeconds() <= maxDelay);
-                assertEquals(data.getCamName(), "Tagus");
-                assertEquals(data.getId(), "2568628");
+                assertEquals("Tagus", data.getCamName());
+                assertEquals("2568628", data.getId());
             }
         }
 
         @Test
         public void nonExistingIdTest() {
             TraceRequest traceRequest = TraceRequest.newBuilder().setData(
-                    ObjectData.newBuilder().setType(ObjectType.CAR).setId("XF4570").build()).build();
+                ObjectData.newBuilder().setType(ObjectType.CAR).setId("XF4570").build()).build();
 
             assertEquals(Status.Code.NOT_FOUND,
-                    assertThrows(StatusRuntimeException.class, () -> frontend.trace(traceRequest))
-                            .getStatus().getCode());
+                assertThrows(StatusRuntimeException.class, () -> frontend.trace(traceRequest))
+                    .getStatus().getCode());
         }
 
         @Test
         public void invalidPersonIdTest() {
             final BigInteger LARGEID = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
             final BigInteger LARGEID2 = LARGEID.add(BigInteger.valueOf(902084218));
-            String[] personIds = {"-1", "-6753825", LARGEID.toString(), LARGEID2.toString(), "0.3",
-                    "hfF2", ")", "%$&#(HF7Fg8FG8", ""/*, null*/};
+            String[] personIds = {"-1", "0", "-6753825", LARGEID.toString(), LARGEID2.toString(), "0.3",
+                "hfF2", ")", "%$&#(HF7Fg8FG8", ""};
 
             for (String id: personIds) {
                 TraceRequest traceRequest = TraceRequest.newBuilder().setData(
-                        ObjectData.newBuilder().setType(ObjectType.PERSON).setId(id).build()).build();
+                    ObjectData.newBuilder().setType(ObjectType.PERSON).setId(id).build()).build();
 
                 assertEquals(Status.Code.INVALID_ARGUMENT,
-                        assertThrows(StatusRuntimeException.class, () -> frontend.trace(traceRequest))
-                                .getStatus().getCode());
+                    assertThrows(StatusRuntimeException.class, () -> frontend.trace(traceRequest))
+                        .getStatus().getCode());
             }
         }
 
         @Test
         public void invalidCarIdTest() {
-            String[] carIds = {"X", "23jn45", "-3232BG", "123456", "36CF2", "55GG66V", "12G3BK", "L*", ""/*, null*/};
+            String[] carIds = {"X", "23jn45", "-3232BG", "123456", "36CF2", "55GG66V", "12G3BK", "L*", ""};
 
             for (String id: carIds) {
                 TraceRequest traceRequest = TraceRequest.newBuilder().setData(
-                        ObjectData.newBuilder().setType(ObjectType.CAR).setId(id).build()).build();
+                    ObjectData.newBuilder().setType(ObjectType.CAR).setId(id).build()).build();
                 assertEquals(Status.Code.INVALID_ARGUMENT,
-                        assertThrows(StatusRuntimeException.class, () -> frontend.trace(traceRequest))
-                                .getStatus().getCode());
+                    assertThrows(StatusRuntimeException.class, () -> frontend.trace(traceRequest))
+                        .getStatus().getCode());
             }
         }
 

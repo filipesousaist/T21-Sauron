@@ -7,7 +7,7 @@
 mvn clean install -DskipTests
 ./silo-server/target/appassembler/bin/silo-server 8080
 ```
-* Note: You only need to run these commands once, before all tests. 
+* Note: You only need to run these commands once, before all tests.
 
 ---
 
@@ -53,7 +53,7 @@ mvn clean install -DskipTests
 #### Test 4: Spotter demonstration
 * Run the following commands in the terminal, in the project root:
 ```
-./spotter/target/appassemler/bin/spotter localhost 8080 < demo/spotterDemo.txt
+./spotter/target/appassembler/bin/spotter localhost 8080 < demo/spotterDemo.txt
 ```
 * Expected output:
 ```
@@ -64,7 +64,7 @@ mvn clean install -DskipTests
 #### Test 5: Spotter invalid commands
 * Run the following commands in the terminal, in the project root:
 ```
-./spotter/target/appassemler/bin/spotter localhost 8080 < demo/spotterInvalid.txt
+./spotter/target/appassembler/bin/spotter localhost 8080 < demo/spotterInvalid.txt
 ```
 * Expected output:
 ```
