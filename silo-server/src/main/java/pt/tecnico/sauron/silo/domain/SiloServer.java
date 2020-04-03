@@ -47,22 +47,21 @@ public class SiloServer {
 
     public Coordinates cam_info(String camName)
             throws UnregisteredEyeException, InvalidEyeNameException {
+        if (!isValidCamName(camName))
+            throw new InvalidEyeNameException();
         synchronized (this) {
-            if (!isValidCamName(camName))
-                throw new InvalidEyeNameException();
-            synchronized (this) {
-                if (eyes.containsKey(camName))
-                    return eyes.get(camName);
-            }
-            throw new UnregisteredEyeException();
+            if (eyes.containsKey(camName))
+                return eyes.get(camName);
         }
+        throw new UnregisteredEyeException();
     }
 
     public void report(List<ObjectData> data, String camName)
             throws InvalidIdException, UnregisteredEyeException {
-        if (!eyes.containsKey(camName))
-            throw new UnregisteredEyeException();
-
+        synchronized (this) {
+            if (!eyes.containsKey(camName))
+                throw new UnregisteredEyeException();
+        }
         Date date = new Date();
 
         for (ObjectData object : data) {
@@ -136,10 +135,12 @@ public class SiloServer {
 
     }
 
+    // No need to synchronize in method definition.
+    // Synchronize instead in calls, where needed.
     private Optional<Observation> getLatest(String id) {
         return observations.stream()
-                .filter(obs -> obs.getStrId().equals(id))
-                .max(Comparator.comparing(Observation::getDate));
+            .filter(obs -> obs.getStrId().equals(id))
+            .max(Comparator.comparing(Observation::getDate));
     }
 
     public List<Observation> trace(String id, ObjectType type) throws InvalidIdException, NoObservationFoundException {

@@ -119,12 +119,12 @@ Unknown command: abc
 ./eye/target/appassembler/bin/eye localhost 8080 Cam1 45 45 < demo/eyeInt.txt
 ./spotter/target/appassembler/bin/spotter localhost 8080 < demo/spotterInt.txt
 ```
-* Expected output(eye):
+* Expected output (eye):
 ```
 Registration successful. Proceeding...
 End
 ```
-* Expected output(spotter):
+* Expected output (spotter):
 ```
 123456,PERSON,2020-04-03T09:24:08,Cam1,45.0,45.0
 AALS00,CAR,2020-04-03T09:24:07,Cam1,45.0,45.0
