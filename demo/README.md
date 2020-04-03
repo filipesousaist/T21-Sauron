@@ -7,7 +7,8 @@
 mvn clean install -DskipTests
 ./silo-server/target/appassembler/bin/silo-server 8080
 ```
-* Note: You only need to run these commands once, before all tests. 
+* Note: You only need to run these commands once, before all tests.
+
 
 ---
 
@@ -23,37 +24,49 @@ mvn clean install -DskipTests
 ```
 * Expected output:
 ```
+EyeApp
+Registration successful. Proceeding...
+End
+```
+
+---
+#### Test 2: Eye invalid commands
+* Run the following commands in the terminal, in the project root:
+```
+./eye/target/appassembler/bin/eye localhost 8080 Cam2 45 45 < demo/eyeInvalid.txt
+```
+* Expected output:
+```
+Registration successful. Proceeding...
+Error: INVALID_ARGUMENT: Person ID does not match the specification
+Error: INVALID_ARGUMENT: Car ID does not match the specification
+Invalid line: Unknown command: airplane
+End
 ```
 
 ---
 
-#### Test 2: Eye invalid join
+
+#### Test 3: Eye invalid join
 * Run the following commands in the terminal, in the project root:
 ```
-./eye/target/appassembler/bin/eye localhost 8080 Tagus 45 45
-./eye/target/appassembler/bin/eye localhost 8080 Tagus -45 80
+./eye/target/appassembler/bin/eye localhost 8080 Tagus 45 45 < demo/emptyFile.txt
+./eye/target/appassembler/bin/eye localhost 8080 Tagus -45 80 < demo/emptyFile.txt
 ```
 * Expected output:
 ```
-```
+Registration successful. Proceeding...
+End
 
----
-
-#### Test 3: Eye invalid commands
-* Run the following commands in the terminal, in the project root:
+Error registering in server: An Eye already exists with same name, but different coordinates.
+End
 ```
-./eye/target/appassembler/bin/eye localhost 8080 Cam1 45 45 < demo/eyeInvalid.txt
-```
-* Expected output:
-```
-```
-
 ---
 
 #### Test 4: Spotter demonstration
 * Run the following commands in the terminal, in the project root:
 ```
-./spotter/target/appassemler/bin/spotter localhost 8080 < demo/spotterDemo.txt
+./spotter/target/appassembler/bin/spotter localhost 8080 < demo/spotterDemo.txt
 ```
 * Expected output:
 ```
@@ -64,7 +77,7 @@ mvn clean install -DskipTests
 #### Test 5: Spotter invalid commands
 * Run the following commands in the terminal, in the project root:
 ```
-./spotter/target/appassemler/bin/spotter localhost 8080 < demo/spotterInvalid.txt
+./spotter/target/appassembler/bin/spotter localhost 8080 < demo/spotterInvalid.txt
 ```
 * Expected output:
 ```

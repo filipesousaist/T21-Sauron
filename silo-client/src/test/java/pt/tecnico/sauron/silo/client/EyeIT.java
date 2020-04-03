@@ -3,8 +3,6 @@ package pt.tecnico.sauron.silo.client;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 
@@ -31,7 +29,7 @@ public class EyeIT extends BaseIT {
     }
 
     @Test
-    public void invalidCoordindates1(){
+    public void invalidCoordinates1(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(-90.000001).setLongitude(0).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
@@ -45,7 +43,7 @@ public class EyeIT extends BaseIT {
     }
 
     @Test
-    public void invalidCoordindates2(){
+    public void invalidCoordinates2(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(-180.000001).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
@@ -60,7 +58,7 @@ public class EyeIT extends BaseIT {
 
 
     @Test
-    public void invalidCoordindates3(){
+    public void invalidCoordinates3(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(90.000001).setLongitude(0).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
@@ -74,7 +72,7 @@ public class EyeIT extends BaseIT {
     }
 
     @Test
-    public void invalidCoordindates4(){
+    public void invalidCoordinates4(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(180.000001).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
@@ -88,42 +86,50 @@ public class EyeIT extends BaseIT {
     }
 
     @Test
-    public void validCoordindates1(){
+    public void validCoordinates1(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(-89.999999).setLongitude(0).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
 
+        frontend.camJoin(camJoinRequest);
     }
 
     @Test
-    public void validCoordindates2(){
+    public void validCoordinates2(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(-179.999999).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
+
+        frontend.camJoin(camJoinRequest);
+
     }
 
 
     @Test
-    public void validCoordindates3(){
+    public void validCoordinates3(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(89.999999).setLongitude(0).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
+
+        frontend.camJoin(camJoinRequest);
+
     }
 
     @Test
-    public void validCoordindates4(){
+    public void validCoordinates4(){
         Coordinates coordinates = Coordinates.newBuilder().setLatitude(0).setLongitude(179.999999).build();
         CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
                 .setCamName("Cam1")
                 .setCoordinates(coordinates)
                 .build();
 
+        frontend.camJoin(camJoinRequest);
     }
 
     @Test
@@ -163,7 +169,6 @@ public class EyeIT extends BaseIT {
                 .build();
 
         frontend.camJoin(camJoinRequest2);
-
     }
 
     @Test
@@ -184,6 +189,15 @@ public class EyeIT extends BaseIT {
         assertEquals(Status.ALREADY_EXISTS.getCode(),
                 assertThrows(StatusRuntimeException.class,
                         () -> frontend.camJoin(camJoinRequest2)).getStatus().getCode());
+    }
+
+
+    @Test
+    public void emptyNameJoin(){
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder().setCamName("").build();
+        assertEquals(Status.INVALID_ARGUMENT.getCode(),
+                assertThrows(StatusRuntimeException.class,
+                        () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
     }
 
     @Test
@@ -258,6 +272,14 @@ public class EyeIT extends BaseIT {
         assertEquals(Status.INVALID_ARGUMENT.getCode(),
                 assertThrows(StatusRuntimeException.class,
                         () -> frontend.camInfo(camInfoRequest)).getStatus().getCode());
+    }
+
+    @Test
+    public void emptyNameInfo(){
+        CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder().setCamName("").build();
+        assertEquals(Status.INVALID_ARGUMENT.getCode(),
+                assertThrows(StatusRuntimeException.class,
+                        () -> frontend.camJoin(camJoinRequest)).getStatus().getCode());
     }
 
     @Test

@@ -14,22 +14,15 @@ public class EyeApp {
 	private static final int NUM_ARGS = 5;
 
 	public static void main(String[] args) {
-		System.out.println(EyeApp.class.getSimpleName());
-		
-		// receive and print arguments
-		System.out.printf("Received %d arguments%n", args.length);
-		for (int i = 0; i < args.length; i++) {
-			System.out.printf("arg[%d] = %s%n", i, args[i]);
-		}
 		try {
 			Object[] parsedArgs = parseArgs(args);
 
 			try (SiloFrontend frontend =
-						 new SiloFrontend((String) parsedArgs[0], (int) parsedArgs[1])) {
+					new SiloFrontend((String) parsedArgs[0], (int) parsedArgs[1])) {
 				Eye eye = new Eye(
-						(String) parsedArgs[2],
-						(Double) parsedArgs[3],
-						(Double) parsedArgs[4]);
+					(String) parsedArgs[2],
+					(Double) parsedArgs[3],
+					(Double) parsedArgs[4]);
 
 				registerOnServer(frontend, eye);
 				handleInput(frontend, eye);
@@ -71,7 +64,6 @@ public class EyeApp {
 		catch (StatusRuntimeException e) {
 			Status.Code code = e.getStatus().getCode();
 			if (Status.ALREADY_EXISTS.getCode().equals(code)) {
-				System.out.println(e.getStatus());
 				System.out.println("This Eye was already registered on server. Proceeding...");
 			}
 			else if (Status.PERMISSION_DENIED.getCode().equals(code)) {
@@ -86,8 +78,6 @@ public class EyeApp {
 				throw new RegistrationException(
 					"Eye coordinates do not match specified format.");
 			}
-
-			System.out.println("Status: " + e.getStatus());
 		}
 	}
 
