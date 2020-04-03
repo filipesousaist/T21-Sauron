@@ -73,7 +73,7 @@ public class SpotterApp {
 				parseTrail(lineArgs, frontend);
 				break;
 			case "ping":
-				ping(lineArgs[1], frontend);
+				ping(lineArgs, frontend);
 				break;
 			case "clear":
 				clear(frontend);
@@ -184,8 +184,13 @@ public class SpotterApp {
 
 	}
 
-	private static void ping(String message, SiloFrontend frontend){
-		CtrlPingRequest request = CtrlPingRequest.newBuilder().setText(message).build();
+	private static void ping(String[] lineArgs, SiloFrontend frontend)
+			throws InvalidLineException {
+		if (lineArgs.length != 2)
+			throw new InvalidLineException(
+					"Wrong number of arguments. Expected 2, but " + lineArgs.length + " were given.");
+
+		CtrlPingRequest request = CtrlPingRequest.newBuilder().setText(lineArgs[1]).build();
 		CtrlPingReply response = frontend.ctrlPing(request);
 		System.out.println(response.getText());
 	}
