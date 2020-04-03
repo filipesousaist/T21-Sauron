@@ -15,12 +15,8 @@ public class EyeApp {
 
 	public static void main(String[] args) {
 		System.out.println(EyeApp.class.getSimpleName());
-		
-		// receive and print arguments
-		System.out.printf("Received %d arguments%n", args.length);
-		for (int i = 0; i < args.length; i++) {
-			System.out.printf("arg[%d] = %s%n", i, args[i]);
-		}
+
+
 		try {
 			Object[] parsedArgs = parseArgs(args);
 
@@ -71,7 +67,6 @@ public class EyeApp {
 		catch (StatusRuntimeException e) {
 			Status.Code code = e.getStatus().getCode();
 			if (Status.ALREADY_EXISTS.getCode().equals(code)) {
-				System.out.println(e.getStatus());
 				System.out.println("This Eye was already registered on server. Proceeding...");
 			}
 			else if (Status.PERMISSION_DENIED.getCode().equals(code)) {
@@ -87,7 +82,6 @@ public class EyeApp {
 					"Eye coordinates do not match specified format.");
 			}
 
-			System.out.println("Status: " + e.getStatus());
 		}
 	}
 
