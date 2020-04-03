@@ -19,14 +19,6 @@ public class SpotterApp {
 	private static final int NUM_ARGS = 2;
 
 	public static void main(String[] args) {
-		System.out.println(SpotterApp.class.getSimpleName());
-
-		// receive and print arguments
-		System.out.printf("Received %d arguments%n", args.length);
-		for (int i = 0; i < args.length; i++) {
-			System.out.printf("arg[%d] = %s%n", i, args[i]);
-		}
-
 		try {
 			//check arguments
 			Object[] parsedArgs = parseArgs(args);
@@ -34,7 +26,8 @@ public class SpotterApp {
 			SiloFrontend frontend = new SiloFrontend((String)parsedArgs[0], (int)parsedArgs[1]);
 
 			handleInput(frontend);
-		} catch(ArgCountException e) {
+		}
+		catch(ArgCountException e) {
 			System.out.println(e.getMessage());
 		}
 	}
@@ -165,25 +158,30 @@ public class SpotterApp {
 		}
 		return type;
 	}
+	
+	private static void printResult(List<ObservationData> reply, SiloFrontend frontend) {
+		List<ObservationData> replyCopy = new ArrayList<>(reply);
 
-	private static void printResult(List<ObservationData> reply, SiloFrontend frontend){
-		List<ObservationData> replyCopy = new ArrayList<>();
-		replyCopy.addAll(reply);
-		replyCopy.sort(Comparator.comparing(ObservationData::getId));
+		if (replyCopy.get(0).getType().equals(ObjectType.CAR))
+			replyCopy.sort(Comparator.comparing(ObservationData::getId));
 
-		for (ObservationData responseData: replyCopy) {
+		else if (replyCopy.get(0).getType().equals(ObjectType.PERSON))
+			replyCopy.sort(Comparator.comparing(id -> Long.parseLong(id.getId())));
+
+		for (ObservationData responseData : replyCopy) {
 			Coordinates camCoords = camInfo(responseData.getCamName(), frontend).getCoordinates();
 
 			SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 			String timeString = timeFormat.format(responseData.getTimestamp().getSeconds() * 1000);
 
 			System.out.println("" + responseData.getId() + ","
-					+ responseData.getType() + ","
-					+ timeString + ","
-					+ responseData.getCamName() + ","
-					+ camCoords.getLatitude() + ","
-					+ camCoords.getLongitude());
+				+ responseData.getType() + ","
+				+ timeString + ","
+				+ responseData.getCamName() + ","
+				+ camCoords.getLatitude() + ","
+				+ camCoords.getLongitude());
 		}
+
 	}
 
 	private static void ping(String message, SiloFrontend frontend){
@@ -206,12 +204,12 @@ public class SpotterApp {
 
 	private static void printHelp(){
 		System.out.println("Supported commands:\n" +
-				"spot <type> <id> (returns observation(s) of <type> with <id> or partial <id>)\n" +
-				"trail <type> <id> (returns path taken by <type> with <id>)\n" +
-				"ping (returns message with server state)\n" +
-				"clear (clears server state)\n" +
-				"init (allows definition of initial configuration parameters of server)\n" +
-				"exit (exits Spotter)");
+			"spot <type> <id> (returns observation(s) of <type> with <id> or partial <id>)\n" +
+			"trail <type> <id> (returns path taken by <type> with <id>)\n" +
+			"ping (returns message with server state)\n" +
+			"clear (clears server state)\n" +
+			"init (allows definition of initial configuration parameters of server)\n" +
+			"exit (exits Spotter)");
 	}
 
 	private static CamInfoReply camInfo(String camName, SiloFrontend frontend){

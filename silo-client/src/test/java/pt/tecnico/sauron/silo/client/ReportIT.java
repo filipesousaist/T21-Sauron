@@ -22,7 +22,7 @@ public class ReportIT extends BaseIT {
 
     @Test
     public void validTest() {
-        String[] personIds = {"0", "1", "36517", Long.toString(Long.MAX_VALUE)};
+        String[] personIds = {"1", "36517", Long.toString(Long.MAX_VALUE)};
         String[] carIds = {"ABCD12", "EF34GH", "56IJKL", "0000ZZ", "67LC95", "XY3774"};
 
         ReportRequest.Builder reportRequestBuilder = ReportRequest.newBuilder().setCamName("Tagus");
@@ -42,7 +42,7 @@ public class ReportIT extends BaseIT {
             ReportRequest.newBuilder().setCamName("Trudy");
 
         reportRequestBuilder.addData(
-            ObjectData.newBuilder().setType(ObjectType.PERSON).setId("0").build());
+            ObjectData.newBuilder().setType(ObjectType.PERSON).setId("3").build());
 
         assertEquals(Code.UNAUTHENTICATED,
             assertThrows(StatusRuntimeException.class, () -> frontend.report(reportRequestBuilder.build()))
@@ -53,8 +53,8 @@ public class ReportIT extends BaseIT {
     public void invalidPersonIdsTest() {
         final BigInteger LARGEID = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
         final BigInteger LARGEID2 = LARGEID.add(BigInteger.valueOf(42153241));
-        String[] personIds = {"-1", "-7828426", LARGEID.toString(), LARGEID2.toString(), "1.2",
-            "abc", "/", "(Y#(F!H))", ""/*, null*/};
+        String[] personIds = {"0", "-1", "-7828426", LARGEID.toString(), LARGEID2.toString(), "1.2",
+            "abc", "/", "(Y#(F!H))", ""};
 
         for (String id: personIds) {
             ReportRequest reportRequest = ReportRequest.newBuilder().setCamName("Alameda")
@@ -67,7 +67,7 @@ public class ReportIT extends BaseIT {
 
     @Test
     public void invalidCarIdsTest() {
-        String[] carIds = {"A", "aa11aa", "-12AABB", "CCCCFF", "36CF2", "SS44SS4", "K4BB00", ""/*, null*/};
+        String[] carIds = {"A", "aa11aa", "-12AABB", "CCCCFF", "36CF2", "SS44SS4", "K4BB00", ""};
 
         for (String id: carIds) {
             ReportRequest reportRequest = ReportRequest.newBuilder().setCamName("Alameda")

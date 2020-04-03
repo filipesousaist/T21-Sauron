@@ -14,18 +14,15 @@ public class EyeApp {
 	private static final int NUM_ARGS = 5;
 
 	public static void main(String[] args) {
-		System.out.println(EyeApp.class.getSimpleName());
-
-
 		try {
 			Object[] parsedArgs = parseArgs(args);
 
 			try (SiloFrontend frontend =
-						 new SiloFrontend((String) parsedArgs[0], (int) parsedArgs[1])) {
+					new SiloFrontend((String) parsedArgs[0], (int) parsedArgs[1])) {
 				Eye eye = new Eye(
-						(String) parsedArgs[2],
-						(Double) parsedArgs[3],
-						(Double) parsedArgs[4]);
+					(String) parsedArgs[2],
+					(Double) parsedArgs[3],
+					(Double) parsedArgs[4]);
 
 				registerOnServer(frontend, eye);
 				handleInput(frontend, eye);
@@ -81,7 +78,6 @@ public class EyeApp {
 				throw new RegistrationException(
 					"Eye coordinates do not match specified format.");
 			}
-
 		}
 	}
 
