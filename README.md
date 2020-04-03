@@ -69,7 +69,7 @@ The integration tests are skipped because they require the servers to be running
 
 In order to try the application start by running the following command in the /silo-server directory:
 ```
-mvn compile exec:java
+mvn exec:java
 ``` 
 
 If you want to try out the Eye, run the following command in the /eye directory and replace camName, latitude and longitude by actual values:
@@ -80,6 +80,10 @@ If you want to try out the Eye, run the following command in the /eye directory 
 If you want to try out the Spotter, run the following command in the /spotter directory:
 ```
 mvn compile  exec:java
+```
+To run the automatic tests run the following command in the root directory, while the server is running:
+```
+mvn verify
 ```
 
 We have created a demo that allows to see the application working. See demo/README.md for further instructions.
