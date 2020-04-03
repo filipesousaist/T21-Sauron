@@ -72,7 +72,7 @@ public class EyeIT extends BaseIT {
             frontend.camJoin(camJoinRequest);
         }
     }
-    
+
 
     @Test
     public void sameNameDifferentCoords() {
