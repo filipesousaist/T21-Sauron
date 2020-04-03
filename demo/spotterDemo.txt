@@ -1,0 +1,12 @@
+help
+init
+init
+init
+spot person 123456
+spot car *BY
+spot person 1*
+trail car AA00BB
+clear
+trail car AA00BB
+ping ABC
+exit

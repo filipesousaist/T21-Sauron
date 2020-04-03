@@ -6,3 +6,6 @@ car,AAA111
 
 #invalid type
 airplane,4815613
+
+#wrong number of arguments
+abc

@@ -24,10 +24,11 @@ mvn clean install -DskipTests
 ```
 * Expected output:
 ```
-EyeApp
 Registration successful. Proceeding...
 End
 ```
+
+* Note that the test takes some time, indicating that the "zzz" command executed successfully.
 
 ---
 #### Test 2: Eye invalid commands
@@ -41,6 +42,7 @@ Registration successful. Proceeding...
 Error: INVALID_ARGUMENT: Person ID does not match the specification
 Error: INVALID_ARGUMENT: Car ID does not match the specification
 Invalid line: Unknown command: airplane
+Invalid line: Wrong number of arguments. Expected 2, but 1 were given.
 End
 ```
 
@@ -53,11 +55,13 @@ End
 ./eye/target/appassembler/bin/eye localhost 8080 Tagus 45 45 < demo/emptyFile.txt
 ./eye/target/appassembler/bin/eye localhost 8080 Tagus -45 80 < demo/emptyFile.txt
 ```
-* Expected output:
+* Expected output (1st command):
 ```
 Registration successful. Proceeding...
 End
-
+```
+* Expected output (2nd command):
+```
 Error registering in server: An Eye already exists with same name, but different coordinates.
 End
 ```
@@ -70,8 +74,28 @@ End
 ```
 * Expected output:
 ```
+Supported commands:
+spot <type> <id> (returns observation(s) of <type> with <id> or partial <id>)
+trail <type> <id> (returns path taken by <type> with <id>)
+ping (sends control message to server, and server sends feedback)
+clear (clears server state)
+init (allows definition of initial configuration parameters of server)
+exit (exits Spotter)
+Observations added.
+Observations added.
+Observations added.
+123456,PERSON,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
+AA43BY,CAR,2020-04-03T15:13:16,Alameda,38.736748,-9.138908
+LD04BY,CAR,2020-04-03T15:13:16,Alameda,38.736748,-9.138908
+12344321,PERSON,2020-04-03T15:13:16,Alameda,38.736748,-9.138908
+123456,PERSON,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
+AA00BB,CAR,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
+AA00BB,CAR,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
+AA00BB,CAR,2020-04-03T15:13:16,Tagus,38.737613,-9.303164
+Server has been cleared.
+Hello, ABC!
 ```
-
+* Note: The command output will not be exactly the same as above, as the time will differ. 
 ---
 
 #### Test 5: Spotter invalid commands
@@ -81,6 +105,10 @@ End
 ```
 * Expected output:
 ```
+Observations added.
+Wrong number of arguments. Expected 3, but 2 were given.
+Unknown command: boat
+Unknown command: abc
 ```
 
 ---

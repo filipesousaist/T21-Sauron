@@ -170,7 +170,7 @@ public class SiloServer {
     }
 
     public String ping(String message) {
-        return "Hello " + message + " !";
+        return "Hello, " + message + "!";
     }
 
     public String clear() {

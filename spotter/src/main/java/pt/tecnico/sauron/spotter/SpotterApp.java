@@ -97,7 +97,7 @@ public class SpotterApp {
 			throws InvalidLineException {
 		if (lineArgs.length != 3){
 			throw new InvalidLineException(
-					"Wrong number of arguments. Expected 3, but " + lineArgs.length + "were given.");
+					"Wrong number of arguments. Expected 3, but " + lineArgs.length + " were given.");
 		}
 		ObjectType type = getObjectType(lineArgs);
 
@@ -124,7 +124,7 @@ public class SpotterApp {
 			throws InvalidLineException {
 		if (lineArgs.length != 3){
 			throw new InvalidLineException(
-					"Wrong number of arguments. Expected 3, but " + lineArgs.length + "were given.");
+					"Wrong number of arguments. Expected 3, but " + lineArgs.length + " were given.");
 		}
 		ObjectType type = getObjectType(lineArgs);
 
@@ -184,29 +184,29 @@ public class SpotterApp {
 
 	}
 
-	private static void ping(String message, SiloFrontend frontend){
+	private static void ping(String message, SiloFrontend frontend) {
 		CtrlPingRequest request = CtrlPingRequest.newBuilder().setText(message).build();
 		CtrlPingReply response = frontend.ctrlPing(request);
 		System.out.println(response.getText());
 	}
 
-	private static void clear(SiloFrontend frontend){
+	private static void clear(SiloFrontend frontend) {
 		CtrlClearRequest request = CtrlClearRequest.newBuilder().build();
 		CtrlClearReply response = frontend.ctrlClear(request);
 		System.out.println(response.getText());
 	}
 
-	private static void init(SiloFrontend frontend){
+	private static void init(SiloFrontend frontend) {
 		CtrlInitRequest request = CtrlInitRequest.newBuilder().build();
 		CtrlInitReply response = frontend.ctrlInit(request);
 		System.out.println(response.getText());
 	}
 
-	private static void printHelp(){
+	private static void printHelp() {
 		System.out.println("Supported commands:\n" +
 			"spot <type> <id> (returns observation(s) of <type> with <id> or partial <id>)\n" +
 			"trail <type> <id> (returns path taken by <type> with <id>)\n" +
-			"ping (returns message with server state)\n" +
+			"ping (sends control message to server, and server sends feedback)\n" +
 			"clear (clears server state)\n" +
 			"init (allows definition of initial configuration parameters of server)\n" +
 			"exit (exits Spotter)");
