@@ -79,7 +79,7 @@ If you want to try out the Eye, run the following command in the /eye directory 
 
 If you want to try out the Spotter, run the following command in the /spotter directory:
 ```
-./target/appassembler/bin/spotter localhost 8080
+./target/appassembler/bin/spotter localhost 8080 localhost 8080
 ```
 To run the automatic tests run the following command in the root directory, while the server is running:
 ```
