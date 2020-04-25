@@ -14,15 +14,14 @@
 	<name>${project.artifactId}</name>
 
 	<properties>
+		<mainclass>pt.tecnico.sauron.silo.SiloServerApp</mainclass>
 		<!-- see parent POM for more properties -->
 		<zoo.host>localhost</zoo.host>
 		<zoo.port>2181</zoo.port>
-		<instance>1</instance>
 
-		<mainclass>pt.tecnico.sauron.silo.SiloServerApp</mainclass>
+		<server.instance>1</server.instance>
 		<server.host>localhost</server.host>
-		<server.port>808${instance}</server.port>
-		<server.path>/grpc/sauron/silo/${instance}</server.path>
+		<server.port>808${server.instance}</server.port>
 	</properties>
 
 	<dependencies>
@@ -81,9 +80,9 @@
 					<arguments>
 						<argument>${zoo.host}</argument>
 						<argument>${zoo.port}</argument>
+						<argument>${server.instance}</argument>
 						<argument>${server.host}</argument>
 						<argument>${server.port}</argument>
-						<argument>${server.path}</argument>
 					</arguments>
 				</configuration>
 			</plugin>

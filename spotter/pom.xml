@@ -71,6 +71,9 @@
 				<configuration>
 					<mainClass>${mainclass}</mainClass>
 					<arguments>
+						<argument>localhost</argument>
+						<argument>2181</argument>
+						<argument>1</argument>
 					</arguments>
 				</configuration>
 			</plugin>

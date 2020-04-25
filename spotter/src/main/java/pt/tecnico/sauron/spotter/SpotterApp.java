@@ -9,36 +9,47 @@ import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 import pt.tecnico.sauron.spotter.domain.exception.*;
-
+import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class SpotterApp {
-	private static final int NUM_ARGS = 2;
+	private static final int NUM_FIXED_ARGS = 2;
+	private static final int NUM_VAR_ARGS = 1;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ZKNamingException {
 		try {
 			//check arguments
 			Object[] parsedArgs = parseArgs(args);
 
-			SiloFrontend frontend = new SiloFrontend((String)parsedArgs[0], (int)parsedArgs[1]);
+			SiloFrontend frontend = new SiloFrontend(
+				(String) parsedArgs[0],
+				(String) parsedArgs[1],
+				(int) parsedArgs[2]
+			);
 
 			handleInput(frontend);
 		}
-		catch(ArgCountException e) {
+		catch(ArgCountException | NumberFormatException e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
-	private static Object[] parseArgs(String[] args) throws ArgCountException{
-		if (args.length != NUM_ARGS)
-			throw new ArgCountException(args.length, NUM_ARGS);
-		Object[] parsedArgs = new Object[NUM_ARGS];
+	private static Object[] parseArgs(String[] args) throws ArgCountException {
+		if (args.length < NUM_FIXED_ARGS || args.length > NUM_FIXED_ARGS + NUM_VAR_ARGS)
+			throw new ArgCountException(args.length, NUM_FIXED_ARGS, NUM_VAR_ARGS + NUM_FIXED_ARGS);
+		Object[] parsedArgs = new Object[NUM_VAR_ARGS + NUM_FIXED_ARGS];
+
+		// check if port is an integer
+		int port = Integer.parseInt(args[1]);
+		if (port < 0 || port >= (2 << 16))
+			throw new NumberFormatException("Port must be between 0 and 65535");
 
 		parsedArgs[0] = args[0];
-		parsedArgs[1] = Integer.parseInt(args[1]);
+		parsedArgs[1] = args[1];
+		parsedArgs[2] = Integer.parseInt(args[2]);
 
 		return parsedArgs;
 	}
