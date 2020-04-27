@@ -1,21 +1,28 @@
 package pt.tecnico.sauron.silo.client;
 
+import pt.tecnico.sauron.silo.client.exception.ArgCountException;
+import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
+
 public class SiloClientApp {
-	public static void main(String[] args) {
-		String host;
-		int port;
+	private static final int NUM_FIXED_ARGS = 2;
+	private static final int NUM_VAR_ARGS = 1;
 
-		System.out.println(SiloClientApp.class.getSimpleName());
-		
-		// receive and print arguments
-		System.out.printf("Received %d arguments%n", args.length);
-		for (int i = 0; i < args.length; i++) {
-			System.out.printf("arg[%d] = %s%n", i, args[i]);
+	public static void main(String[] args)
+		throws ZKNamingException {
+		try {
+			//check arguments
+			Object[] parsedArgs = parseArgs(args);
+
+			SiloFrontend frontend = new SiloFrontend(
+				(String) parsedArgs[0],
+				(String) parsedArgs[1],
+				(int) parsedArgs[2]
+			);
+
 		}
-		host = args[0];
-		port = Integer.parseInt(args[1]);
-
-		SiloFrontend frontend = new SiloFrontend(host, port);
+		catch(ArgCountException | NumberFormatException e) {
+			System.out.println(e.getMessage());
+		}
 /*
 		EmptyMessage request = EmptyMessage.getDefaultInstance();
 
@@ -38,5 +45,24 @@ public class SiloClientApp {
 			String s = format.format(od.getTimestamp().getSeconds()*1000);
 			System.out.println(s);
 		}*/
+	}
+
+	private static Object[] parseArgs(String[] args) throws ArgCountException {
+		if (args.length < NUM_FIXED_ARGS || args.length > NUM_FIXED_ARGS + NUM_VAR_ARGS)
+			throw new ArgCountException(args.length, NUM_FIXED_ARGS, NUM_VAR_ARGS + NUM_FIXED_ARGS);
+		Object[] parsedArgs = new Object[NUM_VAR_ARGS + NUM_FIXED_ARGS];
+
+		parsedArgs[0] = args[0];
+
+		// check if port is an integer
+		int port = Integer.parseInt(args[1]);
+		if (port < 0 || port >= (2 << 16))
+			throw new NumberFormatException("Port must be between 0 and 65535");
+
+		parsedArgs[1] = args[1];
+
+		parsedArgs[2] = Integer.parseInt(args[2]);
+
+		return parsedArgs;
 	}
 }

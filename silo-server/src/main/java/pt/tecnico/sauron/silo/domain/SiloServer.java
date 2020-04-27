@@ -148,10 +148,10 @@ public class SiloServer {
         validateId(id, type);
         synchronized (this) {
             obss = observations.stream()
-                    .filter(o -> o.getType().equals(type))
-                    .filter(o -> o.getStrId().equals(id))
-                    .sorted(Comparator.comparing(Observation::getDate))
-                    .collect(Collectors.toList());
+                .filter(o -> o.getType().equals(type))
+                .filter(o -> o.getStrId().equals(id))
+                .sorted(Comparator.comparing(Observation::getDate).reversed())
+                .collect(Collectors.toList());
         }
 
         if(obss.isEmpty()) throw new NoObservationFoundException(id, type);

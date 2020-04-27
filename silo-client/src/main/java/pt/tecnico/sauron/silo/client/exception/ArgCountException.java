@@ -1,4 +1,4 @@
-package pt.tecnico.sauron.eye.domain.exceptions;
+package pt.tecnico.sauron.silo.client.exception;
 
 public class ArgCountException extends Exception {
     private int argCount;

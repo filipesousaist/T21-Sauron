@@ -6,19 +6,27 @@ import pt.tecnico.sauron.eye.domain.Eye;
 import pt.tecnico.sauron.eye.domain.exceptions.*;
 import pt.tecnico.sauron.silo.client.SiloFrontend;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
+import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
 
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 public class EyeApp {
-	private static final int NUM_ARGS = 5;
+	private static final int NUM_FIXED_ARGS = 5;
+	private static final int NUM_VAR_ARGS = 1;
 
-	public static void main(String[] args) {
+	public static void main(String[] args)
+		throws ZKNamingException {
+
 		try {
 			Object[] parsedArgs = parseArgs(args);
 
 			try (SiloFrontend frontend =
-					new SiloFrontend((String) parsedArgs[0], (int) parsedArgs[1])) {
+				new SiloFrontend(
+					(String) parsedArgs[0],
+					(String) parsedArgs[1],
+					(int) parsedArgs[5]
+			)) {
 				Eye eye = new Eye(
 					(String) parsedArgs[2],
 					(Double) parsedArgs[3],
@@ -31,22 +39,28 @@ public class EyeApp {
 				System.out.println("Error registering in server: " + e.getMessage());
 			}
 		}
-		catch (ArgCountException|NumberFormatException e) { // NumberFormatException can occur in parseArgs
+		catch (ArgCountException | NumberFormatException e) {
 			System.out.println(e.getMessage());
 		}
 		System.out.println("End");
 	}
 
 	private static Object[] parseArgs(String[] args) throws ArgCountException {
-		if (args.length != NUM_ARGS)
-			throw new ArgCountException(args.length, NUM_ARGS);
-		Object[] parsedArgs = new Object[NUM_ARGS];
+		if (args.length < NUM_FIXED_ARGS || args.length > NUM_FIXED_ARGS + NUM_VAR_ARGS)
+			throw new ArgCountException(args.length, NUM_FIXED_ARGS, NUM_VAR_ARGS + NUM_FIXED_ARGS);
+		Object[] parsedArgs = new Object[NUM_VAR_ARGS + NUM_FIXED_ARGS];
+
+		// check if port is an integer
+		int port = Integer.parseInt(args[1]);
+		if (port < 0 || port >= (2 << 16))
+			throw new NumberFormatException("Port must be between 0 and 65535");
 
 		parsedArgs[0] = args[0];
-		parsedArgs[1] = Integer.parseInt(args[1]);
+		parsedArgs[1] = args[1];
 		parsedArgs[2] = args[2];
 		parsedArgs[3] = Double.parseDouble(args[3]);
 		parsedArgs[4] = Double.parseDouble(args[4]);
+		parsedArgs[5] = Integer.parseInt(args[5]);
 
 		return parsedArgs;
 	}

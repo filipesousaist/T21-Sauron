@@ -77,10 +77,11 @@
 					<mainClass>${mainclass}</mainClass>
 					<arguments>
 						<argument>localhost</argument>
-						<argument>8080</argument>
+						<argument>2181</argument>
 						<argument>Tagus</argument>
 						<argument>38.737259</argument>
 						<argument>-9.302400</argument>
+						<argument>1</argument>
 					</arguments>
 				</configuration>
 			</plugin>

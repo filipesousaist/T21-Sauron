@@ -3,6 +3,7 @@ package pt.tecnico.sauron.silo.client;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
+import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -15,7 +16,7 @@ public class BaseIT {
 	static SiloFrontend frontend;
 	
 	@BeforeAll
-	public static void oneTimeSetup () throws IOException {
+	public static void oneTimeSetup () throws IOException, ZKNamingException {
 		testProps = new Properties();
 		
 		try {
@@ -29,9 +30,9 @@ public class BaseIT {
 			throw e;
 		}
 
-		final String host = testProps.getProperty("server.host");
-		final int port = Integer.parseInt(testProps.getProperty("server.port"));
-		frontend = new SiloFrontend(host, port);
+		final String host = testProps.getProperty("zoo.host");
+		final int port = Integer.parseInt(testProps.getProperty("zoo.port"));
+		frontend = new SiloFrontend(host, Integer.toString(port), 1);
 		frontend.ctrlClear(CtrlClearRequest.getDefaultInstance());
 	}
 	
