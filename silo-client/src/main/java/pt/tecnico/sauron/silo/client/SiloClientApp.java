@@ -61,8 +61,7 @@ public class SiloClientApp {
 
 		parsedArgs[1] = args[1];
 
-		parsedArgs[2] = Integer.parseInt(args[2]);
-
+		parsedArgs[2] = args.length > NUM_FIXED_ARGS ? Integer.parseInt(args[2]) : -1;
 		return parsedArgs;
 	}
 }
