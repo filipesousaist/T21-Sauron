@@ -27,7 +27,7 @@ public class SiloServerApp {
 			// publish
 			zkNaming.rebind(path, serverHost, serverPort);
 
-			SiloServerImpl service = new SiloServerImpl(instance);
+			SiloServerImpl service = new SiloServerImpl(instance, zkHost, zkPort);
 			Server server = ServerBuilder.forPort(Integer.parseInt(serverPort))
 					 					 .addService((BindableService) service).build();
 
