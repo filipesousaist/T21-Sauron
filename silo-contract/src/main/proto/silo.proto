@@ -32,28 +32,36 @@ message ObjectData {
 
 // cam_join
 message CamJoinRequest {
-    string camName = 1;
-    Coordinates coordinates = 2;
+    repeated int32 prevTS = 1;
+    string camName = 2;
+    Coordinates coordinates = 3;
 }
 
-message CamJoinReply {}
+message CamJoinReply {
+    repeated int32 valueTS = 1;
+}
 
 // cam_info
 message CamInfoRequest {
-    string camName = 1;
+    repeated int32 prevTS = 1;
+    string camName = 2;
 }
 
 message CamInfoReply {
-    Coordinates coordinates = 1;
+    repeated int32 valueTS = 1;
+    Coordinates coordinates = 2;
 }
 
 // report
 message ReportRequest {
-    string camName = 1;
-    repeated ObjectData data = 2;
+    repeated int32 prevTS = 1;
+    string camName = 2;
+    repeated ObjectData data = 3;
 }
 
-message ReportReply {}
+message ReportReply {
+    repeated int32 valueTS = 1;
+}
 
 
 // *** SPOTTER ***
@@ -68,29 +76,35 @@ message ObservationData {
 
 // track
 message TrackRequest {
-    ObjectData data = 1;
+    repeated int32 prevTS = 1;
+    ObjectData data = 2;
 }
 
 message TrackReply {
-    ObservationData data = 1;
+    repeated int32 valueTS = 1;
+    ObservationData data = 2;
 }
 
 // trackMatch
 message TrackMatchRequest {
-    ObjectData data = 1;
+    repeated int32 prevTS = 1;
+    ObjectData data = 2;
 }
 
 message TrackMatchReply {
-    repeated ObservationData data = 1;
+    repeated int32 valueTS = 1;
+    repeated ObservationData data = 2;
 }
 
 // trace
 message TraceRequest {
-    ObjectData data = 1;
+    repeated int32 prevTS = 1;
+    ObjectData data = 2;
 }
 
 message TraceReply {
-    repeated ObservationData data = 1;
+    repeated int32 valueTS = 1;
+    repeated ObservationData data = 2;
 }
 
 
@@ -98,25 +112,33 @@ message TraceReply {
 
 // ctrlPing
 message CtrlPingRequest {
-    string text = 1;
+    repeated int32 prevTS = 1;
+    string text = 2;
 }
 
 message CtrlPingReply {
-    string text = 1;
+    repeated int32 valueTS = 1;
+    string text = 2;
 }
 
 // ctrlClear
-message CtrlClearRequest {}
+message CtrlClearRequest {
+    repeated int32 prevTS = 1;
+}
 
 message CtrlClearReply {
-    string text = 1;
+    repeated int32 valueTS = 1;
+    string text = 2;
 }
 
 // ctrlInit
-message CtrlInitRequest {}
+message CtrlInitRequest {
+    repeated int32 prevTS = 1;
+}
 
 message CtrlInitReply {
-    string text = 1;
+    repeated int32 valueTS = 1;
+    string text = 2;
 }
 
 

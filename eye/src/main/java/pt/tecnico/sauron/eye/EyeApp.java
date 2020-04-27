@@ -52,7 +52,7 @@ public class EyeApp {
 
 		// check if port is an integer
 		int port = Integer.parseInt(args[1]);
-		if (port < 0 || port >= (2 << 16))
+		if (port < 0 || port >= 1 << 16)
 			throw new NumberFormatException("Port must be between 0 and 65535");
 
 		parsedArgs[0] = args[0];
@@ -60,19 +60,18 @@ public class EyeApp {
 		parsedArgs[2] = args[2];
 		parsedArgs[3] = Double.parseDouble(args[3]);
 		parsedArgs[4] = Double.parseDouble(args[4]);
-		parsedArgs[5] = Integer.parseInt(args[5]);
+		parsedArgs[5] = args.length > NUM_FIXED_ARGS ? Integer.parseInt(args[5]) : -1;
 
 		return parsedArgs;
 	}
 
 	private static void registerOnServer(SiloFrontend frontend, Eye eye)
 			throws RegistrationException {
-		CamJoinRequest camJoinRequest = CamJoinRequest.newBuilder()
+		CamJoinRequest.Builder camJoinRequestBuilder = CamJoinRequest.newBuilder()
 			.setCamName(eye.getName())
-			.setCoordinates(eye.getCoordinates())
-			.build();
+			.setCoordinates(eye.getCoordinates());
 		try {
-			frontend.camJoin(camJoinRequest);
+			frontend.camJoin(camJoinRequestBuilder);
 			System.out.println("Registration successful. Proceeding...");
 		}
 		catch (StatusRuntimeException e) {
@@ -155,7 +154,7 @@ public class EyeApp {
 
 		// Report observations to server and check for status
 		try {
-			frontend.report(reportRequestBuilder.build());
+			frontend.report(reportRequestBuilder);
 		}
 		catch (StatusRuntimeException e) {
 			Status.Code code = e.getStatus().getCode();
