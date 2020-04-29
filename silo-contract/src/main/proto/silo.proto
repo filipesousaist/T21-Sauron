@@ -35,6 +35,7 @@ message CamJoinRequest {
     repeated int32 prevTS = 1;
     string camName = 2;
     Coordinates coordinates = 3;
+    string opId = 4;
 }
 
 message CamJoinReply {
@@ -57,6 +58,7 @@ message ReportRequest {
     repeated int32 prevTS = 1;
     string camName = 2;
     repeated ObjectData data = 3;
+    string opId = 4;
 }
 
 message ReportReply {
@@ -141,6 +143,29 @@ message CtrlInitReply {
     string text = 2;
 }
 
+// *** Gossip ***
+
+message ObservationLogMessage{
+    repeated int32 prevTS = 1;
+    repeated ObservationData data = 2;
+    string opId = 3;
+}
+
+message GossipData{
+    string type = 1;
+    oneof data{
+        ObservationLogMessage observationLogMessage= 2;
+        CamJoinRequest camJoinRequest = 3;
+    }
+}
+
+message GossipMessage{
+    repeated GossipData data = 1;
+}
+
+message GossipReply{
+
+}
 
 // *** RPC SERVICE ***
 
@@ -151,6 +176,7 @@ service SiloService {
     rpc track (TrackRequest) returns (TrackReply);
     rpc trackMatch (TrackMatchRequest) returns (TrackMatchReply);
     rpc trace (TraceRequest) returns (TraceReply);
+    rpc gossip (GossipMessage) returns (GossipReply);
     rpc ctrlPing (CtrlPingRequest) returns (CtrlPingReply);
     rpc ctrlClear (CtrlClearRequest) returns (CtrlClearReply);
     rpc ctrlInit (CtrlInitRequest) returns (CtrlInitReply);
