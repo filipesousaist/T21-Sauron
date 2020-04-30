@@ -97,7 +97,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
             //check for potential new instances
             for (ZKRecord r : conns) {
                 currInstance = extractInstance(r.getPath());
-                if(!existsConnection(currInstance) && currInstance != this.instance){
+                if (!existsConnection(currInstance) && currInstance != this.instance) {
                     String target = zkNaming.lookup(BASE_PATH + "/" + currInstance).getURI();
                     System.out.println("New instance showed up!");
                     System.out.println(target);

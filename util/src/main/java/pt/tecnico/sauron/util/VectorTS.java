@@ -37,6 +37,14 @@ public class VectorTS implements Iterable<Integer> {
     }
 
     public boolean happensBefore(VectorTS v) {
+        return happensBefore(v, false);
+    }
+
+    public boolean happensBeforeOrEquals(VectorTS v) {
+        return happensBefore(v, true);
+    }
+
+    private boolean happensBefore(VectorTS v, boolean orEquals) {
         int size = balanceSizes(this, v);
 
         boolean hasSmaller = false;
@@ -44,12 +52,12 @@ public class VectorTS implements Iterable<Integer> {
             int myVal = values.get(i);
             int otherVal = v.values.get(i);
 
-            if (myVal > otherVal)
-                return false;
-            else if (myVal < otherVal)
+            if (myVal < otherVal)
                 hasSmaller = true;
+            else if (myVal > otherVal)
+                return false;
         }
-        return hasSmaller;
+        return orEquals || hasSmaller;
     }
 
     // Extend this vector until it has
