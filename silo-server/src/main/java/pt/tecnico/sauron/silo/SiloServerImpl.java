@@ -2,6 +2,7 @@ package pt.tecnico.sauron.silo;
 
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
+import pt.tecnico.sauron.silo.domain.CamLog;
 import pt.tecnico.sauron.silo.domain.ObsLog;
 import pt.tecnico.sauron.silo.domain.Observation;
 import pt.tecnico.sauron.silo.domain.SiloServer;
@@ -28,6 +29,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     private int instance;
 
     private List<ObsLog> obsLogs = new ArrayList<>();
+    private List<CamLog> camLogs = new ArrayList<>();
 
     ZKNaming zkNaming = null;
 
@@ -89,6 +91,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
 
         System.out.println("Gossiping...");
+        System.out.println(camLogs);
         System.out.println(obsLogs);
 
         try {
@@ -139,6 +142,7 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     public void camJoin(CamJoinRequest request, StreamObserver<CamJoinReply> responseObserver) {
         try {
             siloServer.cam_join(request.getCamName(), request.getCoordinates());
+            camLogs.add(new CamLog(request.getCoordinates(), request.getCamName()), request.getOpId());
 
             replicaTS.incr(instance);
             responseObserver.onNext(CamJoinReply.newBuilder().addAllValueTS(replicaTS).build());
@@ -294,22 +298,30 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         System.out.println("Maybe getting new updates.");
         System.out.println(obsLogs);
         for(GossipData gd : request.getDataList()){
-            if(gd.getType().equals("observation")) {
-                /*System.out.println(findByOpId(gd.getObservationLogMessage().getOpId()).get());
-                System.out.println(gd.getObservationLogMessage().getOpId());*/
-                if (findByOpId(gd.getObservationLogMessage().getOpId()).isEmpty()){
+            if(gd.getType().equals("cam")){
+                if(findByOpId2(gd.getObservationLogMessage().getOpId(), gd.getObservationLogMessage().getData()));
+            }else if(gd.getType().equals("observation")) {
+                System.out.println(gd.getObservationLogMessage().getOpId());
+                if (findByOpId(gd.getObservationLogMessage().getOpId(), gd.getObservationLogMessage().getData(0).getCamName()).isEmpty()){
                     System.out.println("Need to be updated");
                     obsLogs.add(new ObsLog(gd.getObservationLogMessage()));
                 }
             }
+
         }
         responseObserver.onNext(GossipReply.getDefaultInstance());
         responseObserver.onCompleted();
     }
 
-    private Optional<ObsLog> findByOpId(String opId){
+    private Optional<ObsLog> findByOpId(int opId, String camName){
         return obsLogs.stream()
-                .filter(o -> o.getOpId().equals(opId))
+                .filter(o -> o.getOpId() == opId && o.getCamName().equals(camName))
+                .findFirst();
+    }
+
+    private Optional<CamLog> findByOpId2(int opId, String camName){
+        return camLogs.stream()
+                .filter(o -> o.getOpId() == opId && o.getCamName().equals(camName))
                 .findFirst();
     }
 
@@ -342,3 +354,4 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         responseObserver.onCompleted();
     }
 }
+

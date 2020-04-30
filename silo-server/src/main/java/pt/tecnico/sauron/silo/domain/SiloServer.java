@@ -172,10 +172,6 @@ public class SiloServer {
         }
     }
 
-    public void receiveGossipedInfo(List<GossipData> gossipData){
-
-    }
-
     public String ping(String message) {
         return "Hello, " + message + "!";
     }

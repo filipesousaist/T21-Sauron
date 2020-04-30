@@ -61,7 +61,7 @@ public class SiloFrontend implements AutoCloseable {
     public ReportReply report(ReportRequest.Builder requestBuilder) {
         ReportRequest request = requestBuilder
                 .addAllPrevTS(ts)
-                .setOpId(""+(currOpId++))
+                .setOpId(currOpId++)
                 .build();
 
         ReportReply reply = stub.report(request);

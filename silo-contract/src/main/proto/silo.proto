@@ -35,7 +35,7 @@ message CamJoinRequest {
     repeated int32 prevTS = 1;
     string camName = 2;
     Coordinates coordinates = 3;
-    string opId = 4;
+    int32 opId = 4;
 }
 
 message CamJoinReply {
@@ -58,7 +58,7 @@ message ReportRequest {
     repeated int32 prevTS = 1;
     string camName = 2;
     repeated ObjectData data = 3;
-    string opId = 4;
+    int32 opId = 4;
 }
 
 message ReportReply {
@@ -148,19 +148,12 @@ message CtrlInitReply {
 message ObservationLogMessage{
     repeated int32 prevTS = 1;
     repeated ObservationData data = 2;
-    string opId = 3;
-}
-
-message GossipData{
-    string type = 1;
-    oneof data{
-        ObservationLogMessage observationLogMessage= 2;
-        CamJoinRequest camJoinRequest = 3;
-    }
+    int32 opId = 3;
 }
 
 message GossipMessage{
-    repeated GossipData data = 1;
+    repeated ObservationLogMessage observationLogMessage = 1;
+    repeated CamJoinRequest camJoinRequest = 2;
 }
 
 message GossipReply{

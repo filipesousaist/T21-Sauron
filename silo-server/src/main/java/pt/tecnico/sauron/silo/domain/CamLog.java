@@ -11,8 +11,9 @@ public class CamLog {
     private String camName;
     private double latitude;
     private double longitude;
+    private int opId;
 
-    public CamLog(Coordinates coordinates, String cam_name) throws InvalidCoordinatesException, DuplicateJoinException, RepeatedNameException {
+    public CamLog(Coordinates coordinates, String cam_name, int opId) throws InvalidCoordinatesException, DuplicateJoinException, RepeatedNameException {
         double latitude = coordinates.getLatitude();
         double longitude = coordinates.getLongitude();
         if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180)
@@ -21,6 +22,7 @@ public class CamLog {
         this.latitude = latitude;
         this.longitude = longitude;
         this.camName = cam_name;
+        this.opId = opId;
     }
 
     public String getCamName() {
@@ -45,5 +47,13 @@ public class CamLog {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public int getOpId() {
+        return opId;
+    }
+
+    public void setOpId(int opId) {
+        this.opId = opId;
     }
 }
