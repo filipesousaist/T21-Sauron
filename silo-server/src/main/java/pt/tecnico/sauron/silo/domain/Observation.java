@@ -27,4 +27,8 @@ public abstract class Observation {
 
     public String getCamName(){return camName;}
 
+    @Override
+    public String toString() {
+        return ""+type.toString()+" "+camName;
+    }
 }

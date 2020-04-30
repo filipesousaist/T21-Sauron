@@ -1,0 +1,99 @@
+package pt.tecnico.sauron.silo.domain;
+
+import pt.tecnico.sauron.silo.grpc.Silo;
+import pt.tecnico.sauron.silo.grpc.Silo.*;
+import pt.tecnico.sauron.util.VectorTS;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static pt.tecnico.sauron.silo.grpc.Silo.ObjectType.CAR;
+import static pt.tecnico.sauron.silo.grpc.Silo.ObjectType.PERSON;
+
+
+public class ObsLog {
+    private String opId;
+    private List<Observation> obss = new ArrayList<>();
+    private String camName;
+    private VectorTS vectorTS;
+
+    public ObsLog(List<ObjectData> data, String camName, Date date, VectorTS vectorTS, String opId){
+        data.forEach(d -> {
+            switch (d.getType()){
+                case CAR:
+                    obss.add(new CarObservation(d.getId(), camName, date));
+                    break;
+                case PERSON:
+                    obss.add (new PersonObservation(Long.parseLong(d.getId()), camName, date));
+                    break;
+                default:
+                    throw new RuntimeException("Invalid type");
+            }
+        });
+
+
+        this.vectorTS = vectorTS;
+        this.camName = camName;
+        this.opId = camName+opId;
+    }
+
+    public ObsLog(ObservationLogMessage observationLogMessage){
+        this.opId = observationLogMessage.getOpId();
+        this.camName = observationLogMessage.getData(0).getCamName();
+        this.vectorTS = new VectorTS(observationLogMessage.getPrevTSList());
+        for(ObservationData of : observationLogMessage.getDataList()){
+            Date date = new Date();
+            date.setTime(of.getTimestamp().getSeconds()*1000);
+            switch (of.getType()){
+                case CAR:
+                    obss.add(new CarObservation(of.getId(), camName, date));
+                    break;
+                case PERSON:
+                    obss.add (new PersonObservation(Long.parseLong(of.getId()), camName, date));
+                    break;
+                default:
+                    throw new RuntimeException("Invalid type");
+            }
+        }
+
+    }
+
+
+    @Override
+    public String toString() {
+        return obss.toString();
+    }
+
+    public String getOpId() {
+        return opId;
+    }
+
+    public void setOpId(String opId) {
+        this.opId = opId;
+    }
+
+    public List<Observation> getObss() {
+        return obss;
+    }
+
+    public void setObss(List<Observation> obss) {
+        this.obss = obss;
+    }
+
+    public VectorTS getVectorTS() {
+        return vectorTS;
+    }
+
+    public void setVectorTS(VectorTS vectorTS) {
+        this.vectorTS = vectorTS;
+    }
+
+    public String getCamName() {
+        return camName;
+    }
+
+    public void setCamName(String camName) {
+        this.camName = camName;
+    }
+}

@@ -56,13 +56,12 @@ public class SiloServer {
         throw new UnregisteredEyeException();
     }
 
-    public void report(List<ObjectData> data, String camName)
+    public void report(List<ObjectData> data, String camName, Date date)
             throws InvalidIdException, UnregisteredEyeException {
         synchronized (this) {
             if (!eyes.containsKey(camName))
                 throw new UnregisteredEyeException();
         }
-        Date date = new Date();
 
         for (ObjectData object : data) {
             switch (object.getType()) {
@@ -173,6 +172,10 @@ public class SiloServer {
         }
     }
 
+    public void receiveGossipedInfo(List<GossipData> gossipData){
+
+    }
+
     public String ping(String message) {
         return "Hello, " + message + "!";
     }
@@ -207,5 +210,13 @@ public class SiloServer {
         }
 
         return "Observations added.";
+    }
+
+    public List<Observation> getObservations() {
+        return Collections.unmodifiableList(observations);
+    }
+
+    public Map<String, Coordinates> getEyes() {
+        return Collections.unmodifiableMap(eyes);
     }
 }
