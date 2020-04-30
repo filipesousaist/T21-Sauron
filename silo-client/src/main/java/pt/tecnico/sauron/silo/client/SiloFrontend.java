@@ -53,7 +53,10 @@ public class SiloFrontend implements AutoCloseable {
     }
 
     public CamJoinReply camJoin(CamJoinRequest.Builder requestBuilder) {
-        CamJoinRequest request = requestBuilder.addAllPrevTS(ts).build();
+        CamJoinRequest request = requestBuilder
+                .addAllPrevTS(ts)
+                .setOpId(currOpId++)
+                .build();
         CamJoinReply reply = stub.camJoin(request);
         ts.update(new VectorTS(reply.getValueTSList()));
         return reply;

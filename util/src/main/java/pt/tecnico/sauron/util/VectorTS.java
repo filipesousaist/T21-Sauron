@@ -83,4 +83,9 @@ public class VectorTS implements Iterable<Integer> {
     public Iterator<Integer> iterator() {
         return values.iterator();
     }
+
+    @Override
+    public String toString() {
+        return this.values.toString();
+    }
 }

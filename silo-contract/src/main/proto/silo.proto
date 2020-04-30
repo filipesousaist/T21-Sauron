@@ -152,8 +152,10 @@ message ObservationLogMessage{
 }
 
 message GossipMessage{
-    repeated ObservationLogMessage observationLogMessage = 1;
-    repeated CamJoinRequest camJoinRequest = 2;
+    int32 replicaInstance = 1;
+    repeated int32 vecTS = 2;
+    repeated ObservationLogMessage observationLogMessage = 3;
+    repeated CamJoinRequest camJoinRequest = 4;
 }
 
 message GossipReply{

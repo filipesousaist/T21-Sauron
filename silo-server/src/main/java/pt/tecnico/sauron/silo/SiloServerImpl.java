@@ -19,12 +19,15 @@ import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
 import pt.ulisboa.tecnico.sdis.zk.ZKRecord;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     private static final String BASE_PATH = "/grpc/sauron/silo";
     private static final int GOSSIP_DELAY = 5000;
     private SiloServer siloServer = new SiloServer();
     private HashMap<Integer, SiloServiceBlockingStub> connections = new HashMap<>();
+    private HashMap<Integer, VectorTS> otherReplicasTS = new HashMap<>();
     private VectorTS replicaTS; // Vector timestamp
     private int instance;
 
@@ -86,7 +89,6 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     private void gossip() {
         int currInstance;
         ManagedChannel channel;
-        GossipData gossipData;
         GossipMessage.Builder gossipMessageBuilder = GossipMessage.newBuilder();
 
 
@@ -95,29 +97,42 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         System.out.println(obsLogs);
 
         try {
-            ArrayList<ZKRecord> conns = new ArrayList<>(zkNaming.listRecords(BASE_PATH));
+            List<ZKRecord> conns = new ArrayList<>(zkNaming.listRecords(BASE_PATH));
+            List<Integer> connectedInsntances = conns.stream()
+                    .map(ZKRecord::getPath)
+                    .map(this::extractInstance)
+                    .collect(Collectors.toList());
 
             //check for potential new instances
             for (ZKRecord r : conns) {
                 currInstance = extractInstance(r.getPath());
                 if(!existsConnection(currInstance) && currInstance != this.instance){
                     String target = zkNaming.lookup(BASE_PATH + "/" + currInstance).getURI();
-                    System.out.println("New instance showed up!");
-                    System.out.println(target);
                     channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
                     connections.put(currInstance, SiloServiceGrpc.newBlockingStub(channel));
                 }
             }
-            for(SiloServiceBlockingStub s : connections.values()) {
-                for (ObsLog ol : obsLogs) {
-                    gossipData = GossipData.newBuilder()
-                            .setObservationLogMessage(buildObservationLogMessage(ol))
-                            .setType("observation")
-                            .build();
 
-                    gossipMessageBuilder.addData(gossipData);
-                }
-                s.gossip(gossipMessageBuilder.build());
+            for(Integer i : connections.keySet()){
+                if(!connectedInsntances.contains(i))
+                    conns.remove(i);
+            }
+
+            for(Integer s : connections.keySet()) {
+                // build observation logs
+                gossipMessageBuilder.addAllObservationLogMessage(obsLogs.stream()
+                        .filter(o -> otherReplicasTS.get(s).happensBeforeOrEquals(o.getVectorTS()))
+                        .map(this::buildObservationLogMessage)
+                        .collect(Collectors.toList()));
+
+                // Build cam logs
+                gossipMessageBuilder.addAllCamJoinRequest(camLogs.stream()
+                        .map(this::buildCamJoinRequest)
+                        .collect(Collectors.toList()));
+
+                gossipMessageBuilder.setReplicaInstance(this.instance);
+                gossipMessageBuilder.addAllVecTS(this.replicaTS);
+                connections.get(s).gossip(gossipMessageBuilder.build());
             }
 
         } catch (ZKNamingException e) {
@@ -138,11 +153,26 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         return observationLogMessage;
     }
 
+    private CamJoinRequest buildCamJoinRequest(CamLog camLog){
+
+        Coordinates c = Coordinates.newBuilder()
+                .setLatitude(camLog.getLatitude())
+                .setLongitude(camLog.getLongitude())
+                .build();
+
+        return CamJoinRequest.newBuilder()
+                .addAllPrevTS(this.replicaTS)
+                .setCamName(camLog.getCamName())
+                .setCoordinates(c)
+                .build();
+    }
+
+
     @Override
     public void camJoin(CamJoinRequest request, StreamObserver<CamJoinReply> responseObserver) {
         try {
             siloServer.cam_join(request.getCamName(), request.getCoordinates());
-            camLogs.add(new CamLog(request.getCoordinates(), request.getCamName()), request.getOpId());
+            camLogs.add(new CamLog(request.getCoordinates(), request.getCamName(), request.getOpId()));
 
             replicaTS.incr(instance);
             responseObserver.onNext(CamJoinReply.newBuilder().addAllValueTS(replicaTS).build());
@@ -295,20 +325,28 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
     @Override
     public void gossip(GossipMessage request, StreamObserver<GossipReply> responseObserver) {
-        System.out.println("Maybe getting new updates.");
-        System.out.println(obsLogs);
-        for(GossipData gd : request.getDataList()){
-            if(gd.getType().equals("cam")){
-                if(findByOpId2(gd.getObservationLogMessage().getOpId(), gd.getObservationLogMessage().getData()));
-            }else if(gd.getType().equals("observation")) {
-                System.out.println(gd.getObservationLogMessage().getOpId());
-                if (findByOpId(gd.getObservationLogMessage().getOpId(), gd.getObservationLogMessage().getData(0).getCamName()).isEmpty()){
-                    System.out.println("Need to be updated");
-                    obsLogs.add(new ObsLog(gd.getObservationLogMessage()));
-                }
+        VectorTS incVectorTS;
+        for (CamJoinRequest cjr : request.getCamJoinRequestList()) {
+            if (findByOpId2(cjr.getOpId(), cjr.getCamName()).isEmpty()) {
+                siloServer.addEye(cjr.getCamName(), cjr.getCoordinates());
+                camLogs.add(new CamLog(cjr.getCoordinates(), cjr.getCamName(), cjr.getOpId()));
             }
-
         }
+
+        for (ObservationLogMessage olm : request.getObservationLogMessageList()) {
+            String camName = olm.getData(0).getCamName();
+            if (findByOpId(olm.getOpId(), camName).isEmpty()
+                    && camLogs.stream().map(CamLog::getCamName).collect(Collectors.toList()).contains(camName)) {// checks if cam is registered before adding and observation
+                obsLogs.add(new ObsLog(olm));
+                siloServer.addObservations(olm.getDataList());
+            }
+        }
+        incVectorTS = new VectorTS(request.getVecTSList());
+        System.out.println(otherReplicasTS);
+        this.otherReplicasTS.put(request.getReplicaInstance(), incVectorTS);
+        this.replicaTS.update(incVectorTS);
+
+
         responseObserver.onNext(GossipReply.getDefaultInstance());
         responseObserver.onCompleted();
     }
