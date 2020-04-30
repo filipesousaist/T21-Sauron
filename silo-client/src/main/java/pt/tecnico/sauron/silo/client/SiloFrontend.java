@@ -1,7 +1,10 @@
 package pt.tecnico.sauron.silo.client;
 
+import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc;
 import pt.tecnico.sauron.silo.grpc.SiloServiceGrpc.*;
@@ -14,6 +17,7 @@ import java.util.*;
 
 public class SiloFrontend implements AutoCloseable {
     private static final String BASE_PATH = "/grpc/sauron/silo";
+    private static final int MAX_SIZE = 10;
     private final ManagedChannel channel;
     private SiloServiceBlockingStub stub;
     private ZKNaming zkNaming;
@@ -21,11 +25,15 @@ public class SiloFrontend implements AutoCloseable {
     private int numServers;
     private VectorTS ts; // Vector timestamp
 
+    private SiloCache<SiloCacheKey, Message> cache;
+
     public SiloFrontend(String zkHost, String zkPort, int instance) throws ZKNamingException {
         zkNaming = new ZKNaming(zkHost, zkPort);
 
         numServers = zkNaming.listRecords(BASE_PATH).size();
         ts = new VectorTS(numServers);
+
+        cache = new SiloCache<>(MAX_SIZE);
         // lookup
         String target = instance >= 0 ?
               zkNaming.lookup(BASE_PATH + "/" + instance).getURI()
@@ -51,7 +59,22 @@ public class SiloFrontend implements AutoCloseable {
     public CamInfoReply camInfo(CamInfoRequest.Builder requestBuilder) {
         CamInfoRequest request = requestBuilder.addAllPrevTS(ts).build();
         CamInfoReply reply = stub.camInfo(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
+        VectorTS valueTS = new VectorTS(reply.getValueTSList());
+
+        SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.CAM_INFO,
+                SiloCacheKey.ObjectType.NONE,
+                request.getCamName());
+
+        if (ts.happensBeforeOrEquals(valueTS)) {
+            cache.remove(key);
+            cache.put(key, reply);
+            ts.update(valueTS);
+        } else if (cache.get(key) == null){
+            throw new StatusRuntimeException(Status.NOT_FOUND);
+        } else {
+            reply = (CamInfoReply) cache.remove(key);
+            cache.put(key, reply);
+        }
         return reply;
     }
 
@@ -66,21 +89,67 @@ public class SiloFrontend implements AutoCloseable {
     public TrackReply track(TrackRequest.Builder requestBuilder) {
         TrackRequest request = requestBuilder.addAllPrevTS(ts).build();
         TrackReply reply = stub.track(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
+        VectorTS valueTS = new VectorTS(reply.getValueTSList());
+
+        SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.SPOT,
+                SiloCacheKey.toObjectType(request.getData().getType()),
+                request.getData().getId());
+
+        if (ts.happensBeforeOrEquals(valueTS)) {
+            cache.remove(key);
+            cache.put(key, reply);
+            ts.update(valueTS);
+        } else if (cache.get(key) == null){
+            throw new StatusRuntimeException(Status.NOT_FOUND);
+        } else {
+            reply = (TrackReply) cache.remove(key);
+            cache.put(key, reply);
+        }
+
         return reply;
     }
 
     public TrackMatchReply trackMatch(TrackMatchRequest.Builder requestBuilder) {
         TrackMatchRequest request = requestBuilder.addAllPrevTS(ts).build();
         TrackMatchReply reply = stub.trackMatch(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
+        VectorTS valueTS = new VectorTS(reply.getValueTSList());
+
+        SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.SPOT,
+                SiloCacheKey.toObjectType(request.getData().getType()),
+                request.getData().getId());
+
+        if (ts.happensBeforeOrEquals(valueTS)) {
+            cache.remove(key);
+            cache.put(key, reply);
+            ts.update(valueTS);
+        } else if (cache.get(key) == null){
+            throw new StatusRuntimeException(Status.NOT_FOUND);
+        } else {
+            reply = (TrackMatchReply) cache.remove(key);
+            cache.put(key, reply);
+        }
         return reply;
     }
 
     public TraceReply trace(TraceRequest.Builder requestBuilder) {
         TraceRequest request = requestBuilder.addAllPrevTS(ts).build();
         TraceReply reply = stub.trace(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
+        VectorTS valueTS = new VectorTS(reply.getValueTSList());
+
+        SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.TRAIL,
+                SiloCacheKey.toObjectType(request.getData().getType()),
+                request.getData().getId());
+
+        if (ts.happensBeforeOrEquals(valueTS)) {
+            cache.remove(key);
+            cache.put(key, reply);
+            ts.update(valueTS);
+        } else if (cache.get(key) == null){
+            throw new StatusRuntimeException(Status.NOT_FOUND);
+        } else {
+            reply = (TraceReply) cache.remove(key);
+            cache.put(key, reply);
+        }
         return reply;
     }
 
