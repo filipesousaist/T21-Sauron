@@ -77,10 +77,7 @@ public class EyeApp {
 		}
 		catch (StatusRuntimeException e) {
 			Status.Code code = e.getStatus().getCode();
-			if (Status.ALREADY_EXISTS.getCode().equals(code)) {
-				System.out.println("This Eye was already registered on server. Proceeding...");
-			}
-			else if (Status.PERMISSION_DENIED.getCode().equals(code)) {
+			if (Status.PERMISSION_DENIED.getCode().equals(code)) {
 				throw new RegistrationException(
 					"An Eye already exists with same name, but different coordinates.");
 			}
@@ -163,7 +160,12 @@ public class EyeApp {
 				throw new InvalidIdException(e.getMessage());
 			}
 			else if (Status.UNAUTHENTICATED.getCode().equals(code)) {
-				throw new UnregisteredEyeException();
+				try {
+					registerOnServer(frontend, eye);
+					frontend.report(reportRequestBuilder);
+				} catch (Exception e1) {
+					System.out.println(e1.getMessage());
+				}
 			}
 		} catch (NoServersException e) {
 			System.out.println(e.getMessage());

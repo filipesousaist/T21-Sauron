@@ -7,6 +7,7 @@ public class CamLog {
     private String camName;
     private double latitude;
     private double longitude;
+
     private VectorTS vectorTS;
 
     public CamLog(Coordinates coordinates, String cam_name, VectorTS vectorTS) {
@@ -20,24 +21,16 @@ public class CamLog {
         return camName;
     }
 
-    public void setCamName(String camName) {
-        this.camName = camName;
-    }
-
     public double getLatitude() {
         return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
     }
 
     public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public VectorTS getVectorTS() {
+        return vectorTS;
     }
 
 }

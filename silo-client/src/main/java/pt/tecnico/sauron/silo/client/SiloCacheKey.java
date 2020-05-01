@@ -8,7 +8,9 @@ public class SiloCacheKey {
     public enum OperationType {
         SPOT,
         TRAIL,
-        CAM_INFO
+        CAM_INFO,
+        CAM_JOIN,
+        REPORT
     }
 
     public enum ObjectType {
@@ -18,8 +20,8 @@ public class SiloCacheKey {
     }
 
     private OperationType operationType;
-    private ObjectType objectType;
 
+    private ObjectType objectType;
     private String argument;
 
     public SiloCacheKey(OperationType operationType, ObjectType objectType, String argument) {
@@ -37,6 +39,10 @@ public class SiloCacheKey {
             default:
                 return ObjectType.NONE;
         }
+    }
+
+    public OperationType getOperationType() {
+        return operationType;
     }
 
     @Override

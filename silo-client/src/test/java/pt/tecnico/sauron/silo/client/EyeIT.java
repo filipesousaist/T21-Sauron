@@ -139,9 +139,7 @@ public class EyeIT extends BaseIT {
                     .setCamName("Cam1")
                     .setCoordinates(coordinates);
 
-            assertEquals(Status.ALREADY_EXISTS.getCode(),
-                    assertThrows(StatusRuntimeException.class,
-                            () -> frontend.camJoin(camJoinRequestBuilder2)).getStatus().getCode());
+            frontend.camJoin(camJoinRequestBuilder2);
         } catch (NoServersException e) {
             System.out.println(e.getMessage());
         }

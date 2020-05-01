@@ -31,6 +31,7 @@ public class SpotterIT extends BaseIT {
         public void setUp() {
             ts = Timestamp.newBuilder().setSeconds((new Date()).getTime() / 1000).setNanos(0).build();
             frontend.ctrlInit(CtrlInitRequest.newBuilder());
+            frontend.clear();
         }
 
         // track
