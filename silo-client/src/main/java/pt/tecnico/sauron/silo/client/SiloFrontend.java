@@ -55,7 +55,7 @@ public class SiloFrontend implements AutoCloseable {
         if (records.length == 0)
             throw new NoServersException();
 
-        return records[(new Random()).nextInt(numServers)].getURI();
+        return records[(new Random()).nextInt(records.length)].getURI();
     }
 
     private boolean connect() {
@@ -70,7 +70,7 @@ public class SiloFrontend implements AutoCloseable {
                 channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
                 stub = SiloServiceGrpc.newBlockingStub(channel);
                 return true;
-            } catch (ZKNamingException | NoServersException ignored) {
+            } catch (ZKNamingException | NoServersException | ArrayIndexOutOfBoundsException ignored) {
                 //ignored
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -88,7 +88,6 @@ public class SiloFrontend implements AutoCloseable {
         public Reply call(SiloCacheKey cacheKey) throws NoServersException {
             for (int i = 0; i < MAX_REQUEST_TRIES; i ++) {
                 try {
-                    System.out.println("Before call ");
                     Object[] object = rpc.call();
 
                     return getFromCache(cacheKey, object);
@@ -97,32 +96,26 @@ public class SiloFrontend implements AutoCloseable {
                     onRuntimeStatusException(e,cacheKey);
                 } catch (Exception ignored) {}
             }
-            System.out.println("Failed to reconnect ");
-            throw new StatusRuntimeException(Status.UNAVAILABLE);
+            throw Status.UNAVAILABLE.withDescription("Failed to reconnect to server").asRuntimeException();
         }
 
         private Reply getFromCache(SiloCacheKey cacheKey, Object[] object) {
             Reply reply = (Reply) object[0];
             SiloCacheKey.OperationType operationType = cacheKey.getOperationType();
-            System.out.println("Use cache? ");
             if (operationType != SiloCacheKey.OperationType.CAM_JOIN &&
                 operationType != SiloCacheKey.OperationType.REPORT) {
-                System.out.println("Yes ");
                 VectorTS valueTS = (VectorTS) object[1];
 
                 if (ts.happensBeforeOrEquals(valueTS)) {
-                    System.out.println("Happens before or equals ");
                     if (valueTS.isZero())
                         throw new StatusRuntimeException(Status.NOT_FOUND);
                     cache.remove(cacheKey);
                     cache.put(cacheKey, reply);
                     ts.update(valueTS);
                 } else if (cache.containsKey(cacheKey)) {
-                    System.out.println("Happens after or concurrent");
                     reply = (Reply) cache.remove(cacheKey);
                     cache.put(cacheKey, reply);
                 } else {
-                    System.out.println("Not Found");
                     throw new StatusRuntimeException(Status.NOT_FOUND);
                 }
             }
@@ -130,7 +123,6 @@ public class SiloFrontend implements AutoCloseable {
         }
 
         private void onRuntimeStatusException(StatusRuntimeException e, SiloCacheKey cacheKey) throws NoServersException {
-            System.out.println("Frontend error: " + e.getMessage());
             Status.Code code = e.getStatus().getCode();
             if (!Status.UNAVAILABLE.getCode().equals(code)) {
                 throw e;
@@ -279,7 +271,8 @@ public class SiloFrontend implements AutoCloseable {
     }
     
     @Override
-    public void close(){
-        channel.shutdown();
+    public void close() {
+        if (channel != null)
+            channel.shutdown();
     }
 }

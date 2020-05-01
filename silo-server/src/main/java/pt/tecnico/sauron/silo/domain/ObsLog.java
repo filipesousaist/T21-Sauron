@@ -13,9 +13,9 @@ public class ObsLog implements Iterable<Observation>{
     private String camName;
     private VectorTS vectorTS;
 
-    public ObsLog(List<ObjectData> data, String camName, Date date, VectorTS vectorTS){
+    public ObsLog(List<ObjectData> data, String camName, Date date, VectorTS vectorTS) {
         data.forEach(d -> {
-            switch (d.getType()){
+            switch (d.getType()) {
                 case CAR:
                     obss.add(new CarObservation(d.getId(), camName, date));
                     break;
@@ -26,7 +26,6 @@ public class ObsLog implements Iterable<Observation>{
                     throw new RuntimeException("Invalid type");
             }
         });
-
 
         this.vectorTS = vectorTS;
         this.camName = camName;
