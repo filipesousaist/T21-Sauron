@@ -31,7 +31,7 @@ public class SiloFrontend implements AutoCloseable {
         zkNaming = new ZKNaming(zkHost, zkPort);
 
         numServers = zkNaming.listRecords(BASE_PATH).size();
-        ts = new VectorTS(numServers);
+        ts = new VectorTS();
 
         cache = new SiloCache<>(MAX_SIZE);
         // lookup
@@ -52,17 +52,17 @@ public class SiloFrontend implements AutoCloseable {
 
     public CamJoinReply camJoin(CamJoinRequest.Builder requestBuilder) {
         CamJoinRequest request = requestBuilder
-                .addAllPrevTS(ts)
-                .build();
+            .putAllPrevTS(ts.getMap())
+            .build();
         CamJoinReply reply = stub.camJoin(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
+        ts.update(new VectorTS(reply.getValueTSMap()));
         return reply;
     }
 
     public CamInfoReply camInfo(CamInfoRequest.Builder requestBuilder) {
-        CamInfoRequest request = requestBuilder.addAllPrevTS(ts).build();
+        CamInfoRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
         CamInfoReply reply = stub.camInfo(request);
-        VectorTS valueTS = new VectorTS(reply.getValueTSList());
+        VectorTS valueTS = new VectorTS(reply.getValueTSMap());
 
         SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.CAM_INFO,
                 SiloCacheKey.ObjectType.NONE,
@@ -83,19 +83,19 @@ public class SiloFrontend implements AutoCloseable {
 
     public ReportReply report(ReportRequest.Builder requestBuilder) {
         ReportRequest request = requestBuilder
-                .addAllPrevTS(ts)
+                .putAllPrevTS(ts.getMap())
                 .build();
 
         ReportReply reply = stub.report(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
-        System.out.println(reply.getValueTSList().toString());
+        ts.update(new VectorTS(reply.getValueTSMap()));
+        System.out.println(reply.getValueTSMap().toString());
         return reply;
     }
 
     public TrackReply track(TrackRequest.Builder requestBuilder) {
-        TrackRequest request = requestBuilder.addAllPrevTS(ts).build();
+        TrackRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
         TrackReply reply = stub.track(request);
-        VectorTS valueTS = new VectorTS(reply.getValueTSList());
+        VectorTS valueTS = new VectorTS(reply.getValueTSMap());
 
         SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.SPOT,
                 SiloCacheKey.toObjectType(request.getData().getType()),
@@ -116,9 +116,9 @@ public class SiloFrontend implements AutoCloseable {
     }
 
     public TrackMatchReply trackMatch(TrackMatchRequest.Builder requestBuilder) {
-        TrackMatchRequest request = requestBuilder.addAllPrevTS(ts).build();
+        TrackMatchRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
         TrackMatchReply reply = stub.trackMatch(request);
-        VectorTS valueTS = new VectorTS(reply.getValueTSList());
+        VectorTS valueTS = new VectorTS(reply.getValueTSMap());
 
         SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.SPOT,
                 SiloCacheKey.toObjectType(request.getData().getType()),
@@ -128,7 +128,7 @@ public class SiloFrontend implements AutoCloseable {
             cache.remove(key);
             cache.put(key, reply);
             ts.update(valueTS);
-        } else if (cache.get(key) == null){
+        } else if (cache.get(key) == null) {
             throw new StatusRuntimeException(Status.NOT_FOUND);
         } else {
             reply = (TrackMatchReply) cache.remove(key);
@@ -138,9 +138,9 @@ public class SiloFrontend implements AutoCloseable {
     }
 
     public TraceReply trace(TraceRequest.Builder requestBuilder) {
-        TraceRequest request = requestBuilder.addAllPrevTS(ts).build();
+        TraceRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
         TraceReply reply = stub.trace(request);
-        VectorTS valueTS = new VectorTS(reply.getValueTSList());
+        VectorTS valueTS = new VectorTS(reply.getValueTSMap());
 
         SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.TRAIL,
                 SiloCacheKey.toObjectType(request.getData().getType()),
@@ -160,23 +160,23 @@ public class SiloFrontend implements AutoCloseable {
     }
 
     public CtrlPingReply ctrlPing(CtrlPingRequest.Builder requestBuilder) {
-        CtrlPingRequest request = requestBuilder.addAllPrevTS(ts).build();
+        CtrlPingRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
         CtrlPingReply reply = stub.ctrlPing(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
+        ts.update(new VectorTS(reply.getValueTSMap()));
         return reply;
     }
 
     public CtrlClearReply ctrlClear(CtrlClearRequest.Builder requestBuilder) {
-        CtrlClearRequest request = requestBuilder.addAllPrevTS(ts).build();
+        CtrlClearRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
         CtrlClearReply reply = stub.ctrlClear(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
+        ts.update(new VectorTS(reply.getValueTSMap()));
         return reply;
     }
 
     public CtrlInitReply ctrlInit(CtrlInitRequest.Builder requestBuilder) {
-        CtrlInitRequest request = requestBuilder.addAllPrevTS(ts).build();
+        CtrlInitRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
         CtrlInitReply reply = stub.ctrlInit(request);
-        ts.update(new VectorTS(reply.getValueTSList()));
+        ts.update(new VectorTS(reply.getValueTSMap()));
         return reply;
     }
     

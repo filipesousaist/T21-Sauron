@@ -2,40 +2,37 @@ package pt.tecnico.sauron.util;
 
 import java.util.*;
 
-public class VectorTS implements Iterable<Integer> {
-    private List<Integer> values;
+public class VectorTS {
+    private Map<Integer, Integer> map;
 
-    public VectorTS(int size) {
-        values = new ArrayList<>(Collections.nCopies(size, 0));
+    public VectorTS() {
+        this.map = new HashMap<>();
     }
 
-    public VectorTS(List<Integer> values) {
-        this.values = new ArrayList<>();
-        this.values.addAll(values);
+    public VectorTS(Map<Integer, Integer> map) {
+        this.map = new HashMap<>(map);
+    }
+
+    public Map<Integer, Integer> getMap() {
+        return map;
     }
 
     public int get(int index) {
-        return values.get(index - 1);
+        return map.getOrDefault(index, 0);
     }
 
-    public void set(int index, int value) { values.set(index-1, value); }
+    public void set(int index, int value) {
+        map.put(index, value);
+    }
 
     public void incr(int index) {
-        values.set(index - 1, values.get(index - 1) + 1);
-    }
-
-    public int getSize() {
-        return values.size();
+        map.put(index, get(index) + 1);
     }
 
     public void update(VectorTS v) {
-        int size = balanceSizes(this, v);
-
-        for (int i = 0; i < size; i ++)
-            values.set(i, Integer.max(values.get(i), v.values.get(i)));
-
-        /*System.out.println("My values: "+this.values);
-        System.out.println("Other values: "+v.values);*/
+        v.map.forEach((key, otherValue) ->
+                map.put(key, Integer.max(get(key), otherValue))
+        );
     }
 
     public boolean happensBefore(VectorTS v) {
@@ -47,59 +44,43 @@ public class VectorTS implements Iterable<Integer> {
     }
 
     private boolean happensBefore(VectorTS v, boolean orEquals) {
-        int size = balanceSizes(this, v);
-
         boolean hasSmaller = false;
-        for (int i = 0; i < size; i ++) {
-            int myVal = values.get(i);
-            int otherVal = v.values.get(i);
 
-            if (myVal < otherVal)
+        for (int key : getJoinedKeys(v)) {
+            int myValue = map.get(key);
+            int otherValue = v.map.get(key);
+
+            if (myValue < otherValue)
                 hasSmaller = true;
-            else if (myVal > otherVal)
+            else if (myValue > otherValue)
                 return false;
         }
+
         return orEquals || hasSmaller;
     }
 
-    // Extend this vector until it has
-    // as many elements as 'v'
-    private static int balanceSizes(VectorTS v1, VectorTS v2) {
-        int size1 = v1.values.size();
-        int size2 = v2.values.size();
-
-        if (size1 < size2)
-            v1.extend0(size2 - size1);
-        else if (size2 < size1)
-            v2.extend0(size1 - size2);
-
-        return v1.getSize();
-    }
-
-    private void extend0(int num) {
-        for (int i = 0; i < num; i ++)
-            values.add(0);
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        return values.iterator();
+    private Set<Integer> getJoinedKeys(VectorTS v) {
+        Set<Integer> keys = new HashSet<>();
+        keys.addAll(map.keySet());
+        keys.addAll(v.map.keySet());
+        return keys;
     }
 
     @Override
     public String toString() {
-        return this.values.toString();
+        return map.toString();
     }
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         VectorTS vectorTS = (VectorTS) o;
-        balanceSizes(this,vectorTS);
-        return this.values.equals(vectorTS.values);
+        return Objects.equals(map, vectorTS.map);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(values);
+        return Objects.hash(map);
     }
 }

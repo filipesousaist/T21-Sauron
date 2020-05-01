@@ -1,6 +1,5 @@
 package pt.tecnico.sauron.silo.domain;
 
-import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 import pt.tecnico.sauron.util.VectorTS;
 
@@ -8,10 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import static pt.tecnico.sauron.silo.grpc.Silo.ObjectType.CAR;
-import static pt.tecnico.sauron.silo.grpc.Silo.ObjectType.PERSON;
-
 
 public class ObsLog implements Iterable<Observation>{
     private List<Observation> obss = new ArrayList<>();
@@ -39,7 +34,7 @@ public class ObsLog implements Iterable<Observation>{
 
     public ObsLog(ObservationLogMessage observationLogMessage){
         this.camName = observationLogMessage.getData(0).getCamName();
-        this.vectorTS = new VectorTS(observationLogMessage.getPrevTSList());
+        this.vectorTS = new VectorTS(observationLogMessage.getPrevTSMap());
         for(ObservationData of : observationLogMessage.getDataList()){
             Date date = new Date();
             date.setTime(of.getTimestamp().getSeconds()*1000);
@@ -54,9 +49,7 @@ public class ObsLog implements Iterable<Observation>{
                     throw new RuntimeException("Invalid type");
             }
         }
-
     }
-
 
     @Override
     public String toString() {

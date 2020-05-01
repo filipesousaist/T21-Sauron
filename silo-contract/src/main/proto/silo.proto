@@ -32,35 +32,35 @@ message ObjectData {
 
 // cam_join
 message CamJoinRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
     string camName = 2;
     Coordinates coordinates = 3;
 }
 
 message CamJoinReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
 }
 
 // cam_info
 message CamInfoRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
     string camName = 2;
 }
 
 message CamInfoReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
     Coordinates coordinates = 2;
 }
 
 // report
 message ReportRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
     string camName = 2;
     repeated ObjectData data = 3;
 }
 
 message ReportReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
 }
 
 
@@ -76,34 +76,34 @@ message ObservationData {
 
 // track
 message TrackRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
     ObjectData data = 2;
 }
 
 message TrackReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
     ObservationData data = 2;
 }
 
 // trackMatch
 message TrackMatchRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
     ObjectData data = 2;
 }
 
 message TrackMatchReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
     repeated ObservationData data = 2;
 }
 
 // trace
 message TraceRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
     ObjectData data = 2;
 }
 
 message TraceReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
     repeated ObservationData data = 2;
 }
 
@@ -112,52 +112,52 @@ message TraceReply {
 
 // ctrlPing
 message CtrlPingRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
     string text = 2;
 }
 
 message CtrlPingReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
     string text = 2;
 }
 
 // ctrlClear
 message CtrlClearRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
 }
 
 message CtrlClearReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
     string text = 2;
 }
 
 // ctrlInit
 message CtrlInitRequest {
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
 }
 
 message CtrlInitReply {
-    repeated int32 valueTS = 1;
+    map<int32, int32> valueTS = 1;
     string text = 2;
 }
 
 // *** Gossip ***
 
 message ObservationLogMessage{
-    repeated int32 prevTS = 1;
+    map<int32, int32> prevTS = 1;
     repeated ObservationData data = 2;
     int32 opId = 3;
 }
 
 message GossipReply{
     int32 replicaInstance = 1;
-    repeated int32 replicaTS = 2;
+    map<int32, int32> replicaTS = 2;
     repeated ObservationLogMessage observationLogMessage = 3;
     repeated CamJoinRequest camJoinRequest = 4;
 }
 
 message GossipRequest{
-    repeated int32 vecTS = 1;
+    map<int32, int32> vecTS = 1;
 }
 
 // *** RPC SERVICE ***
