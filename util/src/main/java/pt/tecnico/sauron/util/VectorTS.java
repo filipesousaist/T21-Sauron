@@ -21,6 +21,8 @@ public class VectorTS implements Iterable<Integer> {
         return values.get(index - 1);
     }
 
+    public void set(int index, int value) { values.set(index-1, value); }
+
     public void incr(int index) {
         values.set(index - 1, values.get(index - 1) + 1);
     }
@@ -82,5 +84,10 @@ public class VectorTS implements Iterable<Integer> {
     @Override
     public Iterator<Integer> iterator() {
         return values.iterator();
+    }
+
+    @Override
+    public String toString() {
+        return this.values.toString();
     }
 }

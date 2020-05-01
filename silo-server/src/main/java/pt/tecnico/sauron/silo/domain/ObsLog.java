@@ -13,12 +13,12 @@ import static pt.tecnico.sauron.silo.grpc.Silo.ObjectType.PERSON;
 
 
 public class ObsLog {
-    private String opId;
+    private int opId;
     private List<Observation> obss = new ArrayList<>();
     private String camName;
     private VectorTS vectorTS;
 
-    public ObsLog(List<ObjectData> data, String camName, Date date, VectorTS vectorTS, String opId){
+    public ObsLog(List<ObjectData> data, String camName, Date date, VectorTS vectorTS, int opId){
         data.forEach(d -> {
             switch (d.getType()){
                 case CAR:
@@ -35,7 +35,7 @@ public class ObsLog {
 
         this.vectorTS = vectorTS;
         this.camName = camName;
-        this.opId = camName+opId;
+        this.opId = opId;
     }
 
     public ObsLog(ObservationLogMessage observationLogMessage){
@@ -65,11 +65,11 @@ public class ObsLog {
         return obss.toString();
     }
 
-    public String getOpId() {
+    public int getOpId() {
         return opId;
     }
 
-    public void setOpId(String opId) {
+    public void setOpId(int opId) {
         this.opId = opId;
     }
 

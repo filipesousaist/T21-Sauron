@@ -108,10 +108,11 @@ public class SiloFrontend implements AutoCloseable {
                     return reply;
 
                 } catch (StatusRuntimeException e) {
+                    System.out.println("Frontend error: " + e.getMessage());
                     Status.Code code = e.getStatus().getCode();
-                    if (Status.NOT_FOUND.getCode().equals(code)) {
+                    if (!Status.UNAVAILABLE.getCode().equals(code)) {
                         throw e;
-                    } else if (Status.UNAVAILABLE.getCode().equals(code) && !connect()) {
+                    } else if (!connect()) {
                         throw new NoServersException();
                     }
                 } catch (Exception ignored) {}
@@ -122,7 +123,10 @@ public class SiloFrontend implements AutoCloseable {
 
     //camJoin
     public CamJoinReply camJoin(CamJoinRequest.Builder requestBuilder) throws NoServersException {
-        CamJoinRequest request = requestBuilder.addAllPrevTS(ts).build();
+        CamJoinRequest request = requestBuilder
+                .addAllPrevTS(ts)
+                .setOpId(currOpId++)
+                .build();
         return (new GenericRPC<CamJoinReply>(() -> camJoinRPC(request))).call(false);
     }
 
@@ -151,7 +155,7 @@ public class SiloFrontend implements AutoCloseable {
     public ReportReply report(ReportRequest.Builder requestBuilder) throws NoServersException {
         ReportRequest request = requestBuilder
                 .addAllPrevTS(ts)
-                .setOpId(""+(currOpId++))
+                .setOpId(currOpId++)
                 .build();
 
         return (new GenericRPC<ReportReply>(() -> reportRPC(request))).call(false);
@@ -229,6 +233,11 @@ public class SiloFrontend implements AutoCloseable {
         CtrlInitReply reply = stub.ctrlInit(request);
         ts.update(new VectorTS(reply.getValueTSList()));
         return reply;
+    }
+
+    public void clear(){
+        ts = new VectorTS(0);
+        cache.clear();
     }
     
     @Override

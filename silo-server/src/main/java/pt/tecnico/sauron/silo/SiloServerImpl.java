@@ -2,6 +2,7 @@ package pt.tecnico.sauron.silo;
 
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
+import pt.tecnico.sauron.silo.domain.CamLog;
 import pt.tecnico.sauron.silo.domain.ObsLog;
 import pt.tecnico.sauron.silo.domain.Observation;
 import pt.tecnico.sauron.silo.domain.SiloServer;
@@ -18,16 +19,20 @@ import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
 import pt.ulisboa.tecnico.sdis.zk.ZKRecord;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     private static final String BASE_PATH = "/grpc/sauron/silo";
-    private static final int GOSSIP_DELAY = 5000;
+    private static final int GOSSIP_DELAY = 500;
     private SiloServer siloServer = new SiloServer();
     private HashMap<Integer, SiloServiceBlockingStub> connections = new HashMap<>();
+    private HashMap<Integer, VectorTS> otherReplicasTS = new HashMap<>();
     private VectorTS replicaTS; // Vector timestamp
     private int instance;
 
     private List<ObsLog> obsLogs = new ArrayList<>();
+    private List<CamLog> camLogs = new ArrayList<>();
 
     ZKNaming zkNaming = null;
 
@@ -84,37 +89,50 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     private void gossip() {
         int currInstance;
         ManagedChannel channel;
-        GossipData gossipData;
         GossipMessage.Builder gossipMessageBuilder = GossipMessage.newBuilder();
 
 
         System.out.println("Gossiping...");
+        System.out.println(camLogs);
         System.out.println(obsLogs);
 
         try {
-            ArrayList<ZKRecord> conns = new ArrayList<>(zkNaming.listRecords(BASE_PATH));
+            List<ZKRecord> conns = new ArrayList<>(zkNaming.listRecords(BASE_PATH));
+            List<Integer> connectedInsntances = conns.stream()
+                    .map(ZKRecord::getPath)
+                    .map(this::extractInstance)
+                    .collect(Collectors.toList());
 
             //check for potential new instances
             for (ZKRecord r : conns) {
                 currInstance = extractInstance(r.getPath());
                 if(!existsConnection(currInstance) && currInstance != this.instance){
                     String target = zkNaming.lookup(BASE_PATH + "/" + currInstance).getURI();
-                    System.out.println("New instance showed up!");
-                    System.out.println(target);
                     channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
                     connections.put(currInstance, SiloServiceGrpc.newBlockingStub(channel));
                 }
             }
-            for(SiloServiceBlockingStub s : connections.values()) {
-                for (ObsLog ol : obsLogs) {
-                    gossipData = GossipData.newBuilder()
-                            .setObservationLogMessage(buildObservationLogMessage(ol))
-                            .setType("observation")
-                            .build();
 
-                    gossipMessageBuilder.addData(gossipData);
-                }
-                s.gossip(gossipMessageBuilder.build());
+            for(Integer i : connections.keySet()){
+                if(!connectedInsntances.contains(i))
+                    conns.remove(i);
+            }
+
+            for(Integer s : connections.keySet()) {
+                // build observation logs
+                gossipMessageBuilder.addAllObservationLogMessage(obsLogs.stream()
+                        .filter(o -> otherReplicasTS.get(s).happensBeforeOrEquals(o.getVectorTS()))
+                        .map(this::buildObservationLogMessage)
+                        .collect(Collectors.toList()));
+
+                // Build cam logs
+                gossipMessageBuilder.addAllCamJoinRequest(camLogs.stream()
+                        .map(this::buildCamJoinRequest)
+                        .collect(Collectors.toList()));
+
+                gossipMessageBuilder.setReplicaInstance(this.instance);
+                gossipMessageBuilder.addAllVecTS(this.replicaTS);
+                connections.get(s).gossip(gossipMessageBuilder.build());
             }
 
         } catch (ZKNamingException e) {
@@ -135,12 +153,30 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         return observationLogMessage;
     }
 
+    private CamJoinRequest buildCamJoinRequest(CamLog camLog){
+
+        Coordinates c = Coordinates.newBuilder()
+                .setLatitude(camLog.getLatitude())
+                .setLongitude(camLog.getLongitude())
+                .build();
+
+        return CamJoinRequest.newBuilder()
+                .addAllPrevTS(this.replicaTS)
+                .setCamName(camLog.getCamName())
+                .setCoordinates(c)
+                .build();
+    }
+
+
     @Override
     public void camJoin(CamJoinRequest request, StreamObserver<CamJoinReply> responseObserver) {
         try {
             siloServer.cam_join(request.getCamName(), request.getCoordinates());
+            camLogs.add(new CamLog(request.getCoordinates(), request.getCamName(), request.getOpId()));
+            VectorTS vectorTS = new VectorTS(request.getPrevTSList());
 
             replicaTS.incr(instance);
+            vectorTS.set(instance, replicaTS.get(instance));
             responseObserver.onNext(CamJoinReply.newBuilder().addAllValueTS(replicaTS).build());
             responseObserver.onCompleted();
         }
@@ -181,10 +217,11 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
             VectorTS vectorTS;
             siloServer.report(request.getDataList(), request.getCamName(), date);
             vectorTS = new VectorTS(request.getPrevTSList());
-            System.out.println(request.getOpId());
+            System.out.println(request.getOpId()); //debug
             this.obsLogs.add(new ObsLog(request.getDataList(), request.getCamName(), date, vectorTS, request.getOpId()));
 
             replicaTS.incr(instance);
+            vectorTS.set(instance, replicaTS.get(instance));
             responseObserver.onNext(ReportReply.newBuilder().addAllValueTS(replicaTS).build());
 
             responseObserver.onCompleted();
@@ -291,31 +328,47 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
     @Override
     public void gossip(GossipMessage request, StreamObserver<GossipReply> responseObserver) {
-        System.out.println("Maybe getting new updates.");
-        System.out.println(obsLogs);
-        for(GossipData gd : request.getDataList()){
-            if(gd.getType().equals("observation")) {
-                /*System.out.println(findByOpId(gd.getObservationLogMessage().getOpId()).get());
-                System.out.println(gd.getObservationLogMessage().getOpId());*/
-                if (findByOpId(gd.getObservationLogMessage().getOpId()).isEmpty()){
-                    System.out.println("Need to be updated");
-                    obsLogs.add(new ObsLog(gd.getObservationLogMessage()));
-                }
+        VectorTS incVectorTS;
+        for (CamJoinRequest cjr : request.getCamJoinRequestList()) {
+            if (findByOpId2(cjr.getOpId(), cjr.getCamName()).isEmpty()) {
+                siloServer.addEye(cjr.getCamName(), cjr.getCoordinates());
+                camLogs.add(new CamLog(cjr.getCoordinates(), cjr.getCamName(), cjr.getOpId()));
             }
         }
+
+        for (ObservationLogMessage olm : request.getObservationLogMessageList()) {
+            String camName = olm.getData(0).getCamName();
+            if (findByOpId(olm.getOpId(), camName).isEmpty()
+                    && camLogs.stream().map(CamLog::getCamName).collect(Collectors.toList()).contains(camName)) {// checks if cam is registered before adding and observation
+                obsLogs.add(new ObsLog(olm));
+                siloServer.addObservations(olm.getDataList());
+            }
+        }
+        incVectorTS = new VectorTS(request.getVecTSList());
+        System.out.println(otherReplicasTS);
+        this.otherReplicasTS.put(request.getReplicaInstance(), incVectorTS);
+        this.replicaTS.update(incVectorTS);
+
+
         responseObserver.onNext(GossipReply.getDefaultInstance());
         responseObserver.onCompleted();
     }
 
-    private Optional<ObsLog> findByOpId(String opId){
+    private Optional<ObsLog> findByOpId(int opId, String camName){
         return obsLogs.stream()
-                .filter(o -> o.getOpId().equals(opId))
+                .filter(o -> o.getOpId() == opId && o.getCamName().equals(camName))
+                .findFirst();
+    }
+
+    private Optional<CamLog> findByOpId2(int opId, String camName){
+        return camLogs.stream()
+                .filter(o -> o.getOpId() == opId && o.getCamName().equals(camName))
                 .findFirst();
     }
 
     @Override
     public void ctrlPing(CtrlPingRequest request, StreamObserver<CtrlPingReply> responseObserver) {
-        String msg = siloServer.ping(request.getText());
+        String msg = siloServer.ping(request.getText()) + instance;
         CtrlPingReply response = CtrlPingReply.newBuilder().setText(msg).addAllValueTS(replicaTS).build();
 
         responseObserver.onNext(response);
@@ -325,7 +378,12 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     @Override
     public void ctrlClear(CtrlClearRequest request, StreamObserver<CtrlClearReply> responseObserver) {
         String msg  = siloServer.clear();
-        replicaTS.incr(instance);
+        obsLogs.clear();
+        camLogs.clear();
+        otherReplicasTS.clear();
+        connections.clear();
+        replicaTS = new VectorTS(instance);
+
         CtrlClearReply clearResponse = CtrlClearReply.newBuilder().setText(msg).addAllValueTS(replicaTS).build();
 
         responseObserver.onNext(clearResponse);
@@ -342,3 +400,4 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         responseObserver.onCompleted();
     }
 }
+
