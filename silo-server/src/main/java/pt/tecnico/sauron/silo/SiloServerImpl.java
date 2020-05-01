@@ -115,24 +115,36 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
 
             for(Integer i : connections.keySet()){
                 if(!connectedInsntances.contains(i))
-                    conns.remove(i);
+                    connections.remove(i);
             }
 
-            for(Integer s : connections.keySet()) {
-                // build observation logs
-                gossipMessageBuilder.addAllObservationLogMessage(obsLogs.stream()
-                        .filter(o -> otherReplicasTS.get(s).happensBeforeOrEquals(o.getVectorTS()))
-                        .map(this::buildObservationLogMessage)
-                        .collect(Collectors.toList()));
+            for(Integer i : connections.keySet()) {
+                try {
+                    // build observation logs
+                    VectorTS otherReplicaTS = otherReplicasTS.containsKey(i)
+                            ? otherReplicasTS.get(i)
+                            : new VectorTS(0);
 
-                // Build cam logs
-                gossipMessageBuilder.addAllCamJoinRequest(camLogs.stream()
-                        .map(this::buildCamJoinRequest)
-                        .collect(Collectors.toList()));
+                    gossipMessageBuilder.addAllObservationLogMessage(obsLogs.stream()
+                            .filter(o -> otherReplicaTS.happensBefore(o.getVectorTS()))
+                            .map(this::buildObservationLogMessage)
+                            .collect(Collectors.toList()));
 
-                gossipMessageBuilder.setReplicaInstance(this.instance);
-                gossipMessageBuilder.addAllVecTS(this.replicaTS);
-                connections.get(s).gossip(gossipMessageBuilder.build());
+                    // Build cam logs
+                    gossipMessageBuilder.addAllCamJoinRequest(camLogs.stream()
+                            .map(this::buildCamJoinRequest)
+                            .collect(Collectors.toList()));
+
+                    gossipMessageBuilder.setReplicaInstance(this.instance);
+                    gossipMessageBuilder.addAllVecTS(this.replicaTS);
+                    gossipMessageBuilder.addAllExpectedOtherTS(otherReplicaTS);
+                    System.out.println("Before Gossip: "+this.replicaTS);
+                    connections.get(i).gossip(gossipMessageBuilder.build());
+                }catch (StatusRuntimeException e){
+                    if(!e.getStatus().getCode().equals(Status.UNAVAILABLE.getCode()))
+                        throw e;
+
+                }
             }
 
         } catch (ZKNamingException e) {
@@ -333,18 +345,25 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
             }
         }
 
-        for (ObservationLogMessage olm : request.getObservationLogMessageList()) {
-            String camName = olm.getData(0).getCamName();
-            if (findByOpId(olm.getOpId(), camName).isEmpty()
-                    && camLogs.stream().map(CamLog::getCamName).collect(Collectors.toList()).contains(camName)) {// checks if cam is registered before adding and observation
-                obsLogs.add(new ObsLog(olm));
-                siloServer.addObservations(olm.getDataList());
+        VectorTS myKnownTS = new VectorTS(request.getExpectedOtherTSList());
+        if(myKnownTS.happensBeforeOrEquals(this.replicaTS) {
+            for (ObservationLogMessage olm : request.getObservationLogMessageList()) {
+                String camName = olm.getData(0).getCamName();
+                if (findByOpId(olm.getOpId(), camName).isEmpty()
+                        && camLogs.stream().map(CamLog::getCamName).collect(Collectors.toList()).contains(camName)) {// checks if cam is registered before adding and observation
+
+                    obsLogs.add(new ObsLog(olm));
+                    siloServer.addObservations(olm.getDataList());
+                }
             }
         }
         incVectorTS = new VectorTS(request.getVecTSList());
-        System.out.println(otherReplicasTS);
+        System.out.println("Incoming vector TS: "+incVectorTS);
+        //System.out.println(otherReplicasTS);
         this.otherReplicasTS.put(request.getReplicaInstance(), incVectorTS);
-        this.replicaTS.update(incVectorTS);
+
+        if(myKnownTS.happensBeforeOrEquals(this.replicaTS))
+            this.replicaTS.update(incVectorTS);
 
 
         responseObserver.onNext(GossipReply.getDefaultInstance());

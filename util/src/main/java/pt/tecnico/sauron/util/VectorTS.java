@@ -34,6 +34,9 @@ public class VectorTS implements Iterable<Integer> {
 
         for (int i = 0; i < size; i ++)
             values.set(i, Integer.max(values.get(i), v.values.get(i)));
+
+        /*System.out.println("My values: "+this.values);
+        System.out.println("Other values: "+v.values);*/
     }
 
     public boolean happensBefore(VectorTS v) {
