@@ -24,7 +24,6 @@ public class SiloFrontend implements AutoCloseable {
 
     private int numServers;
     private VectorTS ts; // Vector timestamp
-    private int currOpId;
 
     private SiloCache<SiloCacheKey, Message> cache;
 
@@ -43,7 +42,6 @@ public class SiloFrontend implements AutoCloseable {
         channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
         stub = SiloServiceGrpc.newBlockingStub(channel);
 
-        currOpId = 0;
     }
 
     private String getRandomTarget() throws ZKNamingException {
@@ -55,7 +53,6 @@ public class SiloFrontend implements AutoCloseable {
     public CamJoinReply camJoin(CamJoinRequest.Builder requestBuilder) {
         CamJoinRequest request = requestBuilder
                 .addAllPrevTS(ts)
-                .setOpId(currOpId++)
                 .build();
         CamJoinReply reply = stub.camJoin(request);
         ts.update(new VectorTS(reply.getValueTSList()));
@@ -87,7 +84,6 @@ public class SiloFrontend implements AutoCloseable {
     public ReportReply report(ReportRequest.Builder requestBuilder) {
         ReportRequest request = requestBuilder
                 .addAllPrevTS(ts)
-                .setOpId(currOpId++)
                 .build();
 
         ReportReply reply = stub.report(request);

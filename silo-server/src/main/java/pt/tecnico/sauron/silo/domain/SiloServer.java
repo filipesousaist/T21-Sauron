@@ -35,10 +35,8 @@ public class SiloServer {
             // Try to add Eye to the "database"
             if (eyes.containsKey(cam_name)) {
                 Coordinates dbCoords = eyes.get(cam_name);
-                if (Math.abs(latitude - dbCoords.getLatitude()) < ADMISSIBLE_ERROR &&
-                        Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR)
-                    throw new DuplicateJoinException();
-                else
+                if (!(Math.abs(latitude - dbCoords.getLatitude()) < ADMISSIBLE_ERROR &&
+                        Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR))
                     throw new RepeatedNameException();
             } else
                 eyes.put(cam_name, coordinates);
