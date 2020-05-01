@@ -6,19 +6,19 @@ import pt.tecnico.sauron.util.VectorTS;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import static pt.tecnico.sauron.silo.grpc.Silo.ObjectType.CAR;
 import static pt.tecnico.sauron.silo.grpc.Silo.ObjectType.PERSON;
 
 
-public class ObsLog {
-    private String opId;
+public class ObsLog implements Iterable<Observation>{
     private List<Observation> obss = new ArrayList<>();
     private String camName;
     private VectorTS vectorTS;
 
-    public ObsLog(List<ObjectData> data, String camName, Date date, VectorTS vectorTS, String opId){
+    public ObsLog(List<ObjectData> data, String camName, Date date, VectorTS vectorTS){
         data.forEach(d -> {
             switch (d.getType()){
                 case CAR:
@@ -35,11 +35,9 @@ public class ObsLog {
 
         this.vectorTS = vectorTS;
         this.camName = camName;
-        this.opId = camName+opId;
     }
 
     public ObsLog(ObservationLogMessage observationLogMessage){
-        this.opId = observationLogMessage.getOpId();
         this.camName = observationLogMessage.getData(0).getCamName();
         this.vectorTS = new VectorTS(observationLogMessage.getPrevTSList());
         for(ObservationData of : observationLogMessage.getDataList()){
@@ -65,14 +63,6 @@ public class ObsLog {
         return obss.toString();
     }
 
-    public String getOpId() {
-        return opId;
-    }
-
-    public void setOpId(String opId) {
-        this.opId = opId;
-    }
-
     public List<Observation> getObss() {
         return obss;
     }
@@ -95,5 +85,10 @@ public class ObsLog {
 
     public void setCamName(String camName) {
         this.camName = camName;
+    }
+
+    @Override
+    public Iterator<Observation> iterator() {
+        return obss.iterator();
     }
 }

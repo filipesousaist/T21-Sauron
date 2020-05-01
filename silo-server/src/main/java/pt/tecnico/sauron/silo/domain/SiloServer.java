@@ -35,10 +35,8 @@ public class SiloServer {
             // Try to add Eye to the "database"
             if (eyes.containsKey(cam_name)) {
                 Coordinates dbCoords = eyes.get(cam_name);
-                if (Math.abs(latitude - dbCoords.getLatitude()) < ADMISSIBLE_ERROR &&
-                        Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR)
-                    throw new DuplicateJoinException();
-                else
+                if (!(Math.abs(latitude - dbCoords.getLatitude()) < ADMISSIBLE_ERROR &&
+                        Math.abs(longitude - dbCoords.getLongitude()) < ADMISSIBLE_ERROR))
                     throw new RepeatedNameException();
             } else
                 eyes.put(cam_name, coordinates);
@@ -172,10 +170,6 @@ public class SiloServer {
         }
     }
 
-    public void receiveGossipedInfo(List<GossipData> gossipData){
-
-    }
-
     public String ping(String message) {
         return "Hello, " + message + "!";
     }
@@ -218,5 +212,33 @@ public class SiloServer {
 
     public Map<String, Coordinates> getEyes() {
         return Collections.unmodifiableMap(eyes);
+    }
+
+    public void addEye(String name, Coordinates coordinates){
+        synchronized (this){
+            eyes.put(name, coordinates);
+        }
+    }
+
+    public void addObservations(List<ObservationData> data){
+        Date date = new Date();
+        data.forEach(d -> {
+            switch (d.getType()) {
+                case PERSON:
+                    synchronized (this) {
+                        date.setTime(d.getTimestamp().getSeconds()*1000);
+                        observations.add(new PersonObservation(Long.parseLong(d.getId()), d.getCamName(), date));
+                    }
+                    break;
+                case CAR:
+                    date.setTime(d.getTimestamp().getSeconds()*1000);
+                    synchronized (this) {
+                        observations.add(new CarObservation(d.getId(), d.getCamName(), date));
+                    }
+                    break;
+                default:
+                    throw new RuntimeException("Invalid type");
+            }
+        });
     }
 }
