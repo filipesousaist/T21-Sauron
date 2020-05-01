@@ -29,7 +29,7 @@ public class SiloFrontend implements AutoCloseable {
     private int numServers;
     private VectorTS ts; // Vector timestamp
     private int instance;
-    private int currOpId;
+
 
     private SiloCache<SiloCacheKey, Message> cache;
 
@@ -47,7 +47,6 @@ public class SiloFrontend implements AutoCloseable {
 
         connect();
 
-        currOpId = 0;
     }
 
     private String getRandomTarget() throws ZKNamingException, NoServersException {
@@ -125,7 +124,6 @@ public class SiloFrontend implements AutoCloseable {
     public CamJoinReply camJoin(CamJoinRequest.Builder requestBuilder) throws NoServersException {
         CamJoinRequest request = requestBuilder
                 .addAllPrevTS(ts)
-                .setOpId(currOpId++)
                 .build();
         return (new GenericRPC<CamJoinReply>(() -> camJoinRPC(request))).call(false);
     }
@@ -155,7 +153,6 @@ public class SiloFrontend implements AutoCloseable {
     public ReportReply report(ReportRequest.Builder requestBuilder) throws NoServersException {
         ReportRequest request = requestBuilder
                 .addAllPrevTS(ts)
-                .setOpId(currOpId++)
                 .build();
 
         return (new GenericRPC<ReportReply>(() -> reportRPC(request))).call(false);

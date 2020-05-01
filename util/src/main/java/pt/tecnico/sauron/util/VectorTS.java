@@ -1,9 +1,6 @@
 package pt.tecnico.sauron.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class VectorTS implements Iterable<Integer> {
     private List<Integer> values;
@@ -36,6 +33,9 @@ public class VectorTS implements Iterable<Integer> {
 
         for (int i = 0; i < size; i ++)
             values.set(i, Integer.max(values.get(i), v.values.get(i)));
+
+        /*System.out.println("My values: "+this.values);
+        System.out.println("Other values: "+v.values);*/
     }
 
     public boolean happensBefore(VectorTS v) {
@@ -89,5 +89,17 @@ public class VectorTS implements Iterable<Integer> {
     @Override
     public String toString() {
         return this.values.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        VectorTS vectorTS = (VectorTS) o;
+        balanceSizes(this,vectorTS);
+        return this.values.equals(vectorTS.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(values);
     }
 }

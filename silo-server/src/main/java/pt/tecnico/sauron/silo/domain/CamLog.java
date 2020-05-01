@@ -1,23 +1,19 @@
 package pt.tecnico.sauron.silo.domain;
 
-import pt.tecnico.sauron.silo.domain.exception.DuplicateJoinException;
-import pt.tecnico.sauron.silo.domain.exception.InvalidCoordinatesException;
-import pt.tecnico.sauron.silo.domain.exception.InvalidEyeNameException;
-import pt.tecnico.sauron.silo.domain.exception.RepeatedNameException;
-import pt.tecnico.sauron.silo.grpc.Silo;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
+import pt.tecnico.sauron.util.VectorTS;
 
 public class CamLog {
     private String camName;
     private double latitude;
     private double longitude;
-    private int opId;
+    private VectorTS vectorTS;
 
-    public CamLog(Coordinates coordinates, String cam_name, int opId) {
+    public CamLog(Coordinates coordinates, String cam_name, VectorTS vectorTS) {
         this.latitude = coordinates.getLatitude();
         this.longitude = coordinates.getLongitude();
         this.camName = cam_name;
-        this.opId = opId;
+        this.vectorTS = vectorTS;
     }
 
     public String getCamName() {
@@ -44,11 +40,4 @@ public class CamLog {
         this.longitude = longitude;
     }
 
-    public int getOpId() {
-        return opId;
-    }
-
-    public void setOpId(int opId) {
-        this.opId = opId;
-    }
 }
