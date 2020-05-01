@@ -3,6 +3,7 @@ package pt.tecnico.sauron.spotter;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import pt.tecnico.sauron.silo.client.SiloFrontend;
+import pt.tecnico.sauron.silo.client.exception.NoServersException;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 import pt.tecnico.sauron.spotter.domain.exception.*;
 import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
@@ -14,7 +15,7 @@ public class SpotterApp {
 	private static final int NUM_FIXED_ARGS = 2;
 	private static final int NUM_VAR_ARGS = 1;
 
-	public static void main(String[] args) throws ZKNamingException {
+	public static void main(String[] args) {
 		try {
 			//check arguments
 			Object[] parsedArgs = parseArgs(args);
@@ -26,7 +27,7 @@ public class SpotterApp {
 			);
 
 			handleInput(frontend);
-		} catch (ArgCountException | NumberFormatException e) {
+		} catch (ArgCountException | NumberFormatException | ZKNamingException | NoServersException e) {
 			System.out.println(e.getMessage());
 		}
 	}
@@ -120,6 +121,8 @@ public class SpotterApp {
 			if (!(Status.INVALID_ARGUMENT.getCode().equals(code) ||
 					Status.NOT_FOUND.getCode().equals(code)))
 				System.out.println(e.getMessage());
+		} catch (NoServersException e) {
+			System.out.println(e.getMessage());
 		}
 	}
 
@@ -143,6 +146,8 @@ public class SpotterApp {
 			if (!(Status.INVALID_ARGUMENT.getCode().equals(code) ||
 					Status.NOT_FOUND.getCode().equals(code)))
 				System.out.println(e.getMessage());
+		} catch (NoServersException e) {
+			System.out.println(e.getMessage());
 		}
 	}
 
@@ -170,18 +175,22 @@ public class SpotterApp {
 		else if (replyCopy.get(0).getType().equals(ObjectType.PERSON))
 			replyCopy.sort(Comparator.comparing(id -> Long.parseLong(id.getId())));
 
-		for (ObservationData responseData : replyCopy) {
-			Coordinates camCoords = camInfo(responseData.getCamName(), frontend).getCoordinates();
+		try {
+			for (ObservationData responseData : replyCopy) {
+				Coordinates camCoords = camInfo(responseData.getCamName(), frontend).getCoordinates();
 
-			SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-			String timeString = timeFormat.format(responseData.getTimestamp().getSeconds() * 1000);
+				SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+				String timeString = timeFormat.format(responseData.getTimestamp().getSeconds() * 1000);
 
-			System.out.println("" + responseData.getId() + ","
-					+ responseData.getType() + ","
-					+ timeString + ","
-					+ responseData.getCamName() + ","
-					+ camCoords.getLatitude() + ","
-					+ camCoords.getLongitude());
+				System.out.println(responseData.getId() + ","
+						+ responseData.getType() + ","
+						+ timeString + ","
+						+ responseData.getCamName() + ","
+						+ camCoords.getLatitude() + ","
+						+ camCoords.getLongitude());
+			}
+		} catch (StatusRuntimeException | NoServersException e) {
+			System.out.println(e.getMessage());
 		}
 	}
 
@@ -218,7 +227,7 @@ public class SpotterApp {
 				"exit (exits Spotter)");
 	}
 
-	private static CamInfoReply camInfo(String camName, SiloFrontend frontend) {
+	private static CamInfoReply camInfo(String camName, SiloFrontend frontend) throws NoServersException {
 		CamInfoRequest.Builder requestBuilder = CamInfoRequest.newBuilder().setCamName(camName);
 		return frontend.camInfo(requestBuilder);
 	}

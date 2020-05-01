@@ -5,6 +5,7 @@ import io.grpc.StatusRuntimeException;
 import pt.tecnico.sauron.eye.domain.Eye;
 import pt.tecnico.sauron.eye.domain.exceptions.*;
 import pt.tecnico.sauron.silo.client.SiloFrontend;
+import pt.tecnico.sauron.silo.client.exception.NoServersException;
 import pt.tecnico.sauron.silo.grpc.Silo.*;
 import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
 
@@ -35,7 +36,7 @@ public class EyeApp {
 				registerOnServer(frontend, eye);
 				handleInput(frontend, eye);
 			}
-			catch (RegistrationException e) {
+			catch (RegistrationException | NoServersException e) {
 				System.out.println("Error registering in server: " + e.getMessage());
 			}
 		}
@@ -66,7 +67,7 @@ public class EyeApp {
 	}
 
 	private static void registerOnServer(SiloFrontend frontend, Eye eye)
-			throws RegistrationException {
+			throws RegistrationException, NoServersException {
 		CamJoinRequest.Builder camJoinRequestBuilder = CamJoinRequest.newBuilder()
 			.setCamName(eye.getName())
 			.setCoordinates(eye.getCoordinates());
@@ -164,6 +165,8 @@ public class EyeApp {
 			else if (Status.UNAUTHENTICATED.getCode().equals(code)) {
 				throw new UnregisteredEyeException();
 			}
+		} catch (NoServersException e) {
+			System.out.println(e.getMessage());
 		}
 	}
 

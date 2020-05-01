@@ -1,6 +1,7 @@
 package pt.tecnico.sauron.silo.client;
 
 import pt.tecnico.sauron.silo.client.exception.ArgCountException;
+import pt.tecnico.sauron.silo.client.exception.NoServersException;
 import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
 
 public class SiloClientApp {
@@ -20,7 +21,7 @@ public class SiloClientApp {
 			);
 
 		}
-		catch(ArgCountException | NumberFormatException e) {
+		catch(ArgCountException | NumberFormatException | NoServersException e) {
 			System.out.println(e.getMessage());
 		}
 /*
