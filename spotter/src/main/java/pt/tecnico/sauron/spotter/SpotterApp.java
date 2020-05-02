@@ -13,7 +13,8 @@ import java.util.*;
 
 public class SpotterApp {
 	private static final int NUM_FIXED_ARGS = 2;
-	private static final int NUM_VAR_ARGS = 1;
+	private static final int NUM_VAR_ARGS = 2;
+	private static final int MAX_SIZE = 10;
 
 	public static void main(String[] args) {
 		try {
@@ -23,7 +24,8 @@ public class SpotterApp {
 			SiloFrontend frontend = new SiloFrontend(
 					(String) parsedArgs[0],
 					(String) parsedArgs[1],
-					(int) parsedArgs[2]
+					(int) parsedArgs[2],
+					(int) parsedArgs[3]
 			);
 
 			handleInput(frontend);
@@ -45,6 +47,7 @@ public class SpotterApp {
 		parsedArgs[0] = args[0];
 		parsedArgs[1] = args[1];
 		parsedArgs[2] = args.length > NUM_FIXED_ARGS ? Integer.parseInt(args[2]) : -1;
+		parsedArgs[3] = args.length == NUM_FIXED_ARGS + NUM_VAR_ARGS ? Integer.parseInt(args[3]) : MAX_SIZE;
 
 		return parsedArgs;
 	}

@@ -182,7 +182,7 @@ ATRT51,CAR,2020-05-02T00:48:31,Tagus,0.0,0.0
 
 * Open 5 terminals:
   * 2 with silo-servers, one with instance number 1 and another with instance number 2;
-  * 1 with and eye that connects to the server instance 1
+  * 1 with an eye that connects to the server instance 1;
   * 2 with spotters, one connecting to server instance 1 and other to server instance 2;
 
 Note: See the README.md, to know how to run the commands above.
@@ -264,5 +264,113 @@ ATRT51,CAR,2020-05-02T00:48:31,Tagus,0.0,0.0
 ```
 * It prints the same results again.
 
+#### Test 9: Test a client reconnecting to another server
 
+* Open 4 terminals in the following order:
+  * 1 with a silo-server with instance number 1;
+  * 1 with an eye, without giving a specific instance to connect to;
+  * 1 with a spotter without giving a specific instance to connect to;
+  * 1 with another silo-server with instance number 2;
+  
+Note: This order is to guarantee that both eye and spotter connect to server 1 and are able to change servers
+ when the one they are connected to fails.
+ 
+Note2: See the README.md, to know how to run the commands above. 
 
+* Run the following commands in eye:
+```
+person,55
+
+car,ATRT51
+
+person,55
+car,ATRT51
+```
+* Wait for the updates to be propagated to other replicas. See when the following message pops up on the server
+instance 1 terminal.
+```
+Updates sent...
+```
+
+* Shutdown server instance 1, by pressing 'Enter' on its terminal.
+* Run the following commands in eye:
+```
+person,55
+car,ATRT51
+```
+* The eye will print the message: 
+```
+Registration successful. Proceeding...
+```
+* Because it lost the connection with the server and reconnected successfully to the other server and will still
+send the observations from the command. 
+
+* Run the following commands for the spotter. The spotter will also reconnect when the first command is run and 
+the results will be with all the observations the eye made taken into account.
+```
+>spot person 55
+55,PERSON,2020-05-02T14:43:37,Tagus,0.0,0.0
+>trail person 55
+55,PERSON,2020-05-02T14:43:37,Tagus,0.0,0.0
+55,PERSON,2020-05-02T14:42:52,Tagus,0.0,0.0
+55,PERSON,2020-05-02T14:42:26,Tagus,0.0,0.0
+>spot car ATRT51
+ATRT51,CAR,2020-05-02T14:43:37,Tagus,0.0,0.0
+>trail car ATRT51
+ATRT51,CAR,2020-05-02T14:43:37,Tagus,0.0,0.0
+ATRT51,CAR,2020-05-02T14:42:52,Tagus,0.0,0.0
+ATRT51,CAR,2020-05-02T14:42:39,Tagus,0.0,0.0
+```
+* It prints all the observations made
+
+#### Test 10: Test the client cache
+
+* Open 3 terminals:
+  * 1 with a silo-server with instance number 1;
+  * 1 with an eye that connects to the server instance 1;
+  * 1 with a spotter that connects to the server instance 1; 
+
+Note: See the README.md, to know how to run the commands above.
+
+* Run the following commands in eye:
+```
+person,55
+
+car,ATRT51
+
+person,55
+car,ATRT51
+```
+* Press 'Ctrl+D' to shutdown the eye. It will no longer be needed.
+
+* Run the following commands in the spotter, to make the spotter save these command-result pair in its cache.
+```
+> spot person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+55,PERSON,2020-05-02T00:48:31,Tagus,0.0,0.0
+> spot car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+ATRT51,CAR,2020-05-02T00:48:31,Tagus,0.0,0.0
+```
+* Shutdown server instance 1, by pressing 'Enter' on its terminal.
+* Start the server instance 1.
+
+* Run the following commands again on the spotter.
+```
+> spot person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+55,PERSON,2020-05-02T00:48:31,Tagus,0.0,0.0
+> spot car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+ATRT51,CAR,2020-05-02T00:48:31,Tagus,0.0,0.0
+```
+* It is printed the same results even though the server this spotter is connected to doesn't have the 
+ required information to respond to its requests.

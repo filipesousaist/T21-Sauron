@@ -19,6 +19,7 @@
 		<zoo.host>localhost</zoo.host>
 		<zoo.port>2181</zoo.port>
 		<server.instance>1</server.instance>
+		<cache.size>10</cache.size>
 	</properties>
 
 	<dependencies>
@@ -113,6 +114,7 @@
 						<argument>${zoo.host}</argument>
 						<argument>${zoo.port}</argument>
 						<argument>${server.instance}</argument>
+						<argument>${cache.size}</argument>
 
 					</arguments>
 				</configuration>

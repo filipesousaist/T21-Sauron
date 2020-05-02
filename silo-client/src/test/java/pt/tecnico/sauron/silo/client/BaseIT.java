@@ -34,8 +34,9 @@ public class BaseIT {
 		final String host = testProps.getProperty("zoo.host");
 		final String port = testProps.getProperty("zoo.port");
 		final int instance = Integer.parseInt((testProps.getProperty("server.instance")));
+		final int cacheSize = Integer.parseInt((testProps.getProperty("cache.size")));
 		try {
-			frontend = new SiloFrontend(host, port, instance);
+			frontend = new SiloFrontend(host, port, instance, cacheSize);
 			frontend.ctrlClear(CtrlClearRequest.newBuilder());
 		} catch (NoServersException | ZKNamingException e) {
 			System.out.println(e.getMessage());

@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class EyeApp {
 	private static final int NUM_FIXED_ARGS = 5;
 	private static final int NUM_VAR_ARGS = 1;
+	private static final int MAX_SIZE = 10;
 
 	public static void main(String[] args)
 		throws ZKNamingException {
@@ -26,7 +27,8 @@ public class EyeApp {
 				new SiloFrontend(
 					(String) parsedArgs[0],
 					(String) parsedArgs[1],
-					(int) parsedArgs[5]
+					(int) parsedArgs[5],
+					MAX_SIZE
 			)) {
 				Eye eye = new Eye(
 					(String) parsedArgs[2],
@@ -161,6 +163,7 @@ public class EyeApp {
 			}
 			else if (Status.UNAUTHENTICATED.getCode().equals(code)) {
 				try {
+					System.out.println("Lost connection. Attempting to reconnect...");
 					registerOnServer(frontend, eye);
 					frontend.report(reportRequestBuilder);
 				} catch (Exception e1) {

@@ -25,13 +25,13 @@ mvn install
 To run using appassembler plugin on Linux:
 
 ```
-./target/appassembler/bin/eye arg0 arg1 arg2
+./target/appassembler/bin/eye arg0 arg1 arg2 (arg3)
 ```
 
 To run using appassembler plugin on Windows:
 
 ```
-target\appassembler\bin\eye arg0 arg1 arg2
+target\appassembler\bin\eye arg0 arg1 arg2 (arg3)
 ```
 
 

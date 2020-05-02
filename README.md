@@ -83,9 +83,11 @@ If you want to try out the Eye, run the following command in the /eye directory 
 ```
 
 If you want to try out the Spotter, run the following command in the /spotter directory and replace {instance} with 
-a value from 1 to 9. {instance} is optional, and if it is not provided a random instance will be selected.
+a value from 1 to 9. {instance} is optional, and if it is not provided a random instance will be selected. 
+{cacheSize} is also optional and represents the size that the client cache will have. If it is not provided a default
+value is provived. 
 ```
-./target/appassembler/bin/spotter localhost 2181 {instance}
+./target/appassembler/bin/spotter localhost 2181 {instance} {cacheSize}
 ```
 
 To run the automatic tests run the following command in the root directory, while the server is running:

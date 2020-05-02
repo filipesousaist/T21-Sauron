@@ -19,7 +19,6 @@ import java.util.concurrent.Callable;
 
 public class SiloFrontend implements AutoCloseable {
     private static final String BASE_PATH = "/grpc/sauron/silo";
-    private static final int MAX_SIZE = 10;
     private static final int MAX_CONNECT_TRIES = 5;
     private static final int MAX_REQUEST_TRIES = 3;
     private static final int SLEEP_TIME = 40;//milliseconds
@@ -34,7 +33,7 @@ public class SiloFrontend implements AutoCloseable {
 
     private SiloCache<SiloCacheKey, Message> cache;
 
-    public SiloFrontend(String zkHost, String zkPort, int instance)
+    public SiloFrontend(String zkHost, String zkPort, int instance, int cacheSize)
             throws ZKNamingException, NoServersException {
         zkNaming = new ZKNaming(zkHost, zkPort);
 
@@ -44,7 +43,7 @@ public class SiloFrontend implements AutoCloseable {
         ts = new VectorTS();
         this.instance = instance;
 
-        cache = new SiloCache<>(MAX_SIZE);
+        cache = new SiloCache<>(cacheSize);
 
         connect();
 

@@ -7,6 +7,7 @@ import pt.ulisboa.tecnico.sdis.zk.ZKNamingException;
 public class SiloClientApp {
 	private static final int NUM_FIXED_ARGS = 2;
 	private static final int NUM_VAR_ARGS = 1;
+	private static final int MAX_SIZE = 10;
 
 	public static void main(String[] args)
 		throws ZKNamingException {
@@ -17,7 +18,8 @@ public class SiloClientApp {
 			SiloFrontend frontend = new SiloFrontend(
 				(String) parsedArgs[0],
 				(String) parsedArgs[1],
-				(int) parsedArgs[2]
+				(int) parsedArgs[2],
+				MAX_SIZE
 			);
 
 		}
