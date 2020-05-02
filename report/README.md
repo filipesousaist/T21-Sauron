@@ -2,7 +2,6 @@
 
 Distributed Systems 2019-2020, 2nd semester
 
-
 ## Authors
 
 **Grupo T21**
@@ -20,11 +19,11 @@ Distributed Systems 2019-2020, 2nd semester
 
 ## Fault model
 
-#### Our solution can handle the following faults:
+#### Our solution can has the following fault-tolerance properties:
 
 - When one or more (but not all) servers go down, and come back up, they can recover totally or partially their previous state.
 
-- When the server a client was connected to goes down, the client can reconnect to a different server.
+- When the server a client was connected to goes down, the frontend tries to reconnect to a different server.
 
 - **Partition tolerance**: When there is a partition in the network each "sub-network" can function as an autonomous network, although each one of them will evolve independently.
 
@@ -33,6 +32,8 @@ Distributed Systems 2019-2020, 2nd semester
 #### Our solution cannot handle the following faults:
 
 - When a server goes down and comes back up, and receives updates from a client before a gossip round, the state of the system becomes inconsistent.
+
+- When a server goes down, updates that it received after the last gossip round (before going down) are permanently lost.
 
 - When an Eye connects to a server, and a second Eye connects to a different server with the same name and different coordinates, before the gossiping of the first join to this second server, both eyes are considered registered, and thus the system state becomes inconsistent.
 
@@ -55,8 +56,17 @@ However, in our case, because there are no causal dependencies between observati
 update log and the value will always remain consistent with stored data. 
 Therefore, one of the changes we made to the original protocol was only having one timestamp per replica manager, while the original protocol had two timestamps: the value timestamp, which represents the state of the update log, and the value timestamp, which represents the state of the replica.
 
+#### Updates
+When a replica receives an update request (a report or a cam_join):
+ - it tries to insert them first in the replicated data, to check if the received data is valid (it checks if the person or car ids or camera name match the specified format);
+ - it inserts the updates in the update log;
+ - it increments its own entry in its Replica timestamp;
+ - it replaces its own entry in the frontend's Prev TS with its newly-updated entry (computed in the previous step);
+ - it sends the updated Prev TS back to the frontend, for it to use on further requests.
 
-
+#### Queries
+When a replica receives a query request (cam_info, track, trackMatch, trace), it searches for what was asked and returns it to the client, along with
+its Replica TS.
 
 ## Replication protocol
 
@@ -74,18 +84,27 @@ comes back up, its timestamp will be the zero vector. Then, when it asks the oth
 will realize that that replica has a very low timestamp and will send it a big chunk of updates. And this way in
 one round of gossip messages the replica that just came back up will have the most recent updates. 
 
-
-
 ## Implementation options
 
 In order to better understand one of the implementation options we chose, let's take a look at the following image, which illustrates the basis of our frontend implementation:
 
 ![FrontendStructure](FrontendStructure.png)
 
+#### The frontend
+The frontend has a vector timestamp (Prev TS) which stores how updated is the client in relation to the servers. The value **v** of the entry **i** in the timestamp means that either:
+- the Eye has done a report to server **i**, and after it, the server had done a total of **v** updates;
+- the Spotter has done a query to a server that already had the **v**th update of server **i** (even if the query was unrelated to that update).
+
+The frontend also has a query cache, which stores the results to the latest queries. The cache size is configurable.
+
+#### Updates
 Updates sent by an Eye (mainly observation reports, but also registration requests) go directly to the server, that, as we've seen before, executes it.
 
+#### Queries
+Queries are also sent to the server, but when the frontend receives the results it makes a check: it compares the received timestamp with its own timestamp. 
 
+If the received timestamp is newer than (or the same as) its own timestamp, it returns to the client the newer update, and updates the cache accordingly. Otherwise, it just returns to the client the cache contents for that query, if it exists.
 
-## Notas finais
+## Final notes
 
-_(Algo mais a dizer?)_
+We noted that, the fact that there is no persistent data, brought an additional problem because, when a server goes down, its state is lost. So it has to wait for gossips from other servers, in order to recover its data. 
