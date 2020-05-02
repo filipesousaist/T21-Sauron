@@ -1,9 +1,9 @@
-# Relatório do projeto Sauron
+# Sauron project report
 
-Sistemas Distribuídos 2019-2020, segundo semestre
+Distributed Systems 2019-2020, 2nd semester
 
 
-## Autores
+## Authors
 
 **Grupo T21**
 
@@ -15,50 +15,74 @@ Sistemas Distribuídos 2019-2020, segundo semestre
 
 ![Filipe Sousa](90714.png) ![Pedro Vilela](90762.png) ![Pedro Pereira](90766.png)
 
-## Modelo de faltas
+## Corrections to 1st part
+- Server now accepts multiple connections from Eye with same name and coordinates (i.e., it does not send an error message anymore).
 
-_(que faltas são toleradas, que faltas não são toleradas)_
+## Fault model
 
+#### Our solution can handle the following faults:
 
-## Solução
+- When one or more (but not all) servers go down, and come back up, they can recover totally or partially their previous state.
 
-_(Figura da solução de tolerância a faltas)_
+- When the server a client was connected to goes down, the client can reconnect to a different server.
 
-_(Breve explicação da solução, suportada pela figura anterior)_
+- **Partition tolerance**: When there is a partition in the network each "sub-network" can function as an autonomous network, although each one of them will evolve independently.
 
+- **Coherent reads by same client**: When a client makes the same query twice, it cannot receive older results in the second query compared to the first one.
 
-## Protocolo de replicação
+#### Our solution cannot handle the following faults:
 
-In order to fulfill the requirement of having a high availability and internet partition tolerant system we used a
+- When a server goes down and comes back up, and receives updates from a client before a gossip round, the state of the system becomes inconsistent.
+
+- When an Eye connects to a server, and a second Eye connects to a different server with the same name and different coordinates, before the gossiping of the first join to this second server, both eyes are considered registered, and thus the system state becomes inconsistent.
+
+- **Byzantine server faults**: We did not consider the possibility of a server misbehaving.
+
+## Solution
+
+![ReplicaStructure](ReplicaStructure.png)
+
+In order to fulfill the requirement of having a high availability and partition tolerant system we used a
 a variant of the gossip protocol. The gossip protocol in the project's scenario is used to share information about 
-observations and cameras across all server replicas. One of the changes we made to the original protocol was only 
-having one timestamp per replica. The original protocol has two timestamps: the value timestamp, which represents
-the state of the update log, and the value timestamp, which represents the state of the replica. One of the
-objectives of having an update log is to keep track of updated that cannot be executed due to causal dependencies.
-In our case there are no causal dependencies between observations and between cameras, therefore the 
-update log and the value timestamp will always remain consistent, which is why only one timestamp is needed. 
+observations and cameras across all server replicas.
 
-How it works?
+Each replica manager (i.e. server) has:
+ - a copy of the replicated data;
+ - a vector timestamp, containing the number of updates done by each replica manager;
+ - an update log to keep track of updates that cannot be executed due to causal dependencies, and also to be able to send these updates in the future to other replicas via gossip.
 
-Periodically, a replica will request all other replicas to send it the observations and cameras they have and
+However, in our case, because there are no causal dependencies between observations and between Eye registrations, the 
+update log and the value will always remain consistent with stored data. 
+Therefore, one of the changes we made to the original protocol was only having one timestamp per replica manager, while the original protocol had two timestamps: the value timestamp, which represents the state of the update log, and the value timestamp, which represents the state of the replica.
+
+
+
+
+## Replication protocol
+
+Periodically, a replica will request all other replicas to send it the observations and camera info they have and
 provides them with its actual timestamp. The other replicas will send the updates which they know the replica does
-not have, by looking at the timestamp the replica sent them. The replica will then update its update log, the value
+not have, by looking at the timestamp the replica sent them. The replica will then update its value (replicated data), its log, 
 and its timestamp with the incoming updates. 
 
-This way, we guarantee that the replicas, most of the time will have the most recent data, thus providing high
+This way, we guarantee that the replicas, most of the time, will have the most recent data, thus providing high
 availability.
 
-Furthermore, if a replica for some reason goes down(it needed to perform a reset, or the power fails), when it
-comes back up, it will quickly be updated with the most recent information. This happens because when the replica
-comes back up its timestamp will be at zeros. Then when it asks the other replicas for updates the other replicas 
-will realize that that replica has a very low timestamp and will send it a big chunk of updates and, this way, in
+Furthermore, if a replica for some reason goes down (it needed to perform a reset, or the power fails), when it
+comes back up, it will quickly be updated with the most recent information. This happens because, when the replica
+comes back up, its timestamp will be the zero vector. Then, when it asks the other replicas for updates the other replicas 
+will realize that that replica has a very low timestamp and will send it a big chunk of updates. And this way in
 one round of gossip messages the replica that just came back up will have the most recent updates. 
 
 
 
-## Opções de implementação
+## Implementation options
 
-_(Descrição de opções de implementação, incluindo otimizações e melhorias introduzidas)_
+In order to better understand one of the implementation options we chose, let's take a look at the following image, which illustrates the basis of our frontend implementation:
+
+![FrontendStructure](FrontendStructure.png)
+
+Updates sent by an Eye (mainly observation reports, but also registration requests) go directly to the server, that, as we've seen before, executes it.
 
 
 
