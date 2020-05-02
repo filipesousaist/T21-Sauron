@@ -43,8 +43,7 @@ message CamJoinReply {
 
 // cam_info
 message CamInfoRequest {
-    map<int32, int32> prevTS = 1;
-    string camName = 2;
+    string camName = 1;
 }
 
 message CamInfoReply {
@@ -76,8 +75,7 @@ message ObservationData {
 
 // track
 message TrackRequest {
-    map<int32, int32> prevTS = 1;
-    ObjectData data = 2;
+    ObjectData data = 1;
 }
 
 message TrackReply {
@@ -87,8 +85,7 @@ message TrackReply {
 
 // trackMatch
 message TrackMatchRequest {
-    map<int32, int32> prevTS = 1;
-    ObjectData data = 2;
+    ObjectData data = 1;
 }
 
 message TrackMatchReply {
@@ -98,8 +95,7 @@ message TrackMatchReply {
 
 // trace
 message TraceRequest {
-    map<int32, int32> prevTS = 1;
-    ObjectData data = 2;
+    ObjectData data = 1;
 }
 
 message TraceReply {

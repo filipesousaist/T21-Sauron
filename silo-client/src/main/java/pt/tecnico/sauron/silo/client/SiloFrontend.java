@@ -159,7 +159,7 @@ public class SiloFrontend implements AutoCloseable {
 
     //camInfo
     public CamInfoReply camInfo(CamInfoRequest.Builder requestBuilder) throws NoServersException {
-        CamInfoRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
+        CamInfoRequest request = requestBuilder.build();
         SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.CAM_INFO,
                 SiloCacheKey.ObjectType.NONE,
                 request.getCamName());
@@ -192,7 +192,7 @@ public class SiloFrontend implements AutoCloseable {
 
     //track
     public TrackReply track(TrackRequest.Builder requestBuilder) throws NoServersException {
-        TrackRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
+        TrackRequest request = requestBuilder.build();
         SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.SPOT,
                 SiloCacheKey.toObjectType(request.getData().getType()),
                 request.getData().getId());
@@ -215,7 +215,7 @@ public class SiloFrontend implements AutoCloseable {
 
     //trackMatch
     public TrackMatchReply trackMatch(TrackMatchRequest.Builder requestBuilder) throws NoServersException {
-        TrackMatchRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
+        TrackMatchRequest request = requestBuilder.build();
         SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.SPOT,
                 SiloCacheKey.toObjectType(request.getData().getType()),
                 request.getData().getId());
@@ -230,7 +230,7 @@ public class SiloFrontend implements AutoCloseable {
 
     //trace
     public TraceReply trace(TraceRequest.Builder requestBuilder) throws NoServersException {
-        TraceRequest request = requestBuilder.putAllPrevTS(ts.getMap()).build();
+        TraceRequest request = requestBuilder.build();
         SiloCacheKey key = new SiloCacheKey(SiloCacheKey.OperationType.TRAIL,
                 SiloCacheKey.toObjectType(request.getData().getType()),
                 request.getData().getId());
