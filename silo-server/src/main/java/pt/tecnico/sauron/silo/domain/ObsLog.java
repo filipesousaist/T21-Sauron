@@ -52,7 +52,7 @@ public class ObsLog implements Iterable<Observation>{
 
     @Override
     public String toString() {
-        return obss.toString();
+        return "ObsLog: "+obss.toString();
     }
 
     public List<Observation> getObss() {

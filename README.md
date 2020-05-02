@@ -67,20 +67,27 @@ The integration tests are skipped because they require the servers to be running
 
 ##Running Instructions
 
-In order to try the application start by running the following command in the /silo-server directory:
+In order to try the application start by running the following command in the /silo-server directory, 
+replacing {instance} with a value from 1 to 9 and {gossip_delay} in milliseconds between each time a server
+replica asks the other server replicas for updates. {gossip_delay} is optional, the default value is 
+30000 milliseconds(30 seconds).
 ```
-mvn exec:java
+./target/appassembler/bin/silo-server localhost 2181 {instance} localhost 808{instance} {gossip_delay}
 ``` 
 
-If you want to try out the Eye, run the following command in the /eye directory and replace camName, latitude and longitude by actual values:
+If you want to try out the Eye, run the following command in the /eye directory and replace camName, latitude and
+ longitude by actual values, and {instance} with a value from 1 to 9. {instance} is optional, and if it is not provided a random instance
+ will be selected.
 ```
-./target/appassembler/bin/eye localhost 8080 camName latitude longitude
+./target/appassembler/bin/eye localhost 2181 {eye_name} {latitude} {longitude} {instance}
 ```
 
-If you want to try out the Spotter, run the following command in the /spotter directory:
+If you want to try out the Spotter, run the following command in the /spotter directory and replace {instance} with 
+a value from 1 to 9. {instance} is optional, and if it is not provided a random instance will be selected.
 ```
-./target/appassembler/bin/spotter localhost 8080 localhost 8080
+./target/appassembler/bin/spotter localhost 2181 {instance}
 ```
+
 To run the automatic tests run the following command in the root directory, while the server is running:
 ```
 mvn verify

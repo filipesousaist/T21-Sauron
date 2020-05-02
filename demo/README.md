@@ -145,3 +145,124 @@ Server has been cleared.
 ```
 * Note: The date in the spotter's expected output may vary according to the computer clock
 
+#### Test 7: Test data replication
+* Open 5 terminals:
+  * 2 with silo-servers, one with instance number 1 and another with instance number 2;
+  * 1 with and eye that connects to the server instance 1
+  * 2 with spotters, one connecting to server instance 1 and other to server instance 2;
+
+Note: See the README.md, to know how to run the commands above.
+
+* Run the following commands in eye:
+```
+person,55
+
+car,ATRT51
+
+person,55
+car,ATRT51
+```
+* Now run the following commands for both spotters. If at least one gossiping round has happened the results 
+should be the same, meaning that the updates were propagated successfully.
+
+```
+> spot person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+55,PERSON,2020-05-02T00:48:31,Tagus,0.0,0.0
+> spot car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+ATRT51,CAR,2020-05-02T00:48:31,Tagus,0.0,0.0
+> exit
+```
+#### Test 8: Test a server going down and recovering its state
+
+* Open 5 terminals:
+  * 2 with silo-servers, one with instance number 1 and another with instance number 2;
+  * 1 with and eye that connects to the server instance 1
+  * 2 with spotters, one connecting to server instance 1 and other to server instance 2;
+
+Note: See the README.md, to know how to run the commands above.
+
+* Run the following commands in eye:
+```
+person,55
+
+car,ATRT51
+
+person,55
+car,ATRT51
+```
+* Press 'Ctrl+D' to shutdown the eye. It will no longer be needed.
+* Wait for the updates to be propagated to other replicas. See when the following message pops up on the server
+instance 1 terminal.
+```
+Updates sent...
+```
+
+* Run the following commands for both spotters, just to check that the updates were propagated to both replicas.
+```
+> spot person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+55,PERSON,2020-05-02T00:48:31,Tagus,0.0,0.0
+> spot car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+ATRT51,CAR,2020-05-02T00:48:31,Tagus,0.0,0.0
+```
+
+* Shutdown server instance 1, by pressing 'Enter' on its terminal.
+* Start the server instance 1, and wait for it to receive updates from the other server instance.
+* Wait for the server instance 1 to receive updates from the other replica. The following message will pop up in the 
+server instance 1 terminal.
+```
+Updates Received!
+```
+* Run the following commands again on the spotter that's connected to the server instance 1.
+```
+> spot person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+55,PERSON,2020-05-02T00:48:31,Tagus,0.0,0.0
+> spot car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+ATRT51,CAR,2020-05-02T00:48:31,Tagus,0.0,0.0
+```
+* It prints the same results that were printed last time these commands were ran, which means that the server
+ instance after a gossip round already has the most recent information on the system, including the information
+ it had registered before going down.
+ 
+* Shutdown the server instance 2, by pressing 'Enter' on its terminal.
+* Start the server instance 2, and wait for it to receive updates from the other server instance.
+* Wait for the server 2 to receive updates from the other replica. The following message will pop up in the 
+server instance 2 terminal.
+```
+Updates Received!
+```
+
+* Run the following commands again on the spotter that's connected to the server instance 2.
+```
+> spot person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail person 55
+55,PERSON,2020-05-02T00:48:38,Tagus,0.0,0.0
+55,PERSON,2020-05-02T00:48:31,Tagus,0.0,0.0
+> spot car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+> trail car ATRT51
+ATRT51,CAR,2020-05-02T00:48:38,Tagus,0.0,0.0
+ATRT51,CAR,2020-05-02T00:48:31,Tagus,0.0,0.0
+```
+* It prints the same results again.
+
+
+

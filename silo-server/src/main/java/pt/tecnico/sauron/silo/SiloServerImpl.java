@@ -88,11 +88,10 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
         int currInstance;
         ManagedChannel channel;
 
-        System.out.println("Gossiping...");
-        synchronized (this) {
+        /*synchronized (this) {
             System.out.println(camLogs);
             System.out.println(obsLogs);
-        }
+        }*/
 
         try {
             List<ZKRecord> conns = new ArrayList<>(zkNaming.listRecords(BASE_PATH));
@@ -122,30 +121,39 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
                         .build();
             }
 
+            System.out.println("Requesting Updates from other replicas...");
             connections.values().forEach(c -> {
                 try {
                     GossipReply gossipReply = c.gossip(gossipRequest);
                     replicaTS.update(new VectorTS(gossipReply.getReplicaTSMap()));
 
+                    System.out.println("Receiving new cam updates...");
                     gossipReply.getCamJoinRequestList().forEach(cjr -> {
                         siloServer.addEye(cjr.getCamName(), cjr.getCoordinates());
                         VectorTS prevTS = new VectorTS(cjr.getPrevTSMap());
+                        CamLog incCamLog = new CamLog(cjr.getCoordinates(), cjr.getCamName(), prevTS);
+                        System.out.println("\t"+incCamLog);
                         synchronized (this) {
-                            camLogs.put(prevTS, new CamLog(cjr.getCoordinates(), cjr.getCamName(), prevTS));
+                            camLogs.put(prevTS, incCamLog);
                         }
                     });
 
+                    System.out.println("Receiving new observation updates...");
                     gossipReply.getObservationLogMessageList().forEach(olm -> {
                         if (!olm.getDataList().isEmpty()) {
                             String camName = olm.getData(0).getCamName();
                             synchronized (this) {
-                                if (camLogs.values().stream().map(CamLog::getCamName).collect(Collectors.toList()).contains(camName)) {// checks if cam is registered before adding and observation
-                                    obsLogs.put(new VectorTS(olm.getPrevTSMap()), new ObsLog(olm));
+                                // checks if cam is registered before adding an observation
+                                if (camLogs.values().stream().map(CamLog::getCamName).collect(Collectors.toList()).contains(camName)) {
+                                    ObsLog incObsLog = new ObsLog(olm);
+                                    System.out.println("\t"+incObsLog);
+                                    obsLogs.put(new VectorTS(olm.getPrevTSMap()), incObsLog);
                                     siloServer.addObservations(olm.getDataList());
                                 }
                             }
                         }
                     });
+                    System.out.println("Updates Received!\n");
                 } catch (StatusRuntimeException e) {
                     if (!Status.UNAVAILABLE.getCode().equals(e.getStatus().getCode()))
                         System.out.println(e.getMessage());
@@ -375,8 +383,9 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
     public void gossip(GossipRequest request, StreamObserver<GossipReply> responseObserver) {
         VectorTS incVectorTS = new VectorTS(request.getVecTSMap());
         GossipReply.Builder gossipReplyBuilder = GossipReply.newBuilder();
+        GossipReply gossipReply;
         try {
-            System.out.println("Starting to build observation logs");
+            System.out.println("Sending updates...\n");
             // build observation logs
             gossipReplyBuilder.addAllObservationLogMessage(obsLogs.values().stream()
                     .filter(o -> incVectorTS.happensBefore(o.getVectorTS()))
@@ -386,14 +395,16 @@ public class SiloServerImpl extends SiloServiceGrpc.SiloServiceImplBase {
             // Build cam logs
             synchronized (this) {
                 gossipReplyBuilder.addAllCamJoinRequest(camLogs.values().stream()
-                    .map(this::buildCamJoinRequest)
-                    .collect(Collectors.toList()));
+                        .filter(c -> incVectorTS.happensBefore(c.getVectorTS()))
+                        .map(this::buildCamJoinRequest)
+                        .collect(Collectors.toList()));
 
                 gossipReplyBuilder.putAllReplicaTS(replicaTS.getMap());
             }
-
-            responseObserver.onNext(gossipReplyBuilder.build());
+            gossipReply = gossipReplyBuilder.build();
+            responseObserver.onNext(gossipReply);
             responseObserver.onCompleted();
+            System.out.println("Updates sent!\n");
 
         } catch (StatusRuntimeException e) {
             if (!e.getStatus().getCode().equals(Status.UNAVAILABLE.getCode()))

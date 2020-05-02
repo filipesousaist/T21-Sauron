@@ -29,6 +29,6 @@ public abstract class Observation {
 
     @Override
     public String toString() {
-        return ""+type.toString()+" "+camName;
+        return ""+type.toString()+" "+getStrId()+" "+camName;
     }
 }

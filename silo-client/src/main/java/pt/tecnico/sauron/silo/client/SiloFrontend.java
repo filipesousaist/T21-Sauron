@@ -186,7 +186,6 @@ public class SiloFrontend implements AutoCloseable {
     private Object[] reportRPC(ReportRequest request) {
         ReportReply reply = stub.report(request);
         ts.update(new VectorTS(reply.getValueTSMap()));
-        System.out.println(reply.getValueTSMap().toString()); //debug
         return new Object[]{reply};
     }
 

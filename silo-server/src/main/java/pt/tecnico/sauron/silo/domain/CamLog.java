@@ -33,4 +33,8 @@ public class CamLog {
         return vectorTS;
     }
 
+    @Override
+    public String toString() {
+        return "CamLog: "+this.camName;
+    }
 }
