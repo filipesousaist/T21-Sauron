@@ -167,7 +167,16 @@ public class SiloFrontend implements AutoCloseable {
     }
 
     private Object[] camInfoRPC(CamInfoRequest request) {
-        CamInfoReply reply = stub.camInfo(request);
+        CamInfoReply reply;
+        try {
+            reply = stub.camInfo(request);;
+        } catch (StatusRuntimeException e) {
+            if (Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())){
+                reply = CamInfoReply.getDefaultInstance();
+            } else {
+                throw e;
+            }
+        }
         VectorTS valueTS = new VectorTS(reply.getValueTSMap());
         return new Object[]{reply, valueTS};
     }
@@ -222,7 +231,16 @@ public class SiloFrontend implements AutoCloseable {
     }
 
     private Object[] trackMatchRPC (TrackMatchRequest request) {
-        TrackMatchReply reply = stub.trackMatch(request);
+        TrackMatchReply reply;
+        try {
+            reply = stub.trackMatch(request);
+        } catch (StatusRuntimeException e) {
+            if (Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())){
+                reply = TrackMatchReply.getDefaultInstance();
+            } else {
+                throw e;
+            }
+        }
         VectorTS valueTS = new VectorTS(reply.getValueTSMap());
         return new Object[]{reply, valueTS};
     }
@@ -237,7 +255,16 @@ public class SiloFrontend implements AutoCloseable {
     }
 
     private Object[] traceRPC (TraceRequest request) {
-        TraceReply reply = stub.trace(request);
+        TraceReply reply;
+        try {
+            reply = stub.trace(request);
+        } catch (StatusRuntimeException e) {
+            if (Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())){
+                reply = TraceReply.getDefaultInstance();
+            } else {
+                throw e;
+            }
+        }
         VectorTS valueTS = new VectorTS(reply.getValueTSMap());
         return new Object[]{reply, valueTS};
     }
